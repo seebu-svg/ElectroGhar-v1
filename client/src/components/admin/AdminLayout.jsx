@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Package,
   PlusCircle,
+  FileText,
   LogOut,
   Menu,
   X,
@@ -15,6 +16,8 @@ const NAV = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
   { to: "/admin/products", icon: Package, label: "Products" },
   { to: "/admin/products/new", icon: PlusCircle, label: "Add Product" },
+  { to: "/admin/blogs", icon: FileText, label: "Blog Posts" },
+  { to: "/admin/blogs/new", icon: PlusCircle, label: "Add Blog" },
 ];
 
 export default function AdminLayout() {
@@ -72,7 +75,7 @@ function SidebarContent({ logout, onClose }) {
       {/* Logo */}
       <div className="h-14 flex items-center gap-2 px-5 border-b border-gray-800 shrink-0">
         <Link to="/admin" className="flex items-center gap-2" onClick={onClose}>
-          <img src={logo} alt="ElectroGhar" className="h-8 w-auto brightness-0 invert" />
+          <img src={logo} alt="ElectroGhar" className="h-8 w-auto" />
         </Link>
         {onClose && (
           <button className="ml-auto p-1 text-gray-400 hover:text-white" onClick={onClose}>

@@ -7,6 +7,7 @@ import { testConnection } from "./config/supabase.js";
 import { productRoutes } from "./routes/products.js";
 import { categoryRoutes } from "./routes/categories.js";
 import { adminRoutes } from "./routes/admin.js";
+import { blogRoutes, blogCategoryRoutes } from "./routes/blogs.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -29,6 +30,8 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/blogs", blogRoutes);
+app.use("/api/blog-categories", blogCategoryRoutes);
 
 // ── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((_req, res) => {
@@ -48,6 +51,7 @@ async function start() {
     console.log(`\n🚀 Server running on http://localhost:${PORT}`);
     console.log(`   Health:  http://localhost:${PORT}/api/health`);
     console.log(`   Public:  http://localhost:${PORT}/api/products`);
+    console.log(`   Blogs:   http://localhost:${PORT}/api/blogs`);
     console.log(`   Admin:   http://localhost:${PORT}/api/admin/login\n`);
 
     if (!dbOk) {

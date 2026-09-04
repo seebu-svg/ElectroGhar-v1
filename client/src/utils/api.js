@@ -24,9 +24,19 @@ export const api = {
   getProduct: (slug) => fetchApi(`/products/${slug}`),
   getFeaturedProducts: () => fetchApi("/products/featured"),
   getBrands: () => fetchApi("/products/brands"),
+  suggestProducts: (q) => fetchApi(`/products/suggest?q=${encodeURIComponent(q)}`),
   getLatestProducts: (limit = 8) =>
     fetchApi(`/products?sort=created_at&order=desc&limit=${limit}`),
 
   // ── Categories ──────────────────────────────────────────────
   getCategories: () => fetchApi("/categories"),
+
+  // ── Blogs ────────────────────────────────────────────────────
+  getBlogs: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchApi(`/blogs?${query}`);
+  },
+  getBlog: (slug) => fetchApi(`/blogs/${slug}`),
+  getFeaturedBlog: () => fetchApi("/blogs/featured"),
+  getBlogCategories: () => fetchApi("/blog-categories"),
 };

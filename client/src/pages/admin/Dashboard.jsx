@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Package, Star, FolderOpen, PlusCircle, Loader2 } from "lucide-react";
+import { Package, Star, FolderOpen, PlusCircle, FileText, Loader2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminDashboard() {
@@ -23,6 +23,8 @@ export default function AdminDashboard() {
         { icon: Package, label: "Total Products", value: stats.totalProducts, color: "bg-blue-50 text-blue-600" },
         { icon: Star, label: "Featured", value: stats.featuredProducts, color: "bg-amber-50 text-amber-600" },
         { icon: FolderOpen, label: "Categories", value: stats.totalCategories, color: "bg-emerald-50 text-emerald-600" },
+        { icon: FileText, label: "Blog Posts", value: stats.totalBlogs, color: "bg-brand-50 text-brand-600", to: "/admin/blogs" },
+        { icon: FileText, label: "Published Blogs", value: stats.publishedBlogs, color: "bg-purple-50 text-purple-600", to: "/admin/blogs" },
       ]
     : [];
 
@@ -41,20 +43,30 @@ export default function AdminDashboard() {
         <>
           {/* Stat cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-            {cards.map(({ icon: Icon, label, value, color }) => (
-              <div
-                key={label}
-                className="bg-white rounded-xl border border-gray-200 p-5 flex items-center gap-4"
-              >
-                <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center shrink-0`}>
-                  <Icon className="w-6 h-6" />
+            {cards.map(({ icon: Icon, label, value, color, to }) => {
+              const inner = (
+                <div
+                  className={`bg-white rounded-xl border border-gray-200 p-5 flex items-center gap-4 ${
+                    to ? "hover:border-brand-300 hover:shadow-sm transition-all" : ""
+                  }`}
+                >
+                  <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center shrink-0`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{value}</p>
+                    <p className="text-xs text-gray-500">{label}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{value}</p>
-                  <p className="text-xs text-gray-500">{label}</p>
-                </div>
-              </div>
-            ))}
+              );
+              return to ? (
+                <Link key={label} to={to} className="block">
+                  {inner}
+                </Link>
+              ) : (
+                <div key={label}>{inner}</div>
+              );
+            })}
           </div>
 
           {/* Quick actions */}
@@ -82,6 +94,18 @@ export default function AdminDashboard() {
               <div>
                 <p className="text-sm font-semibold text-gray-900">Manage Products</p>
                 <p className="text-xs text-gray-500">Edit, delete or view all laptops</p>
+              </div>
+            </Link>
+            <Link
+              to="/admin/blogs/new"
+              className="flex items-center gap-3 bg-white rounded-xl border border-gray-200 p-5 hover:border-brand-300 hover:shadow-sm transition-all group"
+            >
+              <div className="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center group-hover:bg-brand-100 transition-colors">
+                <FileText className="w-5 h-5 text-brand-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Write a Blog Post</p>
+                <p className="text-xs text-gray-500">Publish guides and tech tips</p>
               </div>
             </Link>
           </div>

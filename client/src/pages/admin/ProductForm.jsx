@@ -4,14 +4,11 @@ import { ArrowLeft, Plus, Trash2, Loader2, Save } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import placeholderImg from "../../assets/product-placeholder.png";
 
-const CONDITIONS = ["Like New", "Excellent", "Good", "Fair"];
-const CATEGORIES = [
-  "business-laptops",
-  "gaming-laptops",
-  "student-laptops",
-  "creator-laptops",
-  "ultrabooks",
-  "workstation-laptops",
+const CONDITIONS = ["New", "Like New", "Excellent", "Good", "Fair"];
+const CONDITION_TYPES = [
+  { value: "new", label: "New" },
+  { value: "used", label: "Used" },
+  { value: "refurbished", label: "Refurbished" },
 ];
 
 const EMPTY = {
@@ -20,6 +17,7 @@ const EMPTY = {
   description: "",
   brand: "",
   category: "business-laptops",
+  condition_type: "used",
   price: "",
   compare_at_price: "",
   condition_grade: "Good",
@@ -44,6 +42,7 @@ export default function ProductForm() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState(EMPTY);
+  const [categoryTree, setCategoryTree] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -78,8 +77,26 @@ export default function ProductForm() {
       .finally(() => setLoading(false));
   }, [id, isEdit, user.token]);
 
+  // Load category tree (grouped by parent category)
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((res) => setCategoryTree(res.tree || []))
+      .catch(console.error);
+  }, []);
+
   function set(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
+  }
+
+  // Keep grade consistent with type: "new" type → "New" grade
+  function setConditionType(value) {
+    setForm((f) => ({
+      ...f,
+      condition_type: value,
+      condition_grade:
+        value === "new" ? "New" : f.condition_grade === "New" ? "Good" : f.condition_grade,
+    }));
   }
 
   function addSpec() {
@@ -173,7 +190,7 @@ export default function ProductForm() {
       </button>
 
       <h1 className="text-2xl font-bold text-gray-900 mb-6">
-        {isEdit ? "Edit Product" : "Add New Laptop"}
+        {isEdit ? "Edit Product" : "Add New Product"}
       </h1>
 
       {error && (
@@ -200,16 +217,28 @@ export default function ProductForm() {
             </Field>
             <Field label="Category *">
               <select value={form.category} onChange={(e) => set("category", e.target.value)} className={inputCls}>
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}</option>
-                ))}
+                {categoryTree.map((parent) =>
+                  parent.children && parent.children.length > 0 ? (
+                    <optgroup key={parent.id} label={parent.name}>
+                      {parent.children.map((child) => (
+                        <option key={child.id} value={child.slug}>
+                          {child.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ) : (
+                    <option key={parent.id} value={parent.slug}>
+                      {parent.name}
+                    </option>
+                  )
+                )}
               </select>
             </Field>
           </div>
         </Section>
 
         {/* ── Pricing ────────────────────────────────────────── */}
-        <Section title="Pricing & Stock">
+        <Section title="Pricing, Stock & Condition">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <Field label="Price (PKR)">
               <input type="number" value={form.price} onChange={(e) => set("price", e.target.value)} className={inputCls} placeholder="185000" />
@@ -220,13 +249,20 @@ export default function ProductForm() {
             <Field label="Stock Qty">
               <input type="number" value={form.stock_qty} onChange={(e) => set("stock_qty", e.target.value)} className={inputCls} />
             </Field>
-            <Field label="Condition">
+            <Field label="Condition Type">
+              <select value={form.condition_type} onChange={(e) => setConditionType(e.target.value)} className={inputCls}>
+                {CONDITION_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+            </Field>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Field label="Condition Grade">
               <select value={form.condition_grade} onChange={(e) => set("condition_grade", e.target.value)} className={inputCls}>
                 {CONDITIONS.map((c) => <option key={c}>{c}</option>)}
               </select>
             </Field>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
             <Field label="Battery Health">
               <input value={form.battery_health} onChange={(e) => set("battery_health", e.target.value)} className={inputCls} placeholder="85%" />
             </Field>

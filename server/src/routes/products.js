@@ -3,6 +3,39 @@ import { supabase } from "../config/supabase.js";
 
 export const productRoutes = Router();
 
+/**
+ * Resolve a category slug to itself + all descendant slugs.
+ * e.g. "laptops" → ["laptops", "business-laptops", "gaming-laptops", ...]
+ */
+async function getCategoryWithDescendants(slug) {
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, slug, parent_id")
+    .eq("is_active", true);
+
+  if (error || !data) return [slug];
+
+  const target = data.find((c) => c.slug === slug);
+  if (!target) return [slug];
+
+  const slugs = [target.slug];
+  const walk = (parentId) => {
+    data
+      .filter((c) => c.parent_id === parentId)
+      .forEach((c) => {
+        slugs.push(c.slug);
+        walk(c.id);
+      });
+  };
+  walk(target.id);
+  return slugs;
+}
+
+/** Sanitize a search term for PostgREST ilike filters */
+function sanitizeSearch(term) {
+  return String(term).replace(/[%_,()\\]/g, " ").trim();
+}
+
 // ── GET /api/products — list with search, filter, sort, pagination ─────────
 productRoutes.get("/", async (req, res, next) => {
   try {
@@ -10,9 +43,12 @@ productRoutes.get("/", async (req, res, next) => {
       search = "",
       brand,
       category,
+      conditionType,
       minPrice,
       maxPrice,
       condition,
+      featured,
+      deals,
       sort = "created_at",
       order = "desc",
       page = 1,
@@ -26,15 +62,33 @@ productRoutes.get("/", async (req, res, next) => {
       .select("*", { count: "exact" })
       .eq("is_active", true);
 
-    // Search
-    if (search) {
-      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+    // Enhanced search — searches name, brand, description AND specs
+    // via the auto-generated search_text column. Words are ANDed, so
+    // "dell i7" matches any product containing both words anywhere
+    // (not just adjacent), e.g. "Dell Latitude 7420, i7-1185G7".
+    const q = sanitizeSearch(search);
+    if (q) {
+      q.split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 4)
+        .forEach((word) => {
+          query = query.ilike("search_text", `%${word}%`);
+        });
     }
 
     // Filters
     if (brand) query = query.eq("brand", brand);
-    if (category) query = query.eq("category", category);
+    if (category) {
+      // Top-level categories include all their subcategories
+      const slugs = await getCategoryWithDescendants(category);
+      query = query.in("category", slugs);
+    }
+    if (conditionType) query = query.eq("condition_type", conditionType);
     if (condition) query = query.eq("condition_grade", condition);
+
+    // Collections: Best Sellers (featured) & Daily Deals (discounted)
+    if (featured === "1" || featured === "true") query = query.eq("is_featured", true);
+    if (deals === "1" || deals === "true") query = query.not("compare_at_price", "is", null);
     if (minPrice) query = query.gte("price", Number(minPrice));
     if (maxPrice) query = query.lte("price", Number(maxPrice));
 
@@ -96,6 +150,27 @@ productRoutes.get("/brands", async (_req, res, next) => {
   }
 });
 
+// ── GET /api/products/suggest?q= — search autocomplete (max 8) ─────────────
+productRoutes.get("/suggest", async (req, res, next) => {
+  try {
+    const q = sanitizeSearch(req.query.q || "");
+    if (!q) return res.json({ products: [] });
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("id, name, slug, brand, price, thumbnail_url, images, category, condition_type, condition_grade")
+      .eq("is_active", true)
+      .or(`name.ilike.%${q}%,brand.ilike.%${q}%`)
+      .order("is_featured", { ascending: false })
+      .limit(8);
+
+    if (error) throw error;
+    res.json({ products: data || [] });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ── GET /api/products/:slug — single product by slug ───────────────────────
 productRoutes.get("/:slug", async (req, res, next) => {
   try {
@@ -110,12 +185,13 @@ productRoutes.get("/:slug", async (req, res, next) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // Fetch related products (same category, exclude current)
+    // Related products: same category first, then same parent category
+    const categorySlugs = await getCategoryWithDescendants(data.category);
     const { data: related } = await supabase
       .from("products")
-      .select("id, name, slug, price, images, condition_grade, brand")
+      .select("id, name, slug, price, images, thumbnail_url, condition_grade, condition_type, brand, category")
       .eq("is_active", true)
-      .eq("category", data.category)
+      .in("category", categorySlugs)
       .neq("id", data.id)
       .limit(4);
 

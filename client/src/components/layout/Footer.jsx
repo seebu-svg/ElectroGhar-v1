@@ -1,20 +1,24 @@
 import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
-import logo from "../../assets/logo.png";
+import logoFull from "../../assets/logo-full.png";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 lg:py-16">
+    <footer className="relative bg-surface-dark text-gray-300">
+      {/* Red glow top edge */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-600/70 to-transparent" />
+      <div className="absolute -top-20 inset-x-0 h-40 glow-blob pointer-events-none" />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 lg:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* ── Brand ──────────────────────────────────────────── */}
           <div>
             <Link to="/" className="inline-block mb-4">
-              <img src={logo} alt="ElectroGhar" className="h-14 w-auto brightness-0 invert" />
+              <img src={logoFull} alt="ElectroGhar" className="h-16 sm:h-20 w-auto" />
             </Link>
             <p className="text-sm leading-relaxed text-gray-400">
-              Pakistan&apos;s trusted marketplace for quality pre-owned laptops.
-              Every device is inspected, tested, and backed by our warranty.
+              Pakistan&apos;s trusted store for quality checked laptops, PCs,
+              monitors, storage and gadgets — new, used and refurbished.
             </p>
           </div>
 
@@ -25,11 +29,12 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2.5 text-sm">
               {[
-                { label: "Business Laptops", to: "/products?category=business-laptops" },
-                { label: "Gaming Laptops", to: "/products?category=gaming-laptops" },
-                { label: "Student Laptops", to: "/products?category=student-laptops" },
-                { label: "Ultrabooks", to: "/products?category=ultrabooks" },
-                { label: "All Laptops", to: "/products" },
+                { label: "Laptops", to: "/products?category=laptops" },
+                { label: "PCs & Desktops", to: "/products?category=pcs-desktops" },
+                { label: "Monitors & Displays", to: "/products?category=monitors-displays" },
+                { label: "Storage & Accessories", to: "/products?category=storage-accessories" },
+                { label: "Gadgets & Electronics", to: "/products?category=gadgets-electronics" },
+                { label: "All Products", to: "/products" },
               ].map((item) => (
                 <li key={item.to}>
                   <Link
@@ -50,9 +55,14 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <a href="#" className="hover:text-brand-400 transition-colors">
+                <Link to="/about" className="hover:text-brand-400 transition-colors">
                   About Us
-                </a>
+                </Link>
+              </li>
+              <li>
+                <Link to="/blogs" className="hover:text-brand-400 transition-colors">
+                  Blog
+                </Link>
               </li>
               <li>
                 <a href="#" className="hover:text-brand-400 transition-colors">
@@ -103,7 +113,7 @@ export default function Footer() {
         </div>
 
         {/* ── Bottom Bar ─────────────────────────────────────── */}
-        <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+        <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
           <p>&copy; {new Date().getFullYear()} ElectroGhar. All rights reserved.</p>
           <div className="flex gap-4">
             <a href="#" className="hover:text-brand-400 transition-colors">Privacy Policy</a>
