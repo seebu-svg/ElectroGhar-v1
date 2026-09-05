@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "cd client && npm install",
+  "buildCommand": "cd client && npm run build",
+  "outputDirectory": "client/dist",
+  "rewrites": [
+    { "source": "/sitemap.xml", "destination": "https://api.electroghar.pk/sitemap.xml" },
+    { "source": "/robots.txt", "destination": "https://api.electroghar.pk/robots.txt" }
+  ]
+}
