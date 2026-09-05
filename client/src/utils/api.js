@@ -1,4 +1,4 @@
-const API_BASE = "/api";
+
 
 /**
  * Fetch wrapper with error handling
