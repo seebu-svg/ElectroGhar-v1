@@ -1,18 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "cd server && npm install && cd ../client && npm install",
+  "installCommand": "npm install && cd client && npm install",
   "buildCommand": "cd client && npm run build",
   "outputDirectory": "client/dist",
-  "functions": {
-    "server/api/index.mjs": {
-      "maxDuration": 10
-    }
-  },
   "rewrites": [
-    { "source": "/sitemap.xml", "destination": "/server/api/index.mjs" },
-    { "source": "/robots.txt", "destination": "/server/api/index.mjs" },
-    { "source": "/api/(.*)", "destination": "/server/api/index.mjs" },
+    { "source": "/sitemap.xml", "destination": "/api/index.mjs" },
+    { "source": "/robots.txt", "destination": "/api/index.mjs" },
+    { "source": "/api/(.*)", "destination": "/api/index.mjs" },
     { "source": "/((?!assets|sitemap.xml|robots.txt).*)", "destination": "/index.html" }
   ]
 }
