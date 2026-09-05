@@ -5,7 +5,9 @@
   "buildCommand": "cd client && npm run build",
   "outputDirectory": "client/dist",
   "functions": {
-    "server/api/index.mjs": {}
+    "server/api/index.mjs": {
+      "maxDuration": 10
+    }
   },
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/server/api/index.mjs" },
