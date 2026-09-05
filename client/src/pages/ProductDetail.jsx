@@ -21,9 +21,11 @@ import {
 } from "lucide-react";
 import ProductCard from "../components/product/ProductCard";
 import WhatsAppFAB from "../components/ui/WhatsAppFAB";
+import Breadcrumb from "../components/ui/Breadcrumb";
 import placeholderImg from "../assets/product-placeholder.png";
 import { api } from "../utils/api";
 import { formatPrice, conditionColor, buildWhatsAppLink, discountPercent } from "../utils/helpers";
+import { SEOHead, productSchema, breadcrumbSchema } from "../utils/seo";
 
 // Map spec keys to icons
 const SPEC_ICONS = {
@@ -81,6 +83,8 @@ export default function ProductDetail() {
   }
 
   const { product, related } = data;
+  const canonicalBase = typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk";
+  const productUrl = `${canonicalBase}/product/${product.slug}`;
   const images =
     Array.isArray(product.images) && product.images.length > 0
       ? product.images
@@ -103,6 +107,27 @@ export default function ProductDetail() {
 
   return (
     <div className="relative bg-surface-alt min-h-screen">
+      <SEOHead
+        title={product.meta_title || product.name}
+        description={
+          product.meta_description ||
+          product.description?.slice(0, 160) ||
+          `Buy ${product.name} in ${product.condition_grade} condition at ElectroGhar. WhatsApp us for the latest price and delivery across Pakistan.`
+        }
+        canonical={productUrl}
+        image={product.thumbnail_url || (Array.isArray(product.images) ? product.images[0] : undefined)}
+        type="product"
+        jsonLd={[
+          productSchema(product),
+          breadcrumbSchema([
+            { label: "Products", to: `${canonicalBase}/products` },
+            ...(product.category
+              ? [{ label: product.category, to: `${canonicalBase}/products?category=${encodeURIComponent(product.category)}` }]
+              : []),
+            { label: product.name, to: productUrl },
+          ]),
+        ]}
+      />
       {/* ── Ambient glow (clipped so it never breaks sticky) ─────── */}
       <div className="absolute inset-x-0 top-0 h-[32rem] overflow-hidden pointer-events-none">
         <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[70rem] h-[32rem] glow-blob" />
@@ -110,17 +135,12 @@ export default function ProductDetail() {
 
       {/* ── Breadcrumb (spaced away from the header) ─────────────── */}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10">
-        <nav className="inline-flex items-center gap-1.5 text-sm text-gray-500 bg-surface-card/70 backdrop-blur-sm border border-white/5 rounded-full px-4 py-2 max-w-full">
-          <Link to="/" className="hover:text-brand-400 transition-colors shrink-0">
-            Home
-          </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-gray-600 shrink-0" />
-          <Link to="/products" className="hover:text-brand-400 transition-colors shrink-0">
-            Products
-          </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-gray-600 shrink-0" />
-          <span className="text-gray-200 font-medium truncate">{product.name}</span>
-        </nav>
+        <Breadcrumb
+          items={[
+            { label: "Products", to: "/products" },
+            { label: product.name },
+          ]}
+        />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -143,16 +163,16 @@ export default function ProductDetail() {
                   <button
                     onClick={() => setActiveImage((p) => (p - 1 + images.length) % images.length)}
                     aria-label="Previous image"
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/70 border border-white/10 shadow flex items-center justify-center text-white hover:bg-brand-600 transition-colors"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/70 border border-white/10 shadow flex items-center justify-center text-white hover:bg-brand-600 transition-colors"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setActiveImage((p) => (p + 1) % images.length)}
                     aria-label="Next image"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/70 border border-white/10 shadow flex items-center justify-center text-white hover:bg-brand-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/70 border border-white/10 shadow flex items-center justify-center text-white hover:bg-brand-600 transition-colors"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-5 h-5" />
                   </button>
                   <span className="absolute bottom-3 right-3 bg-black/70 border border-white/10 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
                     {activeImage + 1} / {images.length}

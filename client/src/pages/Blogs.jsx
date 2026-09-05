@@ -3,8 +3,6 @@ import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowRight,
   BookOpen,
-  ChevronLeft,
-  ChevronRight,
   Clock,
   Eye,
   PenLine,
@@ -13,8 +11,10 @@ import {
   SearchX,
 } from "lucide-react";
 import WhatsAppFAB from "../components/ui/WhatsAppFAB";
+import Pagination from "../components/ui/Pagination";
 import { api } from "../utils/api";
 import { formatDate } from "../utils/helpers";
+import { SEOHead, breadcrumbSchema } from "../utils/seo";
 
 const WA_GENERAL =
   "https://wa.me/923001234567?text=Hi%20ElectroGhar!%20I%20need%20buying%20advice.";
@@ -99,8 +99,38 @@ export default function Blogs() {
     ? blogs.filter((b) => b.id !== featured.id)
     : blogs;
 
+  const canonicalBase = typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk";
+  const pageTitle = activeCat
+    ? `${activeCat.name} Articles`
+    : currentSearch
+      ? `Search: ${currentSearch}`
+      : "Guides, Tips & Honest Advice";
+  const metaDescription = activeCat
+    ? `Read ${activeCat.name.toLowerCase()} guides and advice from ElectroGhar. Pakistan-focused tips for buying, fixing and selling tech.`
+    : currentSearch
+      ? `Search results for "${currentSearch}" on the ElectroGhar blog. Buying guides, repair tips and honest tech advice for Pakistan.`
+      : "Pakistan-focused tech buying guides, repair tips and honest advice from ElectroGhar. Laptops, PCs, monitors and gadgets.";
+  const canonicalUrl = activeCat
+    ? `${canonicalBase}/blogs?category=${encodeURIComponent(activeCat.slug)}`
+    : currentSearch
+      ? `${canonicalBase}/blogs?search=${encodeURIComponent(currentSearch)}`
+      : `${canonicalBase}/blogs`;
+
   return (
     <div className="bg-surface-alt min-h-screen">
+      <SEOHead
+        title={pageTitle}
+        description={metaDescription}
+        canonical={canonicalUrl}
+        type="website"
+        jsonLd={[
+          breadcrumbSchema([
+            { label: "Blog", to: `${canonicalBase}/blogs` },
+            ...(activeCat ? [{ label: activeCat.name, to: `${canonicalBase}/blogs?category=${activeCat.slug}` }] : []),
+            ...(currentSearch ? [{ label: `Search: ${currentSearch}`, to: `${canonicalBase}/blogs?search=${encodeURIComponent(currentSearch)}` }] : []),
+          ]),
+        ]}
+      />
       {/* ── Hero band ─────────────────────────────────────────────── */}
       <div className="relative bg-surface-dark border-b border-white/5 overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-30" />
@@ -273,40 +303,12 @@ export default function Blogs() {
 
         {/* Pagination */}
         {pagination.totalPages > 1 && (
-          <div className="flex items-center justify-center gap-1.5 mt-10">
-            <button
-              onClick={() => updateParam("page", String(currentPage - 1))}
-              disabled={currentPage <= 1}
-              aria-label="Previous page"
-              className="w-10 h-10 rounded-lg bg-surface-card border border-white/10 text-gray-400 hover:border-brand-600/40 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            {[...Array(pagination.totalPages)].map((_, i) => {
-              const page = i + 1;
-              return (
-                <button
-                  key={page}
-                  onClick={() => updateParam("page", String(page))}
-                  className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
-                    page === currentPage
-                      ? "bg-brand-600 text-white shadow-lg shadow-brand-600/30"
-                      : "bg-surface-card border border-white/10 text-gray-400 hover:border-brand-600/40 hover:text-white"
-                  }`}
-                >
-                  {page}
-                </button>
-              );
-            })}
-            <button
-              onClick={() => updateParam("page", String(currentPage + 1))}
-              disabled={currentPage >= (pagination.totalPages || 1)}
-              aria-label="Next page"
-              className="w-10 h-10 rounded-lg bg-surface-card border border-white/10 text-gray-400 hover:border-brand-600/40 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          <Pagination
+            className="mt-10"
+            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={(page) => updateParam("page", String(page))}
+          />
         )}
       </div>
 
@@ -397,7 +399,7 @@ function CatChip({ label, count, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium border transition-all shrink-0 ${
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium border transition-all shrink-0 min-h-[44px] ${
         active
           ? "bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-600/25"
           : "bg-surface-card/60 text-gray-400 border-white/10 hover:text-white hover:border-brand-600/40"

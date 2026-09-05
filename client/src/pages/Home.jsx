@@ -29,6 +29,7 @@ import SearchBar from "../components/ui/SearchBar";
 import WhatsAppFAB from "../components/ui/WhatsAppFAB";
 import { api } from "../utils/api";
 import { discountPercent, formatPrice } from "../utils/helpers";
+import { SEOHead, organizationSchema, websiteSchema, itemListSchema } from "../utils/seo";
 import { BUDGETS, WHY_ITEMS } from "./homeData";
 
 const WA_GENERAL =
@@ -148,8 +149,21 @@ export default function Home() {
     0
   );
 
+  const canonicalBase = typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk";
+
   return (
     <>
+      <SEOHead
+        title=""
+        description="Pakistan's trusted marketplace for quality checked laptops, PCs, monitors, storage and gadgets — new, used and refurbished. Message us on WhatsApp for the latest price."
+        canonical={`${canonicalBase}/`}
+        type="website"
+        jsonLd={[
+          organizationSchema(),
+          websiteSchema(`${canonicalBase}/products`),
+          ...(featured.length ? [itemListSchema(featured.slice(0, 8), `${canonicalBase}/products`)] : []),
+        ]}
+      />
       <Hero
         products={featured.slice(0, 3)}
         stats={{

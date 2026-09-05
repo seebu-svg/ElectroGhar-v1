@@ -82,10 +82,10 @@ export default function ProductCard({ product, showAskPrice = false }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-green-600 text-white hover:bg-green-500 hover:shadow-lg hover:shadow-green-600/40 transition-all shrink-0"
+                className="flex items-center justify-center w-11 h-11 rounded-full bg-green-600 text-white hover:bg-green-500 hover:shadow-lg hover:shadow-green-600/40 transition-all shrink-0"
                 aria-label="Ask price on WhatsApp"
               >
-                <Phone className="w-3.5 h-3.5" />
+                <Phone className="w-4 h-4" />
               </a>
             )}
           </div>

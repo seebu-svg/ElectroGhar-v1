@@ -9,6 +9,8 @@ import Blogs from "./pages/Blogs";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import BlogDetail from "./pages/BlogDetail";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import AdminLogin from "./pages/admin/LoginPage";
 import Dashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
@@ -30,6 +32,8 @@ export default function App() {
             <Route path="/blogs/:slug" element={<BlogDetail />} />
             <Route path="/products" element={<Products />} />
             <Route path="/product/:slug" element={<ProductDetail />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
           </Route>
 
           {/* ── Admin Login (no layout) ───────────────────────── */}

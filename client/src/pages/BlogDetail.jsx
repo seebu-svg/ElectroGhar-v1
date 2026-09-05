@@ -3,7 +3,6 @@ import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
-  ChevronRight,
   Clock,
   Eye,
   FileText,
@@ -12,8 +11,10 @@ import {
   Tag,
 } from "lucide-react";
 import WhatsAppFAB from "../components/ui/WhatsAppFAB";
+import Breadcrumb from "../components/ui/Breadcrumb";
 import { api } from "../utils/api";
 import { formatDate } from "../utils/helpers";
+import { SEOHead, blogPostingSchema, breadcrumbSchema } from "../utils/seo";
 import { AuthorAvatar, CategoryBadge } from "./Blogs";
 
 const WA_GENERAL =
@@ -46,22 +47,6 @@ export default function BlogDetail() {
       .finally(() => setLoading(false));
   }, [slug]);
 
-  // SEO — set document title + meta description
-  useEffect(() => {
-    if (!blog) return;
-    document.title = blog.meta_title || `${blog.title} | ElectroGhar`;
-    let meta = document.querySelector('meta[name="description"]');
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.setAttribute("name", "description");
-      document.head.appendChild(meta);
-    }
-    meta.setAttribute("content", blog.meta_description || blog.excerpt || "");
-    return () => {
-      document.title = "ElectroGhar — Good Tech. Better Deals.";
-    };
-  }, [blog]);
-
   if (loading) return <BlogDetailSkeleton />;
 
   if (notFound || !blog) {
@@ -88,8 +73,29 @@ export default function BlogDetail() {
     );
   }
 
+  const canonicalBase = typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk";
+  const blogUrl = `${canonicalBase}/blogs/${blog.slug}`;
+  const categoryName = categories.find((c) => c.slug === blog.category)?.name || blog.category;
+
   return (
     <div className="bg-surface-alt min-h-screen">
+      <SEOHead
+        title={blog.meta_title || blog.title}
+        description={blog.meta_description || blog.excerpt}
+        canonical={blogUrl}
+        image={blog.cover_image}
+        type="article"
+        jsonLd={[
+          blogPostingSchema(blog, categories),
+          breadcrumbSchema([
+            { label: "Blog", to: `${canonicalBase}/blogs` },
+            ...(blog.category
+              ? [{ label: categoryName, to: `${canonicalBase}/blogs?category=${encodeURIComponent(blog.category)}` }]
+              : []),
+            { label: blog.title, to: blogUrl },
+          ]),
+        ]}
+      />
       {/* ── Article header ─────────────────────────────────────── */}
       <header className="relative bg-surface-dark border-b border-white/5 overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-30" />
@@ -97,22 +103,15 @@ export default function BlogDetail() {
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 pb-10">
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-xs text-gray-500 mb-6 flex-wrap">
-            <Link to="/" className="hover:text-brand-400 transition-colors">Home</Link>
-            <ChevronRight className="w-3 h-3 text-gray-600" />
-            <Link to="/blogs" className="hover:text-brand-400 transition-colors">Blog</Link>
-            {blog.category && (
-              <>
-                <ChevronRight className="w-3 h-3 text-gray-600" />
-                <Link
-                  to={`/blogs?category=${blog.category}`}
-                  className="hover:text-brand-400 transition-colors"
-                >
-                  {categories.find((c) => c.slug === blog.category)?.name || blog.category}
-                </Link>
-              </>
-            )}
-          </nav>
+          <div className="mb-6">
+            <Breadcrumb
+              items={[
+                { label: "Blog", to: "/blogs" },
+                ...(blog.category ? [{ label: categoryName, to: `/blogs?category=${blog.category}` }] : []),
+                { label: blog.title },
+              ]}
+            />
+          </div>
 
           <div className="flex items-center gap-3 mb-4">
             <CategoryBadge category={blog.category} categories={categories} />

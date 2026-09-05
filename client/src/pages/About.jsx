@@ -10,6 +10,7 @@ import {
   Zap,
 } from "lucide-react";
 import WhatsAppFAB from "../components/ui/WhatsAppFAB";
+import { SEOHead, organizationSchema } from "../utils/seo";
 
 const WA_GENERAL =
   "https://wa.me/923001234567?text=Hi%20ElectroGhar!%20I%20have%20a%20question.";
@@ -55,8 +56,17 @@ const VALUES = [
 ];
 
 export default function About() {
+  const canonicalBase = typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk";
+
   return (
     <div className="bg-surface">
+      <SEOHead
+        title="About Us"
+        description="ElectroGhar is Pakistan's trusted store for quality checked laptops, PCs, monitors, storage and gadgets. New, used and refurbished — honest grading, fair prices, WhatsApp support."
+        canonical={`${canonicalBase}/about`}
+        type="website"
+        jsonLd={[organizationSchema()]}
+      />
       {/* ── Hero ──────────────────────────────────────────────────── */}
       <section className="relative bg-surface-dark border-b border-white/5 overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-50" />

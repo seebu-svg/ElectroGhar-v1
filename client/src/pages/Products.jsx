@@ -4,7 +4,6 @@ import {
   ArrowUpDown,
   BadgeCheck,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   Cpu,
   Flame,
@@ -24,7 +23,9 @@ import {
 } from "lucide-react";
 import ProductCard from "../components/product/ProductCard";
 import WhatsAppFAB from "../components/ui/WhatsAppFAB";
+import Pagination from "../components/ui/Pagination";
 import { api } from "../utils/api";
+import { SEOHead, breadcrumbSchema, itemListSchema } from "../utils/seo";
 
 const SORT_OPTIONS = [
   { value: "stock_qty.desc", label: "Most Popular" },
@@ -166,8 +167,40 @@ export default function Products() {
       : currentDeals
         ? "Daily Deals"
         : currentSearch
-          ? "Search Results"
+          ? `Search: ${currentSearch}`
           : "All Products";
+
+  const metaDescription = activeCat
+    ? `Buy ${activeCat.name} in Pakistan at ElectroGhar. Quality checked, honestly graded, WhatsApp-confirmed pricing. ${pagination.total || 0}+ items in stock.`
+    : currentFeatured
+      ? "Shop the most popular laptops, PCs, monitors and gadgets at ElectroGhar. Quality checked and WhatsApp-confirmed pricing."
+      : currentDeals
+        ? "Biggest discounts on quality checked tech at ElectroGhar. Laptops, PCs, monitors and gadgets — while stock lasts."
+        : currentSearch
+          ? `Search results for "${currentSearch}" at ElectroGhar. Quality checked laptops, PCs, monitors and gadgets.`
+          : "Browse all quality checked laptops, PCs, monitors, storage and gadgets at ElectroGhar. New, used and refurbished. Message us on WhatsApp.";
+
+  const canonicalUrl = (() => {
+    const base = typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk";
+    if (!currentSearch && !currentCategory && !currentBrand && !currentConditionType && !currentCondition && !currentMaxPrice && !currentFeatured && !currentDeals) {
+      return `${base}/products`;
+    }
+    return `${base}${window.location.pathname}${window.location.search}`;
+  })();
+
+  const breadcrumbItems = [{ label: "Products", to: "/products" }];
+  if (activeParent) {
+    breadcrumbItems.push({ label: activeParent.name, to: `/products?category=${activeParent.slug}` });
+  }
+  if (activeCat) {
+    breadcrumbItems.push({ label: activeCat.name });
+  } else if (currentFeatured) {
+    breadcrumbItems.push({ label: "Best Sellers" });
+  } else if (currentDeals) {
+    breadcrumbItems.push({ label: "Daily Deals" });
+  } else if (currentSearch) {
+    breadcrumbItems.push({ label: `Search: ${currentSearch}` });
+  }
 
   const EyebrowIcon = currentFeatured
     ? TrendingUp
@@ -195,6 +228,21 @@ export default function Products() {
 
   return (
     <div className="bg-surface-alt min-h-screen">
+      <SEOHead
+        title={pageTitle}
+        description={metaDescription}
+        canonical={canonicalUrl}
+        type="website"
+        jsonLd={[
+          breadcrumbSchema(
+            breadcrumbItems.map((i) => ({
+              label: i.label,
+              to: i.to ? `${typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk"}${i.to}` : `${typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk"}/products`,
+            }))
+          ),
+          ...(products.length ? [itemListSchema(products, canonicalUrl)] : []),
+        ]}
+      />
       {/* ── Compact page header — the grid stays the hero ── */}
       <div className="relative bg-surface-dark border-b border-white/5 overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-30" />
@@ -460,40 +508,12 @@ export default function Products() {
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-1.5 mt-8">
-                <button
-                  onClick={() => updateParam("page", String(currentPage - 1))}
-                  disabled={currentPage <= 1}
-                  aria-label="Previous page"
-                  className="w-10 h-10 rounded-lg bg-surface-card border border-white/10 text-gray-400 hover:border-brand-600/40 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                {[...Array(pagination.totalPages)].map((_, i) => {
-                  const page = i + 1;
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => updateParam("page", String(page))}
-                      className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
-                        page === currentPage
-                          ? "bg-brand-600 text-white shadow-lg shadow-brand-600/30"
-                          : "bg-surface-card border border-white/10 text-gray-400 hover:border-brand-600/40 hover:text-white"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  );
-                })}
-                <button
-                  onClick={() => updateParam("page", String(currentPage + 1))}
-                  disabled={currentPage >= (pagination.totalPages || 1)}
-                  aria-label="Next page"
-                  className="w-10 h-10 rounded-lg bg-surface-card border border-white/10 text-gray-400 hover:border-brand-600/40 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+              <Pagination
+                className="mt-8"
+                currentPage={currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={(page) => updateParam("page", String(page))}
+              />
             )}
           </div>
         </div>
@@ -534,7 +554,7 @@ function CategoryTab({ icon: Icon, label, count, active, to }) {
   return (
     <Link
       to={to}
-      className={`inline-flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium border transition-all shrink-0 ${
+      className={`inline-flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium border transition-all shrink-0 min-h-[40px] ${
         active
           ? "bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-600/25"
           : "bg-surface-card/60 text-gray-400 border-white/10 hover:text-white hover:border-brand-600/40"
@@ -560,7 +580,7 @@ function SubChip({ label, count, active, to }) {
   return (
     <Link
       to={to}
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium border transition-all shrink-0 ${
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap px-3.5 py-2 rounded-full text-xs font-medium border transition-all shrink-0 min-h-[36px] ${
         active
           ? "bg-brand-600/20 text-brand-300 border-brand-600/50"
           : "bg-transparent text-gray-500 border-white/10 hover:text-gray-200 hover:border-white/25"
@@ -604,7 +624,7 @@ function FilterPanel({
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => updateParam("conditionType", "")}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+              className={`px-3.5 py-2 rounded-full text-xs font-semibold border transition-colors ${
                 !currentConditionType
                   ? "bg-brand-600 text-white border-brand-600"
                   : "bg-surface-card text-gray-400 border-white/10 hover:border-brand-600/40 hover:text-white"
@@ -616,7 +636,7 @@ function FilterPanel({
               <button
                 key={ct.value}
                 onClick={() => updateParam("conditionType", currentConditionType === ct.value ? "" : ct.value)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                className={`px-3.5 py-2 rounded-full text-xs font-semibold border transition-colors ${
                   currentConditionType === ct.value
                     ? "bg-brand-600 text-white border-brand-600"
                     : "bg-surface-card text-gray-400 border-white/10 hover:border-brand-600/40 hover:text-white"
@@ -722,7 +742,7 @@ function FilterPanel({
               <button
                 key={p}
                 onClick={() => updateParam("maxPrice", String(p))}
-                className={`px-2.5 py-1 rounded-md text-[11px] border transition-colors ${
+                className={`px-3 py-1.5 rounded-md text-[11px] border transition-colors ${
                   currentMaxPrice === String(p)
                     ? "text-brand-300 bg-brand-600/15 border-brand-600/40"
                     : "text-gray-400 bg-surface-card border-white/10 hover:border-brand-600/40 hover:text-brand-400"
@@ -772,9 +792,13 @@ function FilterGroup({ title, active = false, defaultOpen = false, children }) {
 
 function FilterTag({ label, onRemove }) {
   return (
-    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-brand-600/10 border border-brand-600/25 text-brand-400 text-xs font-medium">
+    <span className="inline-flex items-center gap-1 pl-3 pr-1 py-1 rounded-full bg-brand-600/10 border border-brand-600/25 text-brand-400 text-xs font-medium">
       {label}
-      <button onClick={onRemove} className="hover:text-brand-200" aria-label={`Remove ${label} filter`}>
+      <button
+        onClick={onRemove}
+        className="p-1 hover:text-brand-200 rounded-full"
+        aria-label={`Remove ${label} filter`}
+      >
         <X className="w-3 h-3" />
       </button>
     </span>

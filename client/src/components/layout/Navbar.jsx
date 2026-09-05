@@ -179,7 +179,7 @@ export default function Navbar() {
 
         {/* ── Mobile toggle ─────────────────────────────────── */}
         <button
-          className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5"
+          className="lg:hidden p-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 min-w-[44px] min-h-[44px] flex items-center justify-center"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >

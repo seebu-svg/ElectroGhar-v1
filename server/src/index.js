@@ -8,6 +8,7 @@ import { productRoutes } from "./routes/products.js";
 import { categoryRoutes } from "./routes/categories.js";
 import { adminRoutes } from "./routes/admin.js";
 import { blogRoutes, blogCategoryRoutes } from "./routes/blogs.js";
+import { seoRoutes } from "./routes/seo.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -32,6 +33,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/blog-categories", blogCategoryRoutes);
+app.use(seoRoutes);
 
 // ── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((_req, res) => {
