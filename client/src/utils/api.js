@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || "/api";
+export const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
 /**
  * Fetch wrapper with error handling
@@ -39,4 +39,8 @@ export const api = {
   getBlog: (slug) => fetchApi(`/blogs/${slug}`),
   getFeaturedBlog: () => fetchApi("/blogs/featured"),
   getBlogCategories: () => fetchApi("/blog-categories"),
+
+  // ── Admin ─────────────────────────────────────────────────────
+  adminLogin: (body) =>
+    fetchApi("/admin/login", { method: "POST", body: JSON.stringify(body) }),
 };

@@ -10,6 +10,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE } from "../../utils/api";
 import { formatPrice, conditionColor } from "../../utils/helpers";
 import placeholderImg from "../../assets/product-placeholder.png";
 
@@ -22,7 +23,7 @@ export default function AdminProducts() {
 
   function fetchProducts(q = "") {
     setLoading(true);
-    fetch(`/api/admin/products?search=${encodeURIComponent(q)}`, {
+    fetch(`${API_BASE}/admin/products?search=${encodeURIComponent(q)}`, {
       headers: { Authorization: `Bearer ${user.token}` },
     })
       .then((r) => r.json())
@@ -38,7 +39,7 @@ export default function AdminProducts() {
   async function handleDelete(id, name) {
     if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
     try {
-      await fetch(`/api/admin/products/${id}`, {
+      await fetch(`${API_BASE}/admin/products/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${user.token}` },
       });

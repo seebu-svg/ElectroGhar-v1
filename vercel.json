@@ -6,6 +6,7 @@
   "outputDirectory": "client/dist",
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "https://api.electroghar.pk/sitemap.xml" },
-    { "source": "/robots.txt", "destination": "https://api.electroghar.pk/robots.txt" }
+    { "source": "/robots.txt", "destination": "https://api.electroghar.pk/robots.txt" },
+    { "source": "/((?!assets|sitemap.xml|robots.txt).*)", "destination": "/index.html" }
   ]
 }

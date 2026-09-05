@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Package, Star, FolderOpen, PlusCircle, FileText, Loader2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE } from "../../utils/api";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -9,7 +10,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/admin/stats", {
+    fetch(`${API_BASE}/admin/stats`, {
       headers: { Authorization: `Bearer ${user.token}` },
     })
       .then((r) => r.json())

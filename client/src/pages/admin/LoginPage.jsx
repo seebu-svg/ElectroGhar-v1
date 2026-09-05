@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { Lock, Mail, Loader2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { api } from "../../utils/api";
 import logoFull from "../../assets/logo-full.png";
 
 export default function AdminLogin() {
@@ -20,15 +21,7 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Login failed");
-
+      const data = await api.adminLogin({ email, password });
       login(data.token, data.user);
     } catch (err) {
       setError(err.message);

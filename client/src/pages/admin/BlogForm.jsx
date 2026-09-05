@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Eye, Loader2, Save, Sparkles } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE } from "../../utils/api";
 
 const INPUT_CLS =
   "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500";
@@ -37,13 +38,13 @@ export default function BlogForm() {
 
   // Load categories + existing post (edit mode)
   useEffect(() => {
-    fetch("/api/admin/blog-categories", { headers: authHeaders })
+    fetch(`${API_BASE}/admin/blog-categories`, { headers: authHeaders })
       .then((r) => r.json())
       .then((res) => setCategories(res.categories || []))
       .catch(console.error);
 
     if (isEdit) {
-      fetch(`/api/admin/blogs/${id}`, { headers: authHeaders })
+      fetch(`${API_BASE}/admin/blogs/${id}`, { headers: authHeaders })
         .then((r) => r.json())
         .then((res) => {
           if (res.blog) {
@@ -101,7 +102,7 @@ export default function BlogForm() {
     if (publishNow !== null) payload.is_published = publishNow;
 
     try {
-      const res = await fetch(isEdit ? `/api/admin/blogs/${id}` : "/api/admin/blogs", {
+      const res = await fetch(isEdit ? `${API_BASE}/admin/blogs/${id}` : `${API_BASE}/admin/blogs`, {
         method: isEdit ? "PUT" : "POST",
         headers: { ...authHeaders, "Content-Type": "application/json" },
         body: JSON.stringify(payload),

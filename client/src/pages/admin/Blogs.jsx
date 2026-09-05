@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE } from "../../utils/api";
 import { formatDate } from "../../utils/helpers";
 import placeholderImg from "../../assets/product-placeholder.png";
 
@@ -39,7 +40,7 @@ export default function AdminBlogs() {
     const params = new URLSearchParams();
     if (q) params.set("search", q);
     if (st) params.set("status", st);
-    fetch(`/api/admin/blogs?${params}`, { headers: authHeaders })
+    fetch(`${API_BASE}/admin/blogs?${params}`, { headers: authHeaders })
       .then((r) => r.json())
       .then((res) => setBlogs(res.blogs || []))
       .catch(console.error)
@@ -55,7 +56,7 @@ export default function AdminBlogs() {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
     setBusyId(id);
     try {
-      await fetch(`/api/admin/blogs/${id}`, {
+      await fetch(`${API_BASE}/admin/blogs/${id}`, {
         method: "DELETE",
         headers: authHeaders,
       });
@@ -70,7 +71,7 @@ export default function AdminBlogs() {
   async function togglePublish(blog) {
     setBusyId(blog.id);
     try {
-      const res = await fetch(`/api/admin/blogs/${blog.id}/publish`, {
+      const res = await fetch(`${API_BASE}/admin/blogs/${blog.id}/publish`, {
         method: "PATCH",
         headers: { ...authHeaders, "Content-Type": "application/json" },
       });
@@ -287,7 +288,7 @@ function CategoryManager({ authHeaders }) {
 
   function fetchCats() {
     setLoading(true);
-    fetch("/api/admin/blog-categories", { headers: authHeaders })
+    fetch(`${API_BASE}/admin/blog-categories`, { headers: authHeaders })
       .then((r) => r.json())
       .then((res) => setCats(res.categories || []))
       .catch(console.error)
@@ -305,7 +306,7 @@ function CategoryManager({ authHeaders }) {
     setSaving(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/blog-categories", {
+      const res = await fetch(`${API_BASE}/admin/blog-categories`, {
         method: "POST",
         headers: { ...authHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim(), description: description.trim() || null }),
@@ -329,7 +330,7 @@ function CategoryManager({ authHeaders }) {
       : `Delete "${cat.name}"?`;
     if (!confirm(msg)) return;
     try {
-      await fetch(`/api/admin/blog-categories/${cat.id}`, {
+      await fetch(`${API_BASE}/admin/blog-categories/${cat.id}`, {
         method: "DELETE",
         headers: authHeaders,
       });

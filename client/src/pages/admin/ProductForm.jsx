@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Plus, Trash2, Loader2, Save } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import placeholderImg from "../../assets/product-placeholder.png";
+import { API_BASE, api } from "../../utils/api";
 
 const CONDITIONS = ["New", "Like New", "Excellent", "Good", "Fair"];
 const CONDITION_TYPES = [
@@ -52,7 +52,7 @@ export default function ProductForm() {
     if (!isEdit) return;
     setLoading(true);
     // Admin products list has all data; find by id
-    fetch("/api/admin/products?limit=200", {
+    fetch(`${API_BASE}/admin/products?limit=200`, {
       headers: { Authorization: `Bearer ${user.token}` },
     })
       .then((r) => r.json())
@@ -79,8 +79,8 @@ export default function ProductForm() {
 
   // Load category tree (grouped by parent category)
   useEffect(() => {
-    fetch("/api/categories")
-      .then((r) => r.json())
+    api
+      .getCategories()
       .then((res) => setCategoryTree(res.tree || []))
       .catch(console.error);
   }, []);
@@ -149,7 +149,7 @@ export default function ProductForm() {
     };
 
     try {
-      const url = isEdit ? `/api/admin/products/${id}` : "/api/admin/products";
+      const url = isEdit ? `${API_BASE}/admin/products/${id}` : `${API_BASE}/admin/products`;
       const method = isEdit ? "PUT" : "POST";
 
       const res = await fetch(url, {
