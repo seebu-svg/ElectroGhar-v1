@@ -17,6 +17,7 @@ import AdminProducts from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
 import AdminBlogs from "./pages/admin/Blogs";
 import BlogForm from "./pages/admin/BlogForm";
+import AdminUsers from "./pages/admin/AdminUsers";
 
 export default function App() {
   return (
@@ -48,6 +49,7 @@ export default function App() {
             <Route path="/admin/blogs" element={<AdminBlogs />} />
             <Route path="/admin/blogs/new" element={<BlogForm />} />
             <Route path="/admin/blogs/:id/edit" element={<BlogForm />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
           </Route>
         </Routes>
       </AuthProvider>

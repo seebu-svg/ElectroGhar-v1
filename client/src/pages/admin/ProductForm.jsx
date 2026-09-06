@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, Loader2, Save } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Loader2, Save, Upload, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { API_BASE, api } from "../../utils/api";
 
@@ -29,7 +29,7 @@ const EMPTY = {
   is_active: true,
   thumbnail_url: "",
   images: [""],
-  whatsapp_number: "+923001234567",
+  whatsapp_number: "+92339244435",
   meta_title: "",
   meta_description: "",
   specs: [{ key: "", value: "" }],
@@ -46,6 +46,9 @@ export default function ProductForm() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef(null);
 
   // Load product for edit mode
   useEffect(() => {
@@ -127,6 +130,50 @@ export default function ProductForm() {
     set("images", next);
   }
 
+  async function handleImageUpload(e) {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    setUploadError("");
+    setUploading(true);
+
+    try {
+      const uploadedUrls = [];
+      for (const file of files) {
+        // Validate file
+        if (file.size > 5 * 1024 * 1024) {
+          throw new Error(`${file.name} is too large (max 5 MB)`);
+        }
+        if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+          throw new Error(`${file.name} is not a supported format`);
+        }
+
+        const formData = new FormData();
+        formData.append("image", file);
+
+        const res = await fetch(`${API_BASE}/upload?folder=products`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${user.token}` },
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Upload failed");
+
+        uploadedUrls.push(data.url);
+      }
+
+      // Add uploaded URLs to images array
+      const currentImages = form.images.filter(Boolean);
+      set("images", [...currentImages, ...uploadedUrls]);
+    } catch (err) {
+      setUploadError(err.message);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
@@ -205,9 +252,6 @@ export default function ProductForm() {
           <Field label="Product Name *">
             <input required value={form.name} onChange={(e) => set("name", e.target.value)} className={inputCls} placeholder="Dell Latitude 7420" />
           </Field>
-          <Field label="Slug *">
-            <input required value={form.slug} onChange={(e) => set("slug", e.target.value)} className={inputCls} placeholder="dell-latitude-7420-i7-16gb" />
-          </Field>
           <Field label="Description" full>
             <textarea rows={3} value={form.description} onChange={(e) => set("description", e.target.value)} className={inputCls} placeholder="Describe the laptop..." />
           </Field>
@@ -279,27 +323,68 @@ export default function ProductForm() {
 
         {/* ── Images ─────────────────────────────────────────── */}
         <Section title="Images">
-          <Field label="Thumbnail URL">
-            <input value={form.thumbnail_url} onChange={(e) => set("thumbnail_url", e.target.value)} className={inputCls} placeholder="https://..." />
-          </Field>
-          {form.images.map((url, i) => (
-            <div key={i} className="flex gap-2">
+          <div>
+            <div className="flex items-center gap-3">
               <input
-                value={url}
-                onChange={(e) => updateImage(i, e.target.value)}
-                className={`${inputCls} flex-1`}
-                placeholder={`Image URL ${i + 1}`}
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                multiple
+                onChange={handleImageUpload}
+                className="hidden"
+                id="product-image-upload"
               />
-              {form.images.length > 1 && (
-                <button type="button" onClick={() => removeImage(i)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
+              <label
+                htmlFor="product-image-upload"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 cursor-pointer transition-colors"
+              >
+                {uploading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Upload className="w-4 h-4" />
+                )}
+                {uploading ? "Uploading..." : "Upload Images"}
+              </label>
+              <span className="text-xs text-gray-400">Select up to 6 images (max 5 MB each)</span>
             </div>
-          ))}
-          <button type="button" onClick={addImage} className="text-sm text-brand-600 font-medium flex items-center gap-1">
-            <Plus className="w-3.5 h-3.5" /> Add image URL
-          </button>
+            {uploadError && (
+              <p className="mt-2 text-sm text-red-500">{uploadError}</p>
+            )}
+          </div>
+
+          {/* Image previews */}
+          {form.images.filter(Boolean).length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {form.images.filter(Boolean).map((url, i) => (
+                <div key={i} className="relative group bg-gray-50 rounded-lg p-2 border border-gray-200">
+                  <img
+                    src={url}
+                    alt={`Product image ${i + 1}`}
+                    className="w-full h-32 object-cover rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(form.images.indexOf(url))}
+                    className="absolute top-3 right-3 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    title="Remove image"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                  {i === 0 && (
+                    <span className="absolute bottom-3 left-3 px-2 py-0.5 bg-brand-500 text-white text-xs rounded-full font-medium">
+                      Thumbnail
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {form.images.filter(Boolean).length === 0 && (
+            <p className="text-sm text-gray-400 text-center py-6 border-2 border-dashed border-gray-200 rounded-lg">
+              No images uploaded yet. Click "Upload Images" to add product photos.
+            </p>
+          )}
         </Section>
 
         {/* ── Specifications ─────────────────────────────────── */}
@@ -364,7 +449,7 @@ export default function ProductForm() {
 }
 
 const inputCls =
-  "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500";
+  "w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500";
 
 function Section({ title, children }) {
   return (

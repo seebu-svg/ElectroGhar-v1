@@ -13,7 +13,7 @@ import WhatsAppFAB from "../components/ui/WhatsAppFAB";
 import { SEOHead, organizationSchema } from "../utils/seo";
 
 const WA_GENERAL =
-  "https://wa.me/923001234567?text=Hi%20ElectroGhar!%20I%20have%20a%20question.";
+  "https://wa.me/92339244435?text=Hi%20ElectroGhar!%20I%20have%20a%20question.";
 
 const STATS = [
   { value: "5", label: "Main Categories" },

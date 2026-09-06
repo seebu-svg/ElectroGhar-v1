@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS products (
   is_active        BOOLEAN DEFAULT true,
   meta_title       TEXT,
   meta_description TEXT,
-  whatsapp_number  TEXT DEFAULT '+923001234567',
+  whatsapp_number  TEXT DEFAULT '+92339244435',
   created_at       TIMESTAMPTZ DEFAULT now(),
   updated_at       TIMESTAMPTZ DEFAULT now()
 );

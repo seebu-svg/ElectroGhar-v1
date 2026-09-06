@@ -5,7 +5,7 @@ export const SITE = {
   tagline: "Good Tech. Better Deals.",
   defaultDescription:
     "Pakistan's trusted marketplace for quality checked laptops, PCs, monitors, storage and gadgets — new, used and refurbished. Message us on WhatsApp for the latest price.",
-  phone: "+92 300 1234567",
+  phone: "+92 339 244435",
   address: {
     street: "",
     city: "Lahore",
@@ -13,7 +13,8 @@ export const SITE = {
     country: "PK",
   },
   social: {
-    whatsapp: "https://wa.me/923001234567",
+    whatsapp: "https://wa.me/92339244435",
+    website: "https://electroghar.pk",
   },
 };
 
@@ -145,7 +146,7 @@ export function organizationSchema() {
       contactType: "Customer Service",
       availableLanguage: ["English", "Urdu"],
     },
-    sameAs: [SITE.social.whatsapp],
+    sameAs: [SITE.social.whatsapp, SITE.social.website],
   };
 }
 

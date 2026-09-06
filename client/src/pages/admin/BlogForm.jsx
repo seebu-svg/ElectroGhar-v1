@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Eye, Loader2, Save, Sparkles } from "lucide-react";
+import { ArrowLeft, Eye, Loader2, Save, Sparkles, Upload, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { API_BASE } from "../../utils/api";
 
 const INPUT_CLS =
-  "w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500";
+  "w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500";
 
 export default function BlogForm() {
   const { user } = useAuth();
@@ -33,6 +33,9 @@ export default function BlogForm() {
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef(null);
 
   const authHeaders = { Authorization: `Bearer ${user.token}` };
 
@@ -76,6 +79,43 @@ export default function BlogForm() {
         .map((t) => t.trim().toLowerCase())
         .filter(Boolean)
     );
+  }
+
+  async function handleCoverUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadError("");
+    setUploading(true);
+
+    try {
+      // Validate file
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("File is too large (max 5 MB)");
+      }
+      if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+        throw new Error("Only JPEG, PNG, WebP, GIF images are allowed");
+      }
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await fetch(`${API_BASE}/upload?folder=blogs`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${user.token}` },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed");
+
+      set("cover_image", data.url);
+    } catch (err) {
+      setUploadError(err.message);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   }
 
   async function handleSubmit(e, publishNow = null) {
@@ -236,19 +276,6 @@ export default function BlogForm() {
 
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-                Slug (URL)
-              </label>
-              <input
-                type="text"
-                value={form.slug}
-                onChange={(e) => set("slug", e.target.value)}
-                placeholder="Auto-generated from title if empty"
-                className={INPUT_CLS}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                 Author
               </label>
               <input
@@ -276,22 +303,65 @@ export default function BlogForm() {
 
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
-              Cover Image URL
+              Cover Image
             </label>
+            <div className="flex items-center gap-3 mb-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={handleCoverUpload}
+                className="hidden"
+                id="blog-cover-upload"
+              />
+              <label
+                htmlFor="blog-cover-upload"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 cursor-pointer transition-colors"
+              >
+                {uploading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Upload className="w-4 h-4" />
+                )}
+                {uploading ? "Uploading..." : "Upload cover image"}
+              </label>
+              {form.cover_image && (
+                <button
+                  type="button"
+                  onClick={() => set("cover_image", "")}
+                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <span className="text-xs text-gray-400">JPEG, PNG, WebP, GIF (max 5 MB)</span>
+            {uploadError && (
+              <p className="mt-1.5 text-xs text-red-500">{uploadError}</p>
+            )}
             <input
               type="text"
               value={form.cover_image}
               onChange={(e) => set("cover_image", e.target.value)}
-              placeholder="https://images.unsplash.com/…"
-              className={INPUT_CLS}
+              placeholder="Or paste an image URL..."
+              className={`${INPUT_CLS} mt-2`}
             />
             {form.cover_image && (
-              <img
-                src={form.cover_image}
-                alt="Cover preview"
-                className="mt-2.5 w-full max-w-sm aspect-video object-cover rounded-lg border border-gray-200"
-                onError={(e) => (e.currentTarget.style.display = "none")}
-              />
+              <div className="mt-2.5 relative group inline-block">
+                <img
+                  src={form.cover_image}
+                  alt="Cover preview"
+                  className="w-full max-w-sm aspect-video object-cover rounded-lg border border-gray-200"
+                  onError={(e) => (e.currentTarget.style.display = "none")}
+                />
+                <button
+                  type="button"
+                  onClick={() => set("cover_image", "")}
+                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
             )}
           </div>
 

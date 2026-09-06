@@ -111,9 +111,15 @@ adminRoutes.get("/products", requireAdmin, async (req, res, next) => {
 // ── POST /api/admin/products ───────────────────────────────────────────────
 adminRoutes.post("/products", requireAdmin, async (req, res, next) => {
   try {
+    const body = { ...req.body };
+    if (!body.name) return res.status(400).json({ error: "Product name is required" });
+    
+    // Auto-generate slug from name
+    body.slug = await uniqueSlug("products", slugify(body.name));
+
     const { data, error } = await supabase
       .from("products")
-      .insert(req.body)
+      .insert(body)
       .select()
       .single();
 
@@ -127,9 +133,18 @@ adminRoutes.post("/products", requireAdmin, async (req, res, next) => {
 // ── PUT /api/admin/products/:id ────────────────────────────────────────────
 adminRoutes.put("/products/:id", requireAdmin, async (req, res, next) => {
   try {
+    const body = { ...req.body };
+    delete body.id;
+    delete body.created_at;
+    
+    // If name changed, regenerate slug
+    if (body.name) {
+      body.slug = await uniqueSlug("products", slugify(body.name), req.params.id);
+    }
+
     const { data, error } = await supabase
       .from("products")
-      .update(req.body)
+      .update(body)
       .eq("id", req.params.id)
       .select()
       .single();
@@ -418,6 +433,117 @@ adminRoutes.delete("/blog-categories/:id", requireAdmin, async (req, res, next) 
       .eq("id", req.params.id);
 
     if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// ADMIN USER MANAGEMENT
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── POST /api/admin/change-password ────────────────────────────────────────
+adminRoutes.post("/change-password", requireAdmin, async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Current and new password are required" });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: "New password must be at least 6 characters" });
+    }
+
+    // Verify current password
+    const { data: signInData, error: signInError } = await supabaseAuth.auth.signInWithPassword({
+      email: req.user.email,
+      password: currentPassword,
+    });
+
+    if (signInError || !signInData.user) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    // Update to new password using service role
+    const { error: updateError } = await supabase.auth.admin.updateUserById(
+      req.user.id,
+      { password: newPassword }
+    );
+
+    if (updateError) {
+      return res.status(500).json({ error: updateError.message });
+    }
+
+    res.json({ success: true, message: "Password updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── GET /api/admin/users ───────────────────────────────────────────────────
+adminRoutes.get("/users", requireAdmin, async (_req, res, next) => {
+  try {
+    const { data, error } = await supabase.auth.admin.listUsers();
+    if (error) throw error;
+
+    const users = (data.users || []).map((u) => ({
+      id: u.id,
+      email: u.email,
+      created_at: u.created_at,
+      last_sign_in_at: u.last_sign_in_at,
+      email_confirmed_at: u.email_confirmed_at,
+    }));
+
+    res.json({ users });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── POST /api/admin/users ──────────────────────────────────────────────────
+adminRoutes.post("/users", requireAdmin, async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    const { data, error } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.status(201).json({
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+        created_at: data.user.created_at,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ── DELETE /api/admin/users/:id ────────────────────────────────────────────
+adminRoutes.delete("/users/:id", requireAdmin, async (req, res, next) => {
+  try {
+    // Prevent deleting yourself
+    if (req.params.id === req.user.id) {
+      return res.status(400).json({ error: "You cannot delete your own account" });
+    }
+
+    const { error } = await supabase.auth.admin.deleteUser(req.params.id);
+    if (error) throw error;
+
     res.json({ success: true });
   } catch (err) {
     next(err);

@@ -1,23 +1,20 @@
 import { Link, NavLink, Outlet, Navigate, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard,
   Package,
-  PlusCircle,
   FileText,
   LogOut,
   Menu,
   X,
+  Settings,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/logo.png";
 
 const NAV = [
-  { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
   { to: "/admin/products", icon: Package, label: "Products" },
-  { to: "/admin/products/new", icon: PlusCircle, label: "Add Product" },
-  { to: "/admin/blogs", icon: FileText, label: "Blog Posts" },
-  { to: "/admin/blogs/new", icon: PlusCircle, label: "Add Blog" },
+  { to: "/admin/blogs", icon: FileText, label: "Blogs" },
+  { to: "/admin/users", icon: Settings, label: "Admin Settings" },
 ];
 
 export default function AdminLayout() {

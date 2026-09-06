@@ -397,14 +397,17 @@ export default function Products() {
                 {/* Mobile filter button */}
                 <button
                   onClick={() => setShowMobileFilters(true)}
-                  className={`lg:hidden inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  className={`lg:hidden inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                     hasFilters
-                      ? "border-brand-600/60 bg-brand-600/10 text-brand-400"
+                      ? "border-brand-500/50 bg-brand-600/15 text-brand-400 shadow-lg shadow-brand-600/10"
                       : "border-white/10 bg-surface-card text-gray-300 hover:border-white/20"
                   }`}
                 >
                   <SlidersHorizontal className="w-4 h-4" />
                   Filters
+                  {hasFilters && (
+                    <span className="w-2 h-2 rounded-full bg-brand-400" />
+                  )}
                 </button>
 
                 {/* Sort */}
@@ -476,25 +479,41 @@ export default function Products() {
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1920px]:grid-cols-5 gap-6">
                 {Array.from({ length: 10 }).map((_, i) => (
-                  <div key={i} className="bg-surface-card rounded-2xl h-96 animate-pulse" />
+                  <div key={i} className="bg-surface-card rounded-2xl border border-white/5 overflow-hidden">
+                    <div className="aspect-[4/3] bg-surface-dark animate-pulse" />
+                    <div className="p-4 space-y-3">
+                      <div className="h-3 w-16 bg-white/5 rounded animate-pulse" />
+                      <div className="h-4 w-full bg-white/5 rounded animate-pulse" />
+                      <div className="h-4 w-3/4 bg-white/5 rounded animate-pulse" />
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <div className="h-6 bg-white/5 rounded animate-pulse" />
+                        <div className="h-6 bg-white/5 rounded animate-pulse" />
+                      </div>
+                      <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+                        <div className="h-5 w-24 bg-white/5 rounded animate-pulse" />
+                        <div className="h-10 w-10 bg-white/5 rounded-xl animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : products.length === 0 ? (
-              <div className="text-center py-20">
-                <div className="mx-auto w-14 h-14 rounded-2xl bg-brand-600/10 border border-brand-600/25 flex items-center justify-center mb-5">
-                  <SearchX className="w-6 h-6 text-brand-500" />
+              <div className="text-center py-24">
+                <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-600/20 to-brand-600/5 border border-brand-600/20 flex items-center justify-center mb-6">
+                  <SearchX className="w-8 h-8 text-brand-400" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-1.5 font-heading">
+                <h3 className="text-xl font-bold text-white mb-2 font-heading">
                   No products found
                 </h3>
-                <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
-                  Nothing matches your current filters. Try a different search,
-                  widen your budget, or clear the filters.
+                <p className="text-sm text-gray-500 mb-8 max-w-md mx-auto leading-relaxed">
+                  Nothing matches your current filters. Try adjusting your search,
+                  widening your budget, or clearing all filters to browse everything.
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-brand-600 text-white text-sm font-bold uppercase tracking-wide hover:bg-brand-500 transition-colors"
+                  className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-brand-600 text-white text-sm font-bold uppercase tracking-wide hover:bg-brand-500 transition-colors shadow-lg shadow-brand-600/25"
                 >
+                  <X className="w-4 h-4" />
                   Clear All Filters
                 </button>
               </div>

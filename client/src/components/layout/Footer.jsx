@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { MapPin, Phone, Mail, Clock, ShieldCheck, FileText, MessageCircle } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, ShieldCheck, FileText, MessageCircle, Globe } from "lucide-react";
 import logoFull from "../../assets/logo-full.png";
 
-const WA_LINK = "https://wa.me/923001234567";
+const WA_LINK = "https://wa.me/92339244435";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -108,14 +108,20 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-brand-400 shrink-0" />
-                <a href="tel:+923001234567" className="hover:text-brand-400 transition-colors">
-                  +92 300 1234567
+                <a href="tel:+92339244435" className="hover:text-brand-400 transition-colors">
+                  +92 339 244435
                 </a>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-brand-400 shrink-0" />
                 <a href="mailto:hello@electroghar.pk" className="hover:text-brand-400 transition-colors">
                   hello@electroghar.pk
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Globe className="w-4 h-4 text-brand-400 shrink-0" />
+                <a href="https://electroghar.pk" target="_blank" rel="noopener noreferrer" className="hover:text-brand-400 transition-colors">
+                  electroghar.pk
                 </a>
               </li>
               <li className="flex items-center gap-2">

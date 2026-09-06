@@ -138,7 +138,7 @@ export default function AdminBlogs() {
                 fetchBlogs(e.target.value, status);
               }
             }}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
         <div className="flex rounded-lg border border-gray-200 overflow-hidden">
@@ -354,7 +354,7 @@ function CategoryManager({ authHeaders }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Category name (e.g. Repair Guides)"
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
             required
           />
           <input
@@ -362,7 +362,7 @@ function CategoryManager({ authHeaders }) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Short description (optional)"
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           {error && <p className="text-xs text-red-600">{error}</p>}
           <button

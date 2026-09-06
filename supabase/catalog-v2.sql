@@ -73,7 +73,7 @@ CREATE TABLE products (
   meta_description TEXT,
 
   -- WhatsApp
-  whatsapp_number  TEXT DEFAULT '+923001234567',
+  whatsapp_number  TEXT DEFAULT '+92339244435',
 
   created_at       TIMESTAMPTZ DEFAULT now(),
   updated_at       TIMESTAMPTZ DEFAULT now()

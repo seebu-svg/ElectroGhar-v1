@@ -168,7 +168,7 @@ export default function Navbar() {
 
         {/* ── WhatsApp CTA (desktop) ────────────────────────── */}
         <a
-          href="https://wa.me/923001234567"
+          href="https://wa.me/92339244435"
           target="_blank"
           rel="noopener noreferrer"
           className="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 text-white text-sm font-semibold hover:bg-green-500 transition-colors shrink-0"
@@ -333,7 +333,7 @@ export default function Navbar() {
 
             <li className="pt-3">
               <a
-                href="https://wa.me/923001234567"
+                href="https://wa.me/92339244435"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full bg-green-600 text-white text-sm font-semibold hover:bg-green-500 transition-colors"

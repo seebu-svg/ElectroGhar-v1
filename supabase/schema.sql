@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS products (
   meta_description TEXT,
   
   -- WhatsApp
-  whatsapp_number  TEXT DEFAULT '+923001234567',
+  whatsapp_number  TEXT DEFAULT '+92339244435',
   
   -- Timestamps
   created_at       TIMESTAMPTZ DEFAULT now(),

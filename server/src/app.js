@@ -10,6 +10,7 @@ import { categoryRoutes } from "./routes/categories.js";
 import { adminRoutes } from "./routes/admin.js";
 import { blogRoutes, blogCategoryRoutes } from "./routes/blogs.js";
 import { seoRoutes } from "./routes/seo.js";
+import { uploadRoutes } from "./routes/upload.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -37,6 +38,7 @@ app.use(
 );
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // ── Health Check ────────────────────────────────────────────────────────────
 app.get("/api/health", (_req, res) => {
@@ -49,6 +51,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/blog-categories", blogCategoryRoutes);
+app.use("/api/upload", uploadRoutes);
 app.use(seoRoutes);
 
 // ── 404 Handler ─────────────────────────────────────────────────────────────

@@ -33,7 +33,7 @@ import { SEOHead, organizationSchema, websiteSchema, itemListSchema } from "../u
 import { BUDGETS, WHY_ITEMS } from "./homeData";
 
 const WA_GENERAL =
-  "https://wa.me/923001234567?text=Hi%20ElectroGhar!%20I%27m%20looking%20for%20a%20product%2C%20can%20you%20help%3F";
+  "https://wa.me/92339244435?text=Hi%20ElectroGhar!%20I%27m%20looking%20for%20a%20product%2C%20can%20you%20help%3F";
 
 const CATEGORY_ICONS = {
   laptops: Laptop,

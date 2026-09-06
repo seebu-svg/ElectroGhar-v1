@@ -84,7 +84,7 @@ export default function AdminProducts() {
                 fetchProducts(e.target.value);
               }
             }}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
         <div className="flex rounded-lg border border-gray-200 overflow-hidden">
