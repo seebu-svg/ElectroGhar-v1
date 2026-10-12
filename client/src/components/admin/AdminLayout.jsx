@@ -10,18 +10,22 @@ import {
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import logo from "../../assets/logo.png";
+import SiteLogo from '../ui/SiteLogo';
 
 const NAV = [
+  { to: "/admin/categories", icon: Package, label: "Categories" },
+  { to: "/admin/hero-images", icon: FileText, label: "Hero Images" },
   { to: "/admin/products", icon: Package, label: "Products" },
   { to: "/admin/blogs", icon: FileText, label: "Blogs" },
   { to: "/admin/users", icon: Settings, label: "Admin Settings" },
 ];
 
 export default function AdminLayout() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
+  if (loading) return <p className="p-8">Loading session…</p>;
   if (!user) return <Navigate to="/admin/login" replace state={{ from: location }} />;
 
   return (
@@ -72,7 +76,7 @@ function SidebarContent({ logout, onClose }) {
       {/* Logo */}
       <div className="h-14 flex items-center gap-2 px-5 border-b border-gray-800 shrink-0">
         <Link to="/admin" className="flex items-center gap-2" onClick={onClose}>
-          <img src={logo} alt="ElectroGhar" className="h-8 w-auto" />
+          <SiteLogo fallback={logo} alt="ElectroGhar" className="h-8 w-auto" />
         </Link>
         {onClose && (
           <button className="ml-auto p-1 text-gray-400 hover:text-white" onClick={onClose}>

@@ -1,7 +1,9 @@
+import { CONTACT } from "../../utils/contact";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, Phone } from "lucide-react";
 import logo from "../../assets/logo.png";
+import SiteLogo from '../ui/SiteLogo';
 import SearchBar from "../ui/SearchBar";
 import { api } from "../../utils/api";
 
@@ -13,6 +15,7 @@ const NAV_LINKS = [
   { label: "Best Sellers", to: "/products?featured=1" },
   { label: "Daily Deals", to: "/products?deals=1" },
   { label: "Blog", to: "/blogs" },
+  { label: "Contact", to: "/contact" },
 ];
 
 function navLinkCls(active) {
@@ -37,7 +40,7 @@ export default function Navbar() {
       .getCategories()
       .then((r) => setTree(r.tree || []))
       .catch(console.error);
-  }, []);
+  }, [location.pathname]);
 
   // Hide the header when scrolling down, show it again when scrolling up
   useEffect(() => {
@@ -118,8 +121,8 @@ export default function Navbar() {
       <nav className="max-w-7xl mx-auto flex items-center gap-2 px-4 sm:px-6 h-16">
         {/* ── Logo ──────────────────────────────────────────── */}
         <Link to="/" className="flex items-center shrink-0">
-          <img
-            src={logo}
+          <SiteLogo
+            fallback={logo}
             alt="ElectroGhar"
             className="h-9 sm:h-10 w-auto"
           />
@@ -168,7 +171,7 @@ export default function Navbar() {
 
         {/* ── WhatsApp CTA (desktop) ────────────────────────── */}
         <a
-          href="https://wa.me/92339244435"
+          href={CONTACT.whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 text-white text-sm font-semibold hover:bg-green-500 transition-colors shrink-0"
@@ -186,7 +189,6 @@ export default function Navbar() {
           {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </nav>
-
       {/* ── Shop mega-menu (desktop) — full category tree ──────── */}
       {shopOpen && (
         <div className="hidden lg:block absolute top-full inset-x-0 z-50">
@@ -314,6 +316,21 @@ export default function Navbar() {
                               {cat.total_count ?? 0}
                             </span>
                           </Link>
+                          {cat.children?.length > 0 && (
+                            <ul className="ml-3 pl-3 border-l border-white/10">
+                              {cat.children.map((sub) => (
+                                <li key={sub.slug}>
+                                  <Link
+                                    to={`/products?category=${sub.slug}`}
+                                    onClick={() => setOpen(false)}
+                                    className="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-colors"
+                                  >
+                                    {sub.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </li>
                       ))}
                       <li>
@@ -333,7 +350,7 @@ export default function Navbar() {
 
             <li className="pt-3">
               <a
-                href="https://wa.me/92339244435"
+                href={CONTACT.whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full bg-green-600 text-white text-sm font-semibold hover:bg-green-500 transition-colors"

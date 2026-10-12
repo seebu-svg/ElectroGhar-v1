@@ -19,6 +19,7 @@ categoryRoutes.get("/", async (_req, res, next) => {
     ]);
 
     if (catRes.error) throw catRes.error;
+    if (prodRes.error) throw prodRes.error;
 
     // Direct product count per category slug
     const counts = {};
@@ -37,7 +38,7 @@ categoryRoutes.get("/", async (_req, res, next) => {
     for (const node of byId.values()) {
       if (node.parent_id && byId.has(node.parent_id)) {
         byId.get(node.parent_id).children.push(node);
-      } else {
+      } else if (!node.parent_id) {
         tree.push(node);
       }
     }
@@ -53,7 +54,8 @@ categoryRoutes.get("/", async (_req, res, next) => {
     };
     tree.forEach(rollup);
 
-    res.json({ categories: flat, tree });
+    const visible = new Set(tree.flatMap(c => [c.id, ...c.children.map(s => s.id)]));
+    res.json({ categories: flat.filter(c => visible.has(c.id)), tree });
   } catch (err) {
     next(err);
   }

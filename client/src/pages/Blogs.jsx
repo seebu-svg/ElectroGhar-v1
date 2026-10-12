@@ -1,3 +1,4 @@
+import { CONTACT } from "../utils/contact";
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -17,7 +18,7 @@ import { formatDate } from "../utils/helpers";
 import { SEOHead, breadcrumbSchema } from "../utils/seo";
 
 const WA_GENERAL =
-  "https://wa.me/92339244435?text=Hi%20ElectroGhar!%20I%20need%20buying%20advice.";
+  `${CONTACT.whatsappUrl}?text=Hi%20ElectroGhar!%20I%20need%20buying%20advice.`;
 
 const PAGE_LIMIT = 9;
 
