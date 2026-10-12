@@ -1,4 +1,3 @@
-import { adminFetch } from "../../utils/adminFetch";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Package, Star, FolderOpen, PlusCircle, FileText, Loader2 } from "lucide-react";
@@ -11,7 +10,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    adminFetch(`${API_BASE}/admin/stats`, {
+    fetch(`${API_BASE}/admin/stats`, {
       headers: { Authorization: `Bearer ${user.token}` },
     })
       .then((r) => r.json())

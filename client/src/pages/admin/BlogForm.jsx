@@ -1,4 +1,3 @@
-import { adminFetch } from "../../utils/adminFetch";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Eye, Loader2, Save, Sparkles, Upload, X } from "lucide-react";
@@ -42,13 +41,13 @@ export default function BlogForm() {
 
   // Load categories + existing post (edit mode)
   useEffect(() => {
-    adminFetch(`${API_BASE}/admin/blog-categories`, { headers: authHeaders })
+    fetch(`${API_BASE}/admin/blog-categories`, { headers: authHeaders })
       .then((r) => r.json())
       .then((res) => setCategories(res.categories || []))
       .catch(console.error);
 
     if (isEdit) {
-      adminFetch(`${API_BASE}/admin/blogs/${id}`, { headers: authHeaders })
+      fetch(`${API_BASE}/admin/blogs/${id}`, { headers: authHeaders })
         .then((r) => r.json())
         .then((res) => {
           if (res.blog) {
@@ -101,7 +100,7 @@ export default function BlogForm() {
       const formData = new FormData();
       formData.append("image", file);
 
-      const res = await adminFetch(`${API_BASE}/upload?folder=blogs`, {
+      const res = await fetch(`${API_BASE}/upload?folder=blogs`, {
         method: "POST",
         headers: { Authorization: `Bearer ${user.token}` },
         body: formData,
@@ -143,7 +142,7 @@ export default function BlogForm() {
     if (publishNow !== null) payload.is_published = publishNow;
 
     try {
-      const res = await adminFetch(isEdit ? `${API_BASE}/admin/blogs/${id}` : `${API_BASE}/admin/blogs`, {
+      const res = await fetch(isEdit ? `${API_BASE}/admin/blogs/${id}` : `${API_BASE}/admin/blogs`, {
         method: isEdit ? "PUT" : "POST",
         headers: { ...authHeaders, "Content-Type": "application/json" },
         body: JSON.stringify(payload),

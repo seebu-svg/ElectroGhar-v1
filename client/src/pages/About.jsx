@@ -1,4 +1,3 @@
-import { CONTACT } from "../utils/contact";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -14,11 +13,11 @@ import WhatsAppFAB from "../components/ui/WhatsAppFAB";
 import { SEOHead, organizationSchema } from "../utils/seo";
 
 const WA_GENERAL =
-  `${CONTACT.whatsappUrl}?text=Hi%20ElectroGhar!%20I%20have%20a%20question.`;
+  "https://wa.me/92339244435?text=Hi%20ElectroGhar!%20I%20have%20a%20question.";
 
 const STATS = [
   { value: "5", label: "Main Categories" },
-  { value: "33", label: "Subcategories" },
+  { value: "55+", label: "Subcategories" },
   { value: "60+", label: "Products in Stock" },
   { value: "100%", label: "Quality Checked" },
 ];

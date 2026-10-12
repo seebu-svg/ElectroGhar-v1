@@ -16,9 +16,6 @@ import { errorHandler } from "./middleware/errorHandler.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-import { catalogAdminRoutes } from "./routes/catalogAdmin.js";
-import { supabase } from "./config/supabase.js";
-
 const app = express();
 
 // ── Middleware ──────────────────────────────────────────────────────────────
@@ -52,29 +49,6 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/admin", catalogAdminRoutes);
-app.get("/api/logo", async (_req, res, next) => {
-  res.set("Cache-Control", "no-store");
-  try {
-    const { data, error } = await supabase.storage.from('uploads').list('branding', { search: 'logo', limit: 100 });
-    if (error) throw error;
-    const logo = data.find(item => item.name === 'logo');
-    if (!logo) return res.json({ url: null });
-    const { data: publicUrl } = supabase.storage.from('uploads').getPublicUrl('branding/logo');
-    res.json({ url: `${publicUrl.publicUrl}?v=${encodeURIComponent(logo.updated_at || logo.id)}` });
-  } catch (error) { next(error); }
-});
-app.get("/api/hero-images", async (_req, res, next) => {
-  try {
-    const { data, error } = await supabase.from("hero_images").select("*").eq("is_active", true).order("sort_order");
-    // Older databases can serve the default homepage hero until the upgrade runs.
-    if (error?.code === "PGRST205" || error?.code === "42P01") {
-      return res.json({ images: [] });
-    }
-    if (error) throw error;
-    res.json({ images: data });
-  } catch (error) { next(error); }
-});
 app.use("/api/blogs", blogRoutes);
 app.use("/api/blog-categories", blogCategoryRoutes);
 app.use("/api/upload", uploadRoutes);

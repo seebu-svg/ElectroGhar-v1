@@ -1,9 +1,7 @@
-import { CONTACT } from "../../utils/contact";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Plus, Trash2, Loader2, Save, Upload, X } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import { adminFetch, adminApi } from "../../utils/adminFetch";
 import { API_BASE, api } from "../../utils/api";
 
 const CONDITIONS = ["New", "Like New", "Excellent", "Good", "Fair"];
@@ -18,7 +16,7 @@ const EMPTY = {
   slug: "",
   description: "",
   brand: "",
-  category: "",
+  category: "business-laptops",
   condition_type: "used",
   price: "",
   compare_at_price: "",
@@ -31,7 +29,7 @@ const EMPTY = {
   is_active: true,
   thumbnail_url: "",
   images: [""],
-  whatsapp_number: CONTACT.internationalPhone,
+  whatsapp_number: "+92339244435",
   meta_title: "",
   meta_description: "",
   specs: [{ key: "", value: "" }],
@@ -43,10 +41,7 @@ export default function ProductForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const draftKey = `product-draft:${user.id}:${id || "new"}`;
-  const hasDraft = useRef(Boolean(sessionStorage.getItem(draftKey)));
-  const [form, setForm] = useState(() => { try { return JSON.parse(sessionStorage.getItem(draftKey)) || EMPTY; } catch { return EMPTY; } });
-  useEffect(() => { if (form !== EMPTY) sessionStorage.setItem(draftKey, JSON.stringify(form)); }, [form, draftKey]);
+  const [form, setForm] = useState(EMPTY);
   const [categoryTree, setCategoryTree] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -57,11 +52,15 @@ export default function ProductForm() {
 
   // Load product for edit mode
   useEffect(() => {
-    if (!isEdit || hasDraft.current) return;
+    if (!isEdit) return;
     setLoading(true);
-    adminApi(`/products/${id}`)
+    // Admin products list has all data; find by id
+    fetch(`${API_BASE}/admin/products?limit=200`, {
+      headers: { Authorization: `Bearer ${user.token}` },
+    })
+      .then((r) => r.json())
       .then((res) => {
-        const p = res.product;
+        const p = (res.products || []).find((x) => x.id === id);
         if (p) {
           const specs = p.specs
             ? Object.entries(p.specs).map(([key, value]) => ({ key, value }))
@@ -77,7 +76,7 @@ export default function ProductForm() {
           });
         }
       })
-      .catch(err => setError(err.message))
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, [id, isEdit, user.token]);
 
@@ -152,7 +151,7 @@ export default function ProductForm() {
         const formData = new FormData();
         formData.append("image", file);
 
-        const res = await adminFetch(`${API_BASE}/upload?folder=products`, {
+        const res = await fetch(`${API_BASE}/upload?folder=products`, {
           method: "POST",
           headers: { Authorization: `Bearer ${user.token}` },
           body: formData,
@@ -196,16 +195,11 @@ export default function ProductForm() {
       thumbnail_url: form.thumbnail_url || form.images.filter(Boolean)[0] || null,
     };
 
-    delete payload.id;
-    delete payload.created_at;
-    delete payload.updated_at;
-    delete payload.search_text;
-
     try {
       const url = isEdit ? `${API_BASE}/admin/products/${id}` : `${API_BASE}/admin/products`;
       const method = isEdit ? "PUT" : "POST";
 
-      const res = await adminFetch(url, {
+      const res = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -217,7 +211,6 @@ export default function ProductForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Save failed");
 
-      sessionStorage.removeItem(draftKey);
       navigate("/admin/products");
     } catch (err) {
       setError(err.message);
@@ -267,9 +260,7 @@ export default function ProductForm() {
               <input required value={form.brand} onChange={(e) => set("brand", e.target.value)} className={inputCls} placeholder="Dell" />
             </Field>
             <Field label="Category *">
-              <select required value={form.category} onChange={(e) => set("category", e.target.value)} className={inputCls}>
-                <option value="">Select category</option>
-                {form.category && !categoryTree.some(c => c.slug === form.category || c.children?.some(s => s.slug === form.category)) && <option value={form.category}>{form.category} (inactive; reassign if needed)</option>}
+              <select value={form.category} onChange={(e) => set("category", e.target.value)} className={inputCls}>
                 {categoryTree.map((parent) =>
                   parent.children && parent.children.length > 0 ? (
                     <optgroup key={parent.id} label={parent.name}>

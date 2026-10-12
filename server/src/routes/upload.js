@@ -16,7 +16,7 @@ const upload = multer({
     if (ALLOWED_TYPES.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(Object.assign(new Error("Only JPEG, PNG, WebP and GIF images are allowed"), { status: 400 }));
+      cb(new Error("Only JPEG, PNG, WebP and GIF images are allowed"));
     }
   },
 });
@@ -57,34 +57,25 @@ router.post("/", requireAdmin, upload.single("image"), async (req, res, next) =>
       return res.status(400).json({ error: "No image file provided" });
     }
 
-    const b = req.file.buffer;
-    const signatures = {
-      'image/jpeg': b[0] === 255 && b[1] === 216 && b[2] === 255,
-      'image/png': b.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])),
-      'image/gif': ['GIF87a','GIF89a'].includes(b.subarray(0,6).toString()),
-      'image/webp': b.subarray(0,4).toString() === 'RIFF' && b.subarray(8,12).toString() === 'WEBP',
-    };
-    if (!signatures[req.file.mimetype]) return res.status(400).json({ error: 'Image content does not match the selected file format' });
     // Ensure bucket exists
     const bucketOk = await ensureBucket();
     if (!bucketOk) {
       return res.status(500).json({ error: "Storage bucket not available. Check Supabase permissions." });
     }
 
-    const folder = ["products", "blogs", "hero", "misc"].includes(req.query.folder) ? req.query.folder : "misc"; // e.g. "products" or "blogs"
-    const ext = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif" }[req.file.mimetype];
+    const folder = req.query.folder || "misc"; // e.g. "products" or "blogs"
+    const ext = req.file.originalname.split(".").pop() || "jpg";
     const safeName = req.file.originalname
       .replace(/\.[^.]+$/, "")
       .replace(/[^a-zA-Z0-9_-]/g, "_")
       .slice(0, 50);
-    const replacingLogo = req.query.folder === "logo";
-    const fileName = replacingLogo ? "branding/logo" : `${folder}/${safeName}-${Date.now()}.${ext}`;
+    const fileName = `${folder}/${safeName}-${Date.now()}.${ext}`;
 
     const { data, error } = await supabase.storage
       .from("uploads")
       .upload(fileName, req.file.buffer, {
         contentType: req.file.mimetype,
-        upsert: replacingLogo,
+        upsert: false,
       });
 
     if (error) {
@@ -96,7 +87,7 @@ router.post("/", requireAdmin, upload.single("image"), async (req, res, next) =>
       .from("uploads")
       .getPublicUrl(data.path);
 
-    res.json({ url: replacingLogo ? `${urlData.publicUrl}?v=${Date.now()}` : urlData.publicUrl, path: data.path });
+    res.json({ url: urlData.publicUrl, path: data.path });
   } catch (err) {
     if (err instanceof multer.MulterError) {
       if (err.code === "LIMIT_FILE_SIZE") {
@@ -116,7 +107,6 @@ router.delete("/", requireAdmin, async (req, res, next) => {
     if (!filePath) {
       return res.status(400).json({ error: "Missing file path" });
     }
-    if (filePath === 'branding/logo') return res.status(400).json({ error: 'The website logo can only be replaced' });
 
     const { error } = await supabase.storage
       .from("uploads")

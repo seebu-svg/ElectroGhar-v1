@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { supabase, createAuthClient } from "../config/supabase.js";
-import { requireAdmin, isAdmin, isMainAdmin, requireMainAdmin, MAIN_ADMIN_EMAIL } from "../middleware/auth.js";
+import { supabase, supabaseAuth } from "../config/supabase.js";
+import { requireAdmin } from "../middleware/auth.js";
 
 export const adminRoutes = Router();
 
@@ -27,40 +27,15 @@ async function uniqueSlug(table, base, exceptId = null) {
   return `${base}-${Date.now()}`;
 }
 
-const productFields = new Set('name slug description brand category price compare_at_price currency images thumbnail_url specs condition_type condition_grade battery_health warranty stock_qty is_available is_featured is_active meta_title meta_description whatsapp_number'.split(' '));
-async function productBody(input, id) {
-  const body = Object.fromEntries(Object.entries(input).filter(([key]) => productFields.has(key)));
-  if (body.category !== undefined) {
-    const { data, error } = await supabase.from('categories').select('slug,is_active,parent_id').eq('slug', body.category).maybeSingle();
-    if (error) throw error;
-    let active = data?.is_active;
-    if (data?.parent_id) {
-      const { data: parent, error: parentError } = await supabase.from('categories').select('is_active').eq('id', data.parent_id).single();
-      if (parentError) throw parentError;
-      active = active && parent.is_active;
-    }
-    // Existing products can retain their inactive category while other fields are edited.
-    let unchanged = false;
-    if (!active && id) {
-      const { data: product, error: productError } = await supabase.from('products').select('category').eq('id', id).maybeSingle();
-      if (productError) throw productError;
-      unchanged = product?.category === body.category;
-    }
-    if (!data || (!active && !unchanged)) throw Object.assign(new Error('Choose an active category'), { status: 400 });
-  }
-  return body;
-}
-
 // ── POST /api/admin/login ──────────────────────────────────────────────────
 adminRoutes.post("/login", async (req, res, next) => {
-  res.set("Cache-Control", "no-store");
   try {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
-    const { data, error } = await createAuthClient().auth.signInWithPassword({
+    const { data, error } = await supabaseAuth.auth.signInWithPassword({
       email,
       password,
     });
@@ -69,7 +44,6 @@ adminRoutes.post("/login", async (req, res, next) => {
       return res.status(401).json({ error: error.message });
     }
 
-    if (!isAdmin(data.user)) return res.status(403).json({ error: "Administrator permission required" });
     res.json({
       token: data.session.access_token,
       refreshToken: data.session.refresh_token,
@@ -81,25 +55,6 @@ adminRoutes.post("/login", async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
-
-adminRoutes.post("/refresh", async (req, res, next) => {
-  res.set("Cache-Control", "no-store");
-  try {
-    if (!req.body.refreshToken) return res.status(401).json({ error: "Please log in again" });
-    const { data, error } = await createAuthClient().auth.refreshSession({ refresh_token: req.body.refreshToken });
-    if (error || !data.user) return res.status(401).json({ error: "Session expired. Please log in again" });
-    if (!isAdmin(data.user)) return res.status(403).json({ error: "Administrator permission required" });
-    res.json({ token: data.session.access_token, refreshToken: data.session.refresh_token });
-  } catch (error) { next(error); }
-});
-adminRoutes.get("/products/:id", requireAdmin, async (req, res, next) => {
-  try {
-    const { data, error } = await supabase.from("products").select("*").eq("id", req.params.id).maybeSingle();
-    if (error) throw error;
-    if (!data) return res.status(404).json({ error: "Product not found" });
-    res.json({ product: data });
-  } catch (error) { next(error); }
 });
 
 // ── GET /api/admin/stats ───────────────────────────────────────────────────
@@ -156,7 +111,7 @@ adminRoutes.get("/products", requireAdmin, async (req, res, next) => {
 // ── POST /api/admin/products ───────────────────────────────────────────────
 adminRoutes.post("/products", requireAdmin, async (req, res, next) => {
   try {
-    const body = await productBody(req.body, req.params.id);
+    const body = { ...req.body };
     if (!body.name) return res.status(400).json({ error: "Product name is required" });
     
     // Auto-generate slug from name
@@ -178,11 +133,9 @@ adminRoutes.post("/products", requireAdmin, async (req, res, next) => {
 // ── PUT /api/admin/products/:id ────────────────────────────────────────────
 adminRoutes.put("/products/:id", requireAdmin, async (req, res, next) => {
   try {
-    const body = await productBody(req.body, req.params.id);
+    const body = { ...req.body };
     delete body.id;
     delete body.created_at;
-    delete body.updated_at;
-    delete body.search_text;
     
     // If name changed, regenerate slug
     if (body.name) {
@@ -218,6 +171,21 @@ adminRoutes.delete("/products/:id", requireAdmin, async (req, res, next) => {
   }
 });
 
+// ── POST /api/admin/categories ─────────────────────────────────────────────
+adminRoutes.post("/categories", requireAdmin, async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from("categories")
+      .insert(req.body)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(201).json({ category: data });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // ════════════════════════════════════════════════════════════════════════════
 // BLOGS — admin management
@@ -310,8 +278,6 @@ adminRoutes.put("/blogs/:id", requireAdmin, async (req, res, next) => {
     const body = { ...req.body };
     delete body.id;
     delete body.created_at;
-    delete body.updated_at;
-    delete body.search_text;
     delete body.views;
 
     // Keep the slug stable once set — only re-slugify if explicitly provided
@@ -441,8 +407,6 @@ adminRoutes.put("/blog-categories/:id", requireAdmin, async (req, res, next) => 
     const body = { ...req.body };
     delete body.id;
     delete body.created_at;
-    delete body.updated_at;
-    delete body.search_text;
     delete body.post_count;
     if (body.slug) body.slug = await uniqueSlug("blog_categories", slugify(body.slug), req.params.id);
 
@@ -491,7 +455,7 @@ adminRoutes.post("/change-password", requireAdmin, async (req, res, next) => {
     }
 
     // Verify current password
-    const { data: signInData, error: signInError } = await createAuthClient().auth.signInWithPassword({
+    const { data: signInData, error: signInError } = await supabaseAuth.auth.signInWithPassword({
       email: req.user.email,
       password: currentPassword,
     });
@@ -519,43 +483,29 @@ adminRoutes.post("/change-password", requireAdmin, async (req, res, next) => {
 // ── GET /api/admin/users ───────────────────────────────────────────────────
 adminRoutes.get("/users", requireAdmin, async (_req, res, next) => {
   try {
-    const canManageUsers = isMainAdmin(_req.user);
-    const accounts = [];
-    if (canManageUsers) {
-      for (let page = 1; ; page++) {
-        const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 100 });
-        if (error) throw error;
-        accounts.push(...data.users.filter(isAdmin));
-        if (data.users.length < 100) break;
-      }
-    } else {
-      accounts.push(_req.user);
-    }
+    const { data, error } = await supabase.auth.admin.listUsers();
+    if (error) throw error;
 
-    const users = accounts.map((u) => ({
+    const users = (data.users || []).map((u) => ({
       id: u.id,
       email: u.email,
       created_at: u.created_at,
       last_sign_in_at: u.last_sign_in_at,
       email_confirmed_at: u.email_confirmed_at,
-      is_main_admin: isMainAdmin(u),
     }));
 
-    res.json({ users, can_manage_users: canManageUsers });
+    res.json({ users });
   } catch (err) {
     next(err);
   }
 });
 
 // ── POST /api/admin/users ──────────────────────────────────────────────────
-adminRoutes.post("/users", requireAdmin, requireMainAdmin, async (req, res, next) => {
+adminRoutes.post("/users", requireAdmin, async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
-    }
-    if (String(email).trim().toLowerCase() === MAIN_ADMIN_EMAIL) {
-      return res.status(400).json({ error: "The main administrator account is protected" });
     }
     if (password.length < 6) {
       return res.status(400).json({ error: "Password must be at least 6 characters" });
@@ -565,7 +515,6 @@ adminRoutes.post("/users", requireAdmin, requireMainAdmin, async (req, res, next
       email,
       password,
       email_confirm: true,
-      app_metadata: { role: "admin" },
     });
 
     if (error) {
@@ -585,20 +534,11 @@ adminRoutes.post("/users", requireAdmin, requireMainAdmin, async (req, res, next
 });
 
 // ── DELETE /api/admin/users/:id ────────────────────────────────────────────
-adminRoutes.delete("/users/:id", requireAdmin, requireMainAdmin, async (req, res, next) => {
+adminRoutes.delete("/users/:id", requireAdmin, async (req, res, next) => {
   try {
     // Prevent deleting yourself
     if (req.params.id === req.user.id) {
       return res.status(400).json({ error: "You cannot delete your own account" });
-    }
-
-    const { data, error: lookupError } = await supabase.auth.admin.getUserById(req.params.id);
-    if (lookupError) throw lookupError;
-    if (data.user?.email?.toLowerCase() === MAIN_ADMIN_EMAIL) {
-      return res.status(403).json({ error: "The main administrator cannot be deleted" });
-    }
-    if (!isAdmin(data.user)) {
-      return res.status(400).json({ error: "Only administrator accounts can be deleted here" });
     }
 
     const { error } = await supabase.auth.admin.deleteUser(req.params.id);

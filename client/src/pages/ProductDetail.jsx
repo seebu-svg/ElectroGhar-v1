@@ -1,4 +1,3 @@
-import { CONTACT } from "../utils/contact";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
@@ -99,7 +98,7 @@ export default function ProductDetail() {
   const inStock = product.is_available && product.stock_qty > 0;
   const lowStock = inStock && product.stock_qty <= 3;
   const whatsappLink = buildWhatsAppLink(
-    CONTACT.internationalPhone,
+    product.whatsapp_number || "+92339244435",
     product.name,
     product.slug
   );

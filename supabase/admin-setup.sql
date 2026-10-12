@@ -50,7 +50,6 @@ CREATE POLICY "Admin delete categories"
   ON categories FOR DELETE
   TO authenticated
   USING (true);
-  
 
 -- ── Step 3: Allow service_role to bypass RLS ─────────────────
 -- The service role key already bypasses RLS by default in Supabase.

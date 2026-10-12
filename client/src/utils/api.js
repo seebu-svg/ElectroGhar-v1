@@ -29,7 +29,6 @@ export const api = {
     fetchApi(`/products?sort=created_at&order=desc&limit=${limit}`),
 
   // ── Categories ──────────────────────────────────────────────
-  getHeroImages: () => fetchApi("/hero-images"),
   getCategories: () => fetchApi("/categories"),
 
   // ── Blogs ────────────────────────────────────────────────────

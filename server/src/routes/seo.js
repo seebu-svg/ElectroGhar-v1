@@ -41,7 +41,6 @@ seoRoutes.get("/sitemap.xml", async (req, res, next) => {
       { loc: `${base}/`, priority: "1.0", changefreq: "daily" },
       { loc: `${base}/products`, priority: "0.9", changefreq: "daily" },
       { loc: `${base}/blogs`, priority: "0.8", changefreq: "weekly" },
-      { loc: `${base}/contact`, priority: "0.7", changefreq: "monthly" },
       { loc: `${base}/about`, priority: "0.7", changefreq: "monthly" },
       { loc: `${base}/privacy`, priority: "0.3", changefreq: "yearly" },
       { loc: `${base}/terms`, priority: "0.3", changefreq: "yearly" },

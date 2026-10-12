@@ -1,14 +1,12 @@
 {
   "name": "electroghar-server",
   "version": "1.0.0",
-  "description": "ElectroGhar API \u2014 used-laptop e-commerce backend",
+  "description": "ElectroGhar API — used-laptop e-commerce backend",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
     "dev": "node --watch src/index.js",
-    "start": "node src/index.js",
-    "setup:admin": "node scripts/setup-admin.js",
-    "test": "node test/admin.test.js && node test/client-auth.test.js"
+    "start": "node src/index.js"
   },
   "engines": {
     "node": ">=18"

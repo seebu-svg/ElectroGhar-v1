@@ -20,19 +20,7 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  useEffect(() => {
-    const expire = () => {
-      localStorage.removeItem("admin_token");
-      localStorage.removeItem("admin_user");
-      localStorage.removeItem("admin_refresh_token");
-      setUser(null);
-    };
-    window.addEventListener("admin-session-expired", expire);
-    return () => window.removeEventListener("admin-session-expired", expire);
-  }, []);
-
-  const login = (token, userData, refreshToken) => {
-    if (refreshToken) localStorage.setItem("admin_refresh_token", refreshToken);
+  const login = (token, userData) => {
     localStorage.setItem("admin_token", token);
     localStorage.setItem("admin_user", JSON.stringify(userData));
     setUser({ token, ...userData });
@@ -41,7 +29,6 @@ export function AuthProvider({ children }) {
   const logout = () => {
     localStorage.removeItem("admin_token");
     localStorage.removeItem("admin_user");
-    localStorage.removeItem("admin_refresh_token");
     setUser(null);
   };
 

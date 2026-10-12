@@ -1,8 +1,6 @@
 import { Router } from "express";
 import { supabase } from "../config/supabase.js";
 
-import { visibleCategorySlugs } from "../services/catalog.js";
-
 export const productRoutes = Router();
 
 /**
@@ -62,8 +60,7 @@ productRoutes.get("/", async (req, res, next) => {
     let query = supabase
       .from("products")
       .select("*", { count: "exact" })
-      .eq("is_active", true)
-      .in("category", await visibleCategorySlugs());
+      .eq("is_active", true);
 
     // Enhanced search — searches name, brand, description AND specs
     // via the auto-generated search_text column. Words are ANDed, so
@@ -126,7 +123,6 @@ productRoutes.get("/featured", async (_req, res, next) => {
       .from("products")
       .select("*")
       .eq("is_active", true)
-      .in("category", await visibleCategorySlugs())
       .eq("is_featured", true)
       .order("created_at", { ascending: false })
       .limit(8);
@@ -144,8 +140,7 @@ productRoutes.get("/brands", async (_req, res, next) => {
     const { data, error } = await supabase
       .from("products")
       .select("brand")
-      .eq("is_active", true)
-      .in("category", await visibleCategorySlugs());
+      .eq("is_active", true);
 
     if (error) throw error;
     const brands = [...new Set(data.map((p) => p.brand).filter(Boolean))].sort();
@@ -165,7 +160,6 @@ productRoutes.get("/suggest", async (req, res, next) => {
       .from("products")
       .select("id, name, slug, brand, price, thumbnail_url, images, category, condition_type, condition_grade")
       .eq("is_active", true)
-      .in("category", await visibleCategorySlugs())
       .or(`name.ilike.%${q}%,brand.ilike.%${q}%`)
       .order("is_featured", { ascending: false })
       .limit(8);
@@ -185,7 +179,6 @@ productRoutes.get("/:slug", async (req, res, next) => {
       .select("*")
       .eq("slug", req.params.slug)
       .eq("is_active", true)
-      .in("category", await visibleCategorySlugs())
       .single();
 
     if (error || !data) {
@@ -198,7 +191,6 @@ productRoutes.get("/:slug", async (req, res, next) => {
       .from("products")
       .select("id, name, slug, price, images, thumbnail_url, condition_grade, condition_type, brand, category")
       .eq("is_active", true)
-      .in("category", await visibleCategorySlugs())
       .in("category", categorySlugs)
       .neq("id", data.id)
       .limit(4);

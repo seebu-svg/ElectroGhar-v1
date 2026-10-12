@@ -4,7 +4,6 @@ import { Lock, Mail, Loader2 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../utils/api";
 import logoFull from "../../assets/logo-full.png";
-import SiteLogo from '../../components/ui/SiteLogo';
 
 export default function AdminLogin() {
   const { user, login } = useAuth();
@@ -14,7 +13,7 @@ export default function AdminLogin() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (user) return <Navigate to={location.state?.from?.pathname || "/admin"} replace />;
+  if (user) return <Navigate to="/admin" replace />;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -23,7 +22,7 @@ export default function AdminLogin() {
 
     try {
       const data = await api.adminLogin({ email, password });
-      login(data.token, data.user, data.refreshToken);
+      login(data.token, data.user);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -40,7 +39,7 @@ export default function AdminLogin() {
       <div className="relative w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <SiteLogo fallback={logoFull} alt="ElectroGhar" className="h-20 sm:h-24 w-auto mx-auto mb-4" />
+          <img src={logoFull} alt="ElectroGhar" className="h-20 sm:h-24 w-auto mx-auto mb-4" />
           <h1 className="text-xl font-bold text-white font-heading">Admin Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">Sign in to manage your store</p>
         </div>

@@ -1,10 +1,9 @@
-import { CONTACT } from "../../utils/contact";
 import { Phone } from "lucide-react";
 
 export default function WhatsAppFAB() {
   return (
     <a
-      href={`${CONTACT.whatsappUrl}?text=Hi%20ElectroGhar!%20I%20have%20a%20question.`}
+      href="https://wa.me/92339244435?text=Hi%20ElectroGhar!%20I%20have%20a%20question."
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"

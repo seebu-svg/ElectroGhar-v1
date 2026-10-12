@@ -5,7 +5,6 @@ import ScrollToTop from "./components/ui/ScrollToTop";
 import AdminLayout from "./components/admin/AdminLayout";
 import Home from "./pages/Home";
 import About from "./pages/About";
-import Contact from "./pages/Contact";
 import Blogs from "./pages/Blogs";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -20,9 +19,6 @@ import AdminBlogs from "./pages/admin/Blogs";
 import BlogForm from "./pages/admin/BlogForm";
 import AdminUsers from "./pages/admin/AdminUsers";
 
-import Categories from "./pages/admin/Categories";
-import HeroImages from "./pages/admin/HeroImages";
-
 export default function App() {
   return (
     <BrowserRouter>
@@ -33,7 +29,6 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/blogs/:slug" element={<BlogDetail />} />
             <Route path="/products" element={<Products />} />
@@ -48,8 +43,6 @@ export default function App() {
           {/* ── Admin Dashboard (protected) ────────────────────── */}
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<Dashboard />} />
-            <Route path="/admin/categories" element={<Categories />} />
-            <Route path="/admin/hero-images" element={<HeroImages />} />
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/products/new" element={<ProductForm />} />
             <Route path="/admin/products/:id/edit" element={<ProductForm />} />

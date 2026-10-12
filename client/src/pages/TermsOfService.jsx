@@ -1,4 +1,3 @@
-import { CONTACT } from "../utils/contact";
 import { Link } from "react-router-dom";
 import { ArrowLeft, FileText } from "lucide-react";
 import WhatsAppFAB from "../components/ui/WhatsAppFAB";
@@ -6,7 +5,7 @@ import { SEOHead } from "../utils/seo";
 
 const SITE = "ElectroGhar";
 const EMAIL = "hello@electroghar.pk";
-const PHONE = CONTACT.phone;
+const PHONE = "+92 300 1234567";
 
 export default function TermsOfService() {
   return (
@@ -152,12 +151,11 @@ export default function TermsOfService() {
             </li>
             <li>
               Phone:{" "}
-              <a href={CONTACT.callUrl} className="text-brand-400 hover:text-brand-300">
+              <a href={`tel:${PHONE.replace(/\s/g, "")}`} className="text-brand-400 hover:text-brand-300">
                 {PHONE}
               </a>
             </li>
-            <li>Address: {CONTACT.address}</li>
-            <li>Hours: {CONTACT.hours}</li>
+            <li>Address: Lahore, Punjab, Pakistan</li>
           </ul>
         </article>
       </main>

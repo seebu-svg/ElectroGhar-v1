@@ -1,15 +1,10 @@
-import { CONTACT } from "../../utils/contact";
-import { useEffect, useState } from "react";
-import { api } from "../../utils/api";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Clock, ShieldCheck, FileText, MessageCircle, Globe } from "lucide-react";
 import logoFull from "../../assets/logo-full.png";
-import SiteLogo from '../ui/SiteLogo';
+
+const WA_LINK = "https://wa.me/92339244435";
 
 export default function Footer() {
-  const [tree, setTree] = useState([]);
-  const location = useLocation();
-  useEffect(() => { api.getCategories().then(r => setTree(r.tree || [])).catch(console.error); }, [location.pathname]);
   const year = new Date().getFullYear();
 
   return (
@@ -23,8 +18,8 @@ export default function Footer() {
           {/* ── Brand ──────────────────────────────────────────── */}
           <div>
             <Link to="/" className="inline-block mb-4">
-              <SiteLogo
-                fallback={logoFull}
+              <img
+                src={logoFull}
                 alt="ElectroGhar"
                 className="h-16 sm:h-20 w-auto"
                 loading="lazy"
@@ -43,7 +38,11 @@ export default function Footer() {
             </h3>
             <ul className="space-y-1 text-sm">
               {[
-                ...tree.map(c => ({ label: c.name, to: `/products?category=${c.slug}` })),
+                { label: "Laptops", to: "/products?category=laptops" },
+                { label: "PCs & Desktops", to: "/products?category=pcs-desktops" },
+                { label: "Monitors & Displays", to: "/products?category=monitors-displays" },
+                { label: "Storage & Accessories", to: "/products?category=storage-accessories" },
+                { label: "Gadgets & Electronics", to: "/products?category=gadgets-electronics" },
                 { label: "Best Sellers", to: "/products?featured=1" },
                 { label: "Daily Deals", to: "/products?deals=1" },
                 { label: "All Products", to: "/products" },
@@ -85,12 +84,14 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/contact"
+                <a
+                  href={WA_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 py-1 hover:text-brand-400 transition-colors"
                 >
                   <MessageCircle className="w-3.5 h-3.5" /> Contact Us
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -103,18 +104,12 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-0.5 text-brand-400 shrink-0" />
-                <span>{CONTACT.address}</span>
+                <span>Lahore, Punjab, Pakistan</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-brand-400 shrink-0" />
-                <a href={CONTACT.callUrl} className="hover:text-brand-400 transition-colors">
-                  {CONTACT.phone}
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-brand-400 shrink-0" />
-                <a href={CONTACT.whatsappUrl} target="_blank" rel="noopener noreferrer" className="hover:text-brand-400 transition-colors">
-                  Chat on WhatsApp
+                <a href="tel:+92339244435" className="hover:text-brand-400 transition-colors">
+                  +92 339 244435
                 </a>
               </li>
               <li className="flex items-center gap-2">
@@ -131,7 +126,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-brand-400 shrink-0" />
-                <span>{CONTACT.hours}</span>
+                <span>Mon–Sat: 10am – 8pm</span>
               </li>
             </ul>
           </div>

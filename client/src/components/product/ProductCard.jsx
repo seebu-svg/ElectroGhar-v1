@@ -1,4 +1,3 @@
-import { CONTACT } from "../../utils/contact";
 import { Link } from "react-router-dom";
 import { Cpu, HardDrive, Monitor, MemoryStick, Phone, Eye, Sparkles, Tag } from "lucide-react";
 import { formatPrice, conditionColor, discountPercent, buildWhatsAppLink } from "../../utils/helpers";
@@ -161,7 +160,7 @@ export default function ProductCard({ product, showAskPrice = false }) {
 
             {showAskPrice && !isOutOfStock && (
               <a
-                href={buildWhatsAppLink(CONTACT.internationalPhone, product.name, product.slug)}
+                href={buildWhatsAppLink(product.whatsapp_number || "+92339244435", product.name, product.slug)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
