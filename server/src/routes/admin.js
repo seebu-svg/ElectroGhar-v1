@@ -44,6 +44,10 @@ adminRoutes.post("/login", async (req, res, next) => {
       return res.status(401).json({ error: error.message });
     }
 
+    if (data.user.app_metadata?.role !== "admin") {
+      return res.status(403).json({ error: "Administrator access required" });
+    }
+
     res.json({
       token: data.session.access_token,
       refreshToken: data.session.refresh_token,
@@ -515,6 +519,7 @@ adminRoutes.post("/users", requireAdmin, async (req, res, next) => {
       email,
       password,
       email_confirm: true,
+      app_metadata: { role: "admin" },
     });
 
     if (error) {

@@ -88,7 +88,7 @@ export default function Home() {
 
   const shelves = tree
     .map((cat) => {
-      const subSlugs = new Set(cat.children.map((c) => c.slug));
+      const subSlugs = new Set([cat.slug, ...cat.children.map((c) => c.slug)]);
       return {
         ...cat,
         products: pool.filter((p) => subSlugs.has(p.category)).slice(0, 4),
@@ -117,7 +117,7 @@ export default function Home() {
     const used = new Set([...featured, ...deals.slice(0, 4)].map((p) => p.id));
     const picks = [];
     tree.forEach((cat) => {
-      const subSlugs = new Set(cat.children.map((c) => c.slug));
+      const subSlugs = new Set([cat.slug, ...cat.children.map((c) => c.slug)]);
       const pick = pool.find((p) => subSlugs.has(p.category) && !used.has(p.id));
       if (pick) {
         picks.push(pick);

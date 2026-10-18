@@ -19,6 +19,7 @@ categoryRoutes.get("/", async (_req, res, next) => {
     ]);
 
     if (catRes.error) throw catRes.error;
+    if (prodRes.error) throw prodRes.error;
 
     // Direct product count per category slug
     const counts = {};

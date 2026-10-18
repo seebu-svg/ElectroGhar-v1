@@ -71,6 +71,7 @@ export default function Products() {
   const [tree, setTree] = useState([]);
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   // Read from URL
@@ -99,6 +100,7 @@ export default function Products() {
   // Fetch products whenever filters change
   const fetchProducts = useCallback(async () => {
     setLoading(true);
+    setError("");
     try {
       const [sortField, sortOrder] = currentSort.split(".");
       const params = {
@@ -120,6 +122,9 @@ export default function Products() {
       setProducts(res.products || []);
       setPagination(res.pagination || {});
     } catch (err) {
+      setError("Unable to load products. Please try again.");
+      setProducts([]);
+      setPagination({});
       console.error(err);
     } finally {
       setLoading(false);
@@ -496,6 +501,11 @@ export default function Products() {
                     </div>
                   </div>
                 ))}
+              </div>
+            ) : error ? (
+              <div role="alert" className="text-center py-24 text-gray-300">
+                <p>{error}</p>
+                <button onClick={fetchProducts} className="mt-4 text-brand-400">Try again</button>
               </div>
             ) : products.length === 0 ? (
               <div className="text-center py-24">

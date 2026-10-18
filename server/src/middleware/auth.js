@@ -18,6 +18,10 @@ export async function requireAdmin(req, res, next) {
       return res.status(401).json({ error: "Invalid or expired token" });
     }
 
+    if (data.user.app_metadata?.role !== "admin") {
+      return res.status(403).json({ error: "Administrator access required" });
+    }
+
     req.user = data.user;
     next();
   } catch (err) {

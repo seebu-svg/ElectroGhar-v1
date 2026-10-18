@@ -4,7 +4,7 @@
   "private": true,
   "description": "ElectroGhar — Quality used-laptop e-commerce catalog for Pakistan",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "scripts": {
     "dev:server": "cd server && npm run dev",
