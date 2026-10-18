@@ -233,7 +233,7 @@ function BlogRow({ blog, busy, onDelete, onTogglePublish }) {
         </div>
       </td>
       <td className="px-4 py-3 text-gray-600">
-        <span className="capitalize">{(blog.category || "—").replace(/-/g, " ")}</span>
+        <span className="capitalize">{(blog.category || ",").replace(/-/g, " ")}</span>
       </td>
       <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
         <span className="inline-flex items-center gap-1">
@@ -383,7 +383,7 @@ function CategoryManager({ authHeaders }) {
               <Loader2 className="w-6 h-6 text-brand-500 animate-spin" />
             </div>
           ) : cats.length === 0 ? (
-            <p className="text-sm text-gray-500 py-4">No categories yet — add the first one.</p>
+            <p className="text-sm text-gray-500 py-4">No categories yet , add the first one.</p>
           ) : (
             <ul className="divide-y divide-gray-100 border border-gray-100 rounded-lg">
               {cats.map((c) => (

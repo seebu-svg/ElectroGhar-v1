@@ -189,7 +189,7 @@ export default function Navbar() {
           {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </nav>
-      {/* ── Shop mega-menu (desktop) — full category tree ──────── */}
+      {/* ── Shop mega-menu (desktop) , full category tree ──────── */}
       {shopOpen && (
         <div className="hidden lg:block absolute top-full inset-x-0 z-50">
           <div className="bg-surface-dark/95 backdrop-blur-xl border-b border-white/10 shadow-2xl shadow-black/60">
@@ -274,7 +274,7 @@ export default function Navbar() {
                 </li>
               ) : (
                 <li key={link.label}>
-                  {/* Shop — link + expandable category list */}
+                  {/* Shop , link + expandable category list */}
                   <div className="flex items-center">
                     <Link
                       to="/products"

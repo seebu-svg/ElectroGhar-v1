@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- Supabase Storage — Image Upload Setup
+-- Supabase Storage , Image Upload Setup
 -- Run this in Supabase SQL Editor to create the storage bucket and policies.
 -- ─────────────────────────────────────────────────────────────────────────────
 
@@ -16,7 +16,7 @@ ON CONFLICT (id) DO UPDATE SET
   file_size_limit = 5242880,
   allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
--- 2. Public read access — anyone can view uploaded images
+-- 2. Public read access , anyone can view uploaded images
 CREATE POLICY "Public read access for uploads"
 ON storage.objects
 FOR SELECT

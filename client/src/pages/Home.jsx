@@ -35,7 +35,7 @@ const WA_GENERAL =
 const WHY_ICON_MAP = { ShieldCheck, BadgeCheck, MessageCircle };
 
 /* ────────────────────────────────────────────────────────────────
-   Home — product-focused marketplace homepage.
+   Home , product-focused marketplace homepage.
    One parallel fetch supplies every section; light sections are
    derived client-side from the shared pool.
    ──────────────────────────────────────────────────────────────── */
@@ -134,7 +134,7 @@ export default function Home() {
     <>
       <SEOHead
         title=""
-        description="Pakistan's trusted marketplace for quality checked laptops, PCs, monitors, storage and gadgets — new, used and refurbished. Message us on WhatsApp for the latest price."
+        description="Pakistan's trusted marketplace for quality checked laptops, PCs, monitors, storage and gadgets , new, used and refurbished. Message us on WhatsApp for the latest price."
         canonical={`${canonicalBase}/`}
         type="website"
         jsonLd={[
@@ -171,7 +171,7 @@ export default function Home() {
   );
 }
 
-/* ── 1. Hero — Featured Product ───────────────────────────────── */
+/* ── 1. Hero , Featured Product ───────────────────────────────── */
 function Hero({ products, stats }) {
   const [images, setImages] = useState([]);
   const [index, setIndex] = useState(0);
@@ -211,7 +211,7 @@ function Hero({ products, stats }) {
             <span className="text-brand-500"> Better Deals.</span>
           </h1>
           <p className="mt-4 text-base sm:text-lg text-gray-400 leading-relaxed max-w-md">
-            Laptops, PCs, monitors, storage and gadgets — quality checked,
+            Laptops, PCs, monitors, storage and gadgets , quality checked,
             honestly graded, priced to move.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
@@ -355,7 +355,7 @@ function DailyDeals({ products }) {
               Daily Deals
             </h2>
             <p className="text-sm text-gray-400 mt-1">
-              The biggest discounts live right now — while stock lasts.
+              The biggest discounts live right now , while stock lasts.
             </p>
           </div>
           <HeadLink to="/products?deals=1">All Deals</HeadLink>
@@ -418,7 +418,7 @@ function NewArrivals({ products }) {
           icon={Sparkles}
           eyebrow="Fresh Stock"
           title="New Arrivals"
-          sub="Recently added inventory — first come, first served."
+          sub="Recently added inventory , first come, first served."
           action={<HeadLink to="/products?sort=created_at&order=desc">View All</HeadLink>}
         />
         <Carousel>
@@ -445,7 +445,7 @@ function ShopByBrand({ brands }) {
         <SectionHead
           eyebrow="Top Brands"
           title="Shop by Brand"
-          sub="Dell, HP, Lenovo, Apple and more — jump straight to a brand."
+          sub="Dell, HP, Lenovo, Apple and more , jump straight to a brand."
         />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {brands.map((b) => (
@@ -618,7 +618,7 @@ function WhySection({ products }) {
   );
 }
 
-/* ── 11. Final Product Discovery — Still Looking? ─────────────── */
+/* ── 11. Final Product Discovery , Still Looking? ─────────────── */
 function FinalDiscovery() {
   return (
     <section className="relative bg-gradient-to-br from-surface-dark via-brand-950/60 to-surface-dark text-white overflow-hidden">
@@ -630,7 +630,7 @@ function FinalDiscovery() {
           Still Looking?
         </h2>
         <p className="text-gray-400 leading-relaxed mb-8 max-w-lg mx-auto">
-          Search the catalog, browse everything, or just message us — tell us
+          Search the catalog, browse everything, or just message us , tell us
           your budget and we&rsquo;ll find the right machine.
         </p>
         <div className="max-w-xl mx-auto mb-8">

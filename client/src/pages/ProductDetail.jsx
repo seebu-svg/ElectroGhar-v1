@@ -263,7 +263,7 @@ export default function ProductDetail() {
                 </p>
               )}
               <p className="text-xs text-gray-500 mt-2.5">
-                Price is negotiable on WhatsApp — message us for the latest deal.
+                Price is negotiable on WhatsApp , message us for the latest deal.
               </p>
             </div>
 

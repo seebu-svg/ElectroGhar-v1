@@ -3,7 +3,7 @@ import { testConnection } from "./config/supabase.js";
 
 const PORT = process.env.PORT || 5000;
 
-// ── Start Server (async — tests Supabase first) ─────────────────────────────
+// ── Start Server (async , tests Supabase first) ─────────────────────────────
 async function start() {
   console.log("\n⚡ ElectroGhar API starting...\n");
 

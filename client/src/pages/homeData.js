@@ -9,12 +9,12 @@ export const WHY_ITEMS = [
   {
     icon: "BadgeCheck",
     title: "Honest Condition",
-    desc: "New, used or refurbished — graded exactly as it is.",
+    desc: "New, used or refurbished , graded exactly as it is.",
   },
   {
     icon: "MessageCircle",
     title: "WhatsApp Support",
-    desc: "Real people, fast replies — before and after you buy.",
+    desc: "Real people, fast replies , before and after you buy.",
   },
 ];
 

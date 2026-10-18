@@ -20,7 +20,7 @@ function toPublicBlog(b) {
   return { ...b, read_time: readingMinutes(b.content) };
 }
 
-// ── GET /api/blogs — published list with search/filter/sort/pagination ──────
+// ── GET /api/blogs , published list with search/filter/sort/pagination ──────
 blogRoutes.get("/", async (req, res, next) => {
   try {
     const {
@@ -41,7 +41,7 @@ blogRoutes.get("/", async (req, res, next) => {
       .select("*", { count: "exact" })
       .eq("is_published", true);
 
-    // Multi-word search — words are ANDed across title, excerpt and content
+    // Multi-word search , words are ANDed across title, excerpt and content
     const q = sanitizeSearch(search);
     if (q) {
       q.split(/\s+/)
@@ -80,7 +80,7 @@ blogRoutes.get("/", async (req, res, next) => {
   }
 });
 
-// ── GET /api/blogs/featured — latest featured published post ────────────────
+// ── GET /api/blogs/featured , latest featured published post ────────────────
 blogRoutes.get("/featured", async (_req, res, next) => {
   try {
     const { data, error } = await supabase
@@ -99,7 +99,7 @@ blogRoutes.get("/featured", async (_req, res, next) => {
   }
 });
 
-// ── GET /api/blogs/:slug — single published post (+ related, + view count) ──
+// ── GET /api/blogs/:slug , single published post (+ related, + view count) ──
 blogRoutes.get("/:slug", async (req, res, next) => {
   try {
     const { data: blog, error } = await supabase
@@ -119,7 +119,7 @@ blogRoutes.get("/:slug", async (req, res, next) => {
       .eq("id", blog.id)
       .then(() => {}, () => {});
 
-    // Related posts — same category first, then anything recent
+    // Related posts , same category first, then anything recent
     let related = [];
     if (blog.category) {
       const { data: sameCat } = await supabase
@@ -150,7 +150,7 @@ blogRoutes.get("/:slug", async (req, res, next) => {
   }
 });
 
-// ── GET /api/blog-categories — categories with published post counts ────────
+// ── GET /api/blog-categories , categories with published post counts ────────
 blogCategoryRoutes.get("/", async (_req, res, next) => {
   try {
     const [{ data: cats, error: catErr }, { data: blogs, error: blogErr }] = await Promise.all([

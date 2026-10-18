@@ -5,7 +5,7 @@ import { requireAdmin } from "../middleware/auth.js";
 
 const router = Router();
 
-// ── Multer config — in-memory storage with image validation ──────────────
+// ── Multer config , in-memory storage with image validation ──────────────
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
@@ -48,7 +48,7 @@ async function ensureBucket() {
   return true;
 }
 
-// ── POST /api/upload — upload a single image ─────────────────────────────
+// ── POST /api/upload , upload a single image ─────────────────────────────
 // Body: multipart/form-data with field "image"
 // Returns: { url: "https://.../uploads/products/abc-123.jpg" }
 router.post("/", requireAdmin, upload.single("image"), async (req, res, next) => {
@@ -108,7 +108,7 @@ router.post("/", requireAdmin, upload.single("image"), async (req, res, next) =>
   }
 });
 
-// ── DELETE /api/upload — delete an image by path ─────────────────────────
+// ── DELETE /api/upload , delete an image by path ─────────────────────────
 // Body: { path: "products/laptop-abc-123.jpg" }
 router.delete("/", requireAdmin, async (req, res, next) => {
   try {

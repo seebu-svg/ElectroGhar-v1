@@ -5,7 +5,7 @@ export const SITE = {
   name: "ElectroGhar",
   tagline: "Good Tech. Better Deals.",
   defaultDescription:
-    "Pakistan's trusted marketplace for quality checked laptops, PCs, monitors, storage and gadgets in Karachi — new, used and refurbished. Visit Naaz Digital Plaza or call 03319244435.",
+    "Pakistan's trusted marketplace for quality checked laptops, PCs, monitors, storage and gadgets in Karachi , new, used and refurbished. Visit Naaz Digital Plaza or call 03319244435.",
   phone: CONTACT.internationalPhone,
   address: {
     street: CONTACT.street,
@@ -61,7 +61,7 @@ export function SEOHead({
   useEffect(() => {
     const fullTitle = title
       ? `${title} | ${SITE.name}`
-      : `${SITE.name} — ${SITE.tagline}`;
+      : `${SITE.name} , ${SITE.tagline}`;
     document.title = fullTitle;
 
     const url = canonical || (typeof window !== "undefined" ? window.location.href : baseUrl());
@@ -104,7 +104,7 @@ export function SEOHead({
 
     return () => {
       // Reset title only on unmount; page transitions set it again immediately.
-      document.title = `${SITE.name} — ${SITE.tagline}`;
+      document.title = `${SITE.name} , ${SITE.tagline}`;
       const script = document.getElementById("structured-data");
       if (script) script.remove();
     };
@@ -169,7 +169,7 @@ export function productSchema(product) {
     "@type": "Product",
     name: product.name,
     image,
-    description: product.meta_description || product.description || `${product.name} — ${product.condition_grade} condition`,
+    description: product.meta_description || product.description || `${product.name} , ${product.condition_grade} condition`,
     sku: product.sku || product.slug,
     brand: {
       "@type": "Brand",

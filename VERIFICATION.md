@@ -1,4 +1,4 @@
-# Verification — 2026-10-18
+# Verification , 2026-10-18
 
 The configured database is `jllqmeialxfrwocryucy.supabase.co`. Read-only API checks against it returned 67 active products, 38 categories, 8 published blogs and 4 blog categories. Product list, Dell search (11 matches), laptops filter (20 matches), featured products, brands, autocomplete and product detail all returned HTTP 200. An unauthenticated admin product request returned 401.
 
@@ -18,6 +18,6 @@ Remaining verification: browser interaction/visual checks, authenticated admin l
 
 Additional issue: legacy SQL setup scripts grant writes to all authenticated users via permissive RLS policies. Backend role checks do not fix direct database access. Inspect actual remote policies and replace permissive policies with trusted admin-role checks before production approval; local SQL files alone do not establish which remote policies are installed.
 
-## Feature restoration — 2026-10-18
+## Feature restoration , 2026-10-18
 
 Restored the features removed by commit 2508216, retaining the subsequent Node 22 requirement, API configuration correction, category query error handling and public product error/retry UI. Restored contact page and shared Karachi address/phone/hours, category management, hero image controls, logo replacement, admin session refresh and draft preservation, product input allowlisting, and main-admin account protections. Homepage now uses the restored layout; the prior shelf implementation is no longer present. Restored database migrations and setup scripts to the repository without executing them. Build passed; 22 backend tests, 3 client auth tests and the additional admin middleware regression test passed. Lint has no errors (15 warnings). Deployment credentials and migration state still require verification.

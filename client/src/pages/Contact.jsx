@@ -9,7 +9,7 @@ export default function Contact() {
   return (
     <div className="bg-surface">
       <SEOHead
-        title="Contact Us — Karachi"
+        title="Contact Us , Karachi"
         description={`Visit ElectroGhar at ${CONTACT.address}. Call ${CONTACT.phone} or message us on WhatsApp. Open ${CONTACT.hours}.`}
         canonical={`${origin}/contact`}
         jsonLd={organizationSchema()}

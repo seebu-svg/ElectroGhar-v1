@@ -1,7 +1,7 @@
 import { supabaseAuth } from "../config/supabase.js";
 
 /**
- * Middleware — verifies Supabase JWT and attaches user to req.
+ * Middleware , verifies Supabase JWT and attaches user to req.
  * Rejects with 401 if token is missing or invalid.
  */
 export async function requireAdmin(req, res, next) {

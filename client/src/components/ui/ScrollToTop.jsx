@@ -7,7 +7,7 @@ import { useLocation } from "react-router-dom";
  * under the sticky header. This resets it so every route change
  * starts at the top of the page.
  *
- * Keys on pathname only — query-string changes (in-page filters,
+ * Keys on pathname only , query-string changes (in-page filters,
  * pagination) intentionally keep the current scroll position.
  */
 export default function ScrollToTop() {

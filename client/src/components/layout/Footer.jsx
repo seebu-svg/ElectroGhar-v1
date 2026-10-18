@@ -32,7 +32,7 @@ export default function Footer() {
             </Link>
             <p className="text-sm leading-relaxed text-gray-400">
               Pakistan&apos;s trusted store for quality checked laptops, PCs,
-              monitors, storage and gadgets — new, used and refurbished.
+              monitors, storage and gadgets , new, used and refurbished.
             </p>
           </div>
 

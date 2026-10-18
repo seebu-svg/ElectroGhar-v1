@@ -1,5 +1,5 @@
 -- ============================================================
--- ElectroGhar — Admin Setup
+-- ElectroGhar , Admin Setup
 -- Run this AFTER schema.sql and seed.sql
 -- ============================================================
 

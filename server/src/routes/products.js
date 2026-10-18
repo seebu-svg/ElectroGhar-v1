@@ -38,7 +38,7 @@ function sanitizeSearch(term) {
   return String(term).replace(/[%_,()\\]/g, " ").trim();
 }
 
-// ── GET /api/products — list with search, filter, sort, pagination ─────────
+// ── GET /api/products , list with search, filter, sort, pagination ─────────
 productRoutes.get("/", async (req, res, next) => {
   try {
     const {
@@ -65,7 +65,7 @@ productRoutes.get("/", async (req, res, next) => {
       .eq("is_active", true)
       .in("category", await visibleCategorySlugs());
 
-    // Enhanced search — searches name, brand, description AND specs
+    // Enhanced search , searches name, brand, description AND specs
     // via the auto-generated search_text column. Words are ANDed, so
     // "dell i7" matches any product containing both words anywhere
     // (not just adjacent), e.g. "Dell Latitude 7420, i7-1185G7".
@@ -138,7 +138,7 @@ productRoutes.get("/featured", async (_req, res, next) => {
   }
 });
 
-// ── GET /api/products/brands — distinct brand list ─────────────────────────
+// ── GET /api/products/brands , distinct brand list ─────────────────────────
 productRoutes.get("/brands", async (_req, res, next) => {
   try {
     const { data, error } = await supabase
@@ -155,7 +155,7 @@ productRoutes.get("/brands", async (_req, res, next) => {
   }
 });
 
-// ── GET /api/products/suggest?q= — search autocomplete (max 8) ─────────────
+// ── GET /api/products/suggest?q= , search autocomplete (max 8) ─────────────
 productRoutes.get("/suggest", async (req, res, next) => {
   try {
     const q = sanitizeSearch(req.query.q || "");
@@ -177,7 +177,7 @@ productRoutes.get("/suggest", async (req, res, next) => {
   }
 });
 
-// ── GET /api/products/:slug — single product by slug ───────────────────────
+// ── GET /api/products/:slug , single product by slug ───────────────────────
 productRoutes.get("/:slug", async (req, res, next) => {
   try {
     const { data, error } = await supabase

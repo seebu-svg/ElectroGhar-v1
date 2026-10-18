@@ -207,7 +207,7 @@ export default function BlogDetail() {
             Need This Fixed or Found For You?
           </h2>
           <p className="text-gray-400 mb-7">
-            Our workshop checks every machine we sell. Tell us what you need —
+            Our workshop checks every machine we sell. Tell us what you need ,
             we will match you with the right one.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">

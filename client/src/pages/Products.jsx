@@ -180,7 +180,7 @@ export default function Products() {
     : currentFeatured
       ? "Shop the most popular laptops, PCs, monitors and gadgets at ElectroGhar. Quality checked and WhatsApp-confirmed pricing."
       : currentDeals
-        ? "Biggest discounts on quality checked tech at ElectroGhar. Laptops, PCs, monitors and gadgets — while stock lasts."
+        ? "Biggest discounts on quality checked tech at ElectroGhar. Laptops, PCs, monitors and gadgets , while stock lasts."
         : currentSearch
           ? `Search results for "${currentSearch}" at ElectroGhar. Quality checked laptops, PCs, monitors and gadgets.`
           : "Browse all quality checked laptops, PCs, monitors, storage and gadgets at ElectroGhar. New, used and refurbished. Message us on WhatsApp.";
@@ -248,7 +248,7 @@ export default function Products() {
           ...(products.length ? [itemListSchema(products, canonicalUrl)] : []),
         ]}
       />
-      {/* ── Compact page header — the grid stays the hero ── */}
+      {/* ── Compact page header , the grid stays the hero ── */}
       <div className="relative bg-surface-dark border-b border-white/5 overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-30" />
         <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-600/50 to-transparent" />
@@ -278,7 +278,7 @@ export default function Products() {
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
                   {pagination.total
-                    ? `${pagination.total} quality-checked ${pagination.total === 1 ? "item" : "items"} — order on WhatsApp`
+                    ? `${pagination.total} quality-checked ${pagination.total === 1 ? "item" : "items"} , order on WhatsApp`
                     : "Browse the full ElectroGhar catalog"}
                 </p>
               </div>

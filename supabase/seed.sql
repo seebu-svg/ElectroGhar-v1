@@ -1,5 +1,5 @@
 -- ============================================================
--- ElectroGhar — Seed Data
+-- ElectroGhar , Seed Data
 -- Run AFTER schema.sql to populate demo data
 -- ============================================================
 
@@ -51,7 +51,7 @@ INSERT INTO products (
 (
   'Lenovo ThinkPad X1 Carbon Gen 9',
   'lenovo-thinkpad-x1-carbon-gen9-i7-16gb-512gb',
-  'The legendary ThinkPad X1 Carbon — ultra-light, ultra-powerful. 11th Gen i7 with stunning 14-inch 2K display.',
+  'The legendary ThinkPad X1 Carbon , ultra-light, ultra-powerful. 11th Gen i7 with stunning 14-inch 2K display.',
   'Lenovo', 'ultrabooks',
   245000, 290000,
   '["https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800","https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800"]',
@@ -79,7 +79,7 @@ INSERT INTO products (
 (
   'MacBook Air M1 2020',
   'macbook-air-m1-2020-8gb-256gb',
-  'Apple MacBook Air with M1 chip — incredible performance and battery life. Perfect for students and creators.',
+  'Apple MacBook Air with M1 chip , incredible performance and battery life. Perfect for students and creators.',
   'Apple', 'ultrabooks',
   225000, 260000,
   '["https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=800","https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800"]',

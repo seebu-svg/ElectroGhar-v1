@@ -151,11 +151,11 @@ export default function Blogs() {
             </h1>
             <p className="text-gray-400 leading-relaxed">
               Everything we have learned about buying and fixing tech in
-              Pakistan — straight from the shop floor.
+              Pakistan , straight from the shop floor.
             </p>
           </div>
 
-          {/* Search — the primary tool on this page */}
+          {/* Search , the primary tool on this page */}
           <div className="mt-7 max-w-xl">
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-500 group-focus-within:text-brand-400 transition-colors pointer-events-none" />
@@ -322,7 +322,7 @@ export default function Blogs() {
           </h2>
           <p className="text-gray-400 mb-8">
             Skip the research rabbit hole. Tell us your budget and what you
-            need — we will point you to the right machine.
+            need , we will point you to the right machine.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <a

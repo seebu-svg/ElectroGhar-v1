@@ -3,7 +3,7 @@ import { supabase } from "../config/supabase.js";
 
 export const categoryRoutes = Router();
 
-// ── GET /api/categories — flat list + hierarchy tree + product counts ─────
+// ── GET /api/categories , flat list + hierarchy tree + product counts ─────
 categoryRoutes.get("/", async (_req, res, next) => {
   try {
     const [catRes, prodRes] = await Promise.all([

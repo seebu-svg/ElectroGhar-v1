@@ -1,5 +1,5 @@
 -- ============================================================
--- ElectroGhar — Supabase Database Schema
+-- ElectroGhar , Supabase Database Schema
 -- Run this in the Supabase SQL Editor to set up your database.
 -- ============================================================
 
@@ -101,7 +101,7 @@ CREATE POLICY "Public read categories"
   ON categories FOR SELECT
   USING (is_active = true);
 
--- Admin write policies (placeholder — enable after setting up auth)
+-- Admin write policies (placeholder , enable after setting up auth)
 -- CREATE POLICY "Admin write products"
 --   ON products FOR ALL
 --   USING (auth.role() = 'authenticated');

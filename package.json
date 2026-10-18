@@ -2,7 +2,7 @@
   "name": "electroghar",
   "version": "1.0.0",
   "private": true,
-  "description": "ElectroGhar — Quality used-laptop e-commerce catalog for Pakistan",
+  "description": "ElectroGhar , Quality used-laptop e-commerce catalog for Pakistan",
   "engines": {
     "node": ">=22"
   },

@@ -8,7 +8,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
 if (!supabaseUrl) {
-  throw new Error("❌ Missing SUPABASE_URL in .env — get it from Supabase Dashboard → Settings → API");
+  throw new Error("❌ Missing SUPABASE_URL in .env , get it from Supabase Dashboard → Settings → API");
 }
 
 if (!supabaseKey || supabaseKey === "your-service-role-key-here") {
@@ -16,14 +16,14 @@ if (!supabaseKey || supabaseKey === "your-service-role-key-here") {
   console.warn("   Get it from: Supabase Dashboard → Settings → API → service_role key\n");
 }
 
-// Service-role client — for data operations (bypasses RLS)
+// Service-role client , for data operations (bypasses RLS)
 export const supabase = createClient(
   supabaseUrl,
   supabaseKey || supabaseAnonKey || "",
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
-// Anon client — for Supabase Auth (login, token verify)
+// Anon client , for Supabase Auth (login, token verify)
 export const supabaseAuth = supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: { autoRefreshToken: false, persistSession: false },

@@ -32,7 +32,7 @@ const VALUES = [
   {
     icon: BadgeCheck,
     title: "Honest Grading",
-    desc: "New, used or refurbished — we describe condition exactly as it is.",
+    desc: "New, used or refurbished , we describe condition exactly as it is.",
   },
   {
     icon: Tag,
@@ -42,7 +42,7 @@ const VALUES = [
   {
     icon: MessageCircle,
     title: "Real Support",
-    desc: "Talk to a real person before you buy — advice is always free.",
+    desc: "Talk to a real person before you buy , advice is always free.",
   },
   {
     icon: Truck,
@@ -63,7 +63,7 @@ export default function About() {
     <div className="bg-surface">
       <SEOHead
         title="About Us"
-        description="ElectroGhar is Pakistan's trusted store for quality checked laptops, PCs, monitors, storage and gadgets. New, used and refurbished — honest grading, fair prices, WhatsApp support."
+        description="ElectroGhar is Pakistan's trusted store for quality checked laptops, PCs, monitors, storage and gadgets. New, used and refurbished , honest grading, fair prices, WhatsApp support."
         canonical={`${canonicalBase}/about`}
         type="website"
         jsonLd={[organizationSchema()]}
@@ -84,7 +84,7 @@ export default function About() {
             </span>
           </h1>
           <p className="text-gray-400 leading-relaxed max-w-2xl mx-auto">
-            &quot;Ghar&quot; means home — and that is exactly what we want
+            &quot;Ghar&quot; means home , and that is exactly what we want
             ElectroGhar to feel like. A place where you can shop for laptops,
             PCs, monitors and gadgets without pressure, without hidden flaws,
             and without paying a rupee more than you should.
@@ -111,7 +111,7 @@ export default function About() {
                 and everyday gadgets.
               </p>
               <p>
-                Every product — new, used or refurbished — is inspected,
+                Every product , new, used or refurbished , is inspected,
                 tested and honestly graded before it is listed. What you read
                 on the product page is exactly what arrives at your door.
               </p>
@@ -202,7 +202,7 @@ export default function About() {
             Ready to Upgrade Your Tech?
           </h2>
           <p className="text-gray-400 mb-8">
-            Explore the catalog or message us — we will help you find the right
+            Explore the catalog or message us , we will help you find the right
             machine for your budget.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">

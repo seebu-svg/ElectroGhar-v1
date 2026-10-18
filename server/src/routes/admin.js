@@ -220,10 +220,10 @@ adminRoutes.delete("/products/:id", requireAdmin, async (req, res, next) => {
 
 
 // ════════════════════════════════════════════════════════════════════════════
-// BLOGS — admin management
+// BLOGS , admin management
 // ════════════════════════════════════════════════════════════════════════════
 
-// ── GET /api/admin/blogs — all posts (incl. drafts) with search + pagination ─
+// ── GET /api/admin/blogs , all posts (incl. drafts) with search + pagination ─
 adminRoutes.get("/blogs", requireAdmin, async (req, res, next) => {
   try {
     const { search = "", status = "", page = 1, limit = 20 } = req.query;
@@ -258,7 +258,7 @@ adminRoutes.get("/blogs", requireAdmin, async (req, res, next) => {
   }
 });
 
-// ── GET /api/admin/blogs/:id — single post for the edit form ─────────────────
+// ── GET /api/admin/blogs/:id , single post for the edit form ─────────────────
 adminRoutes.get("/blogs/:id", requireAdmin, async (req, res, next) => {
   try {
     const { data, error } = await supabase
@@ -275,7 +275,7 @@ adminRoutes.get("/blogs/:id", requireAdmin, async (req, res, next) => {
   }
 });
 
-// ── POST /api/admin/blogs — create ──────────────────────────────────────────
+// ── POST /api/admin/blogs , create ──────────────────────────────────────────
 adminRoutes.post("/blogs", requireAdmin, async (req, res, next) => {
   try {
     const body = { ...req.body };
@@ -304,7 +304,7 @@ adminRoutes.post("/blogs", requireAdmin, async (req, res, next) => {
   }
 });
 
-// ── PUT /api/admin/blogs/:id — update ──────────────────────────────────────
+// ── PUT /api/admin/blogs/:id , update ──────────────────────────────────────
 adminRoutes.put("/blogs/:id", requireAdmin, async (req, res, next) => {
   try {
     const body = { ...req.body };
@@ -314,7 +314,7 @@ adminRoutes.put("/blogs/:id", requireAdmin, async (req, res, next) => {
     delete body.search_text;
     delete body.views;
 
-    // Keep the slug stable once set — only re-slugify if explicitly provided
+    // Keep the slug stable once set , only re-slugify if explicitly provided
     if (body.slug) body.slug = await uniqueSlug("blogs", slugify(body.slug), req.params.id);
 
     // Stamp published_at on the first publish transition
@@ -346,7 +346,7 @@ adminRoutes.put("/blogs/:id", requireAdmin, async (req, res, next) => {
   }
 });
 
-// ── PATCH /api/admin/blogs/:id/publish — toggle publish state ───────────────
+// ── PATCH /api/admin/blogs/:id/publish , toggle publish state ───────────────
 adminRoutes.patch("/blogs/:id/publish", requireAdmin, async (req, res, next) => {
   try {
     const { data: current, error: fetchErr } = await supabase
