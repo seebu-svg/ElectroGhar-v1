@@ -1,7 +1,9 @@
+import { adminFetch } from "../../utils/adminFetch";
 import { useEffect, useState } from "react";
 import { Loader2, Trash2, UserPlus, Key, Shield, Check } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { API_BASE } from "../../utils/api";
+import LogoSettings from '../../components/admin/LogoSettings';
 
 const inputCls =
   "w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500";
@@ -9,6 +11,7 @@ const inputCls =
 export default function AdminUsers() {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
+  const [canManageUsers, setCanManageUsers] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -35,12 +38,13 @@ export default function AdminUsers() {
 
   async function loadUsers() {
     try {
-      const res = await fetch(`${API_BASE}/admin/users`, {
+      const res = await adminFetch(`${API_BASE}/admin/users`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load users");
       setUsers(data.users || []);
+      setCanManageUsers(data.can_manage_users === true);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -64,7 +68,7 @@ export default function AdminUsers() {
 
     setChangingPassword(true);
     try {
-      const res = await fetch(`${API_BASE}/admin/change-password`, {
+      const res = await adminFetch(`${API_BASE}/admin/change-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -102,7 +106,7 @@ export default function AdminUsers() {
 
     setCreating(true);
     try {
-      const res = await fetch(`${API_BASE}/admin/users`, {
+      const res = await adminFetch(`${API_BASE}/admin/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -131,7 +135,7 @@ export default function AdminUsers() {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/admin/users/${userId}`, {
+      const res = await adminFetch(`${API_BASE}/admin/users/${userId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${user.token}` },
       });
@@ -166,6 +170,7 @@ export default function AdminUsers() {
   return (
     <div className="max-w-4xl space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Admin Management</h1>
+      <LogoSettings />
 
       {error && (
         <div className="text-sm text-red-600 bg-red-50 rounded-lg px-4 py-2.5 border border-red-100">
@@ -244,7 +249,7 @@ export default function AdminUsers() {
       </div>
 
       {/* ── Create New Admin ────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+      {canManageUsers && <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
         <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
           <UserPlus className="w-4 h-4 text-brand-500" />
           Create New Admin
@@ -308,6 +313,7 @@ export default function AdminUsers() {
         </form>
       </div>
 
+      }
       {/* ── Admin Users List ────────────────────────────────────── */}
       <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
         <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
@@ -329,6 +335,7 @@ export default function AdminUsers() {
                 <tr key={u.id} className="hover:bg-gray-50">
                   <td className="py-3 pr-4 font-medium text-gray-900">
                     {u.email}
+                    {u.is_main_admin && <span className="ml-2 text-xs text-brand-600">Main admin · Protected</span>}
                     {u.id === user.id && (
                       <span className="ml-2 text-xs text-brand-600 font-normal">(you)</span>
                     )}
@@ -336,7 +343,7 @@ export default function AdminUsers() {
                   <td className="py-3 pr-4 text-gray-500">{formatDate(u.created_at)}</td>
                   <td className="py-3 pr-4 text-gray-500">{formatDate(u.last_sign_in_at)}</td>
                   <td className="py-3">
-                    {u.id !== user.id ? (
+                    {canManageUsers && !u.is_main_admin && u.id !== user.id ? (
                       <button
                         onClick={() => handleDelete(u.id, u.email)}
                         className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -345,7 +352,7 @@ export default function AdminUsers() {
                         <Trash2 className="w-4 h-4" />
                       </button>
                     ) : (
-                      <span className="text-xs text-gray-400">Current user</span>
+                      <span className="text-xs text-gray-400">{u.is_main_admin ? "Protected account" : "Current user"}</span>
                     )}
                   </td>
                 </tr>

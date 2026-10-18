@@ -49,3 +49,7 @@ export async function testConnection() {
     return false;
   }
 }
+
+export function createAuthClient() {
+  return createClient(supabaseUrl, supabaseAnonKey || supabaseKey, { auth: { autoRefreshToken: false, persistSession: false } });
+}

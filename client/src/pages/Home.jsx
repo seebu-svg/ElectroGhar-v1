@@ -1,3 +1,4 @@
+import { CONTACT } from "../utils/contact";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -6,13 +7,8 @@ import {
   BadgeCheck,
   ChevronLeft,
   ChevronRight,
-  Cpu,
   Flame,
-  HardDrive,
-  Laptop,
-  LayoutGrid,
   MessageCircle,
-  Monitor,
   Phone,
   Search,
   ShieldCheck,
@@ -20,7 +16,6 @@ import {
   ThumbsUp,
   TrendingUp,
   Wallet,
-  Zap,
 } from "lucide-react";
 import heroBanner from "../assets/hero-banner.png";
 import placeholderImg from "../assets/product-placeholder.png";
@@ -33,15 +28,9 @@ import { SEOHead, organizationSchema, websiteSchema, itemListSchema } from "../u
 import { BUDGETS, WHY_ITEMS } from "./homeData";
 
 const WA_GENERAL =
-  "https://wa.me/92339244435?text=Hi%20ElectroGhar!%20I%27m%20looking%20for%20a%20product%2C%20can%20you%20help%3F";
+  `${CONTACT.whatsappUrl}?text=Hi%20ElectroGhar!%20I%27m%20looking%20for%20a%20product%2C%20can%20you%20help%3F`;
 
-const CATEGORY_ICONS = {
-  laptops: Laptop,
-  "pcs-desktops": Cpu,
-  "monitors-displays": Monitor,
-  "storage-accessories": HardDrive,
-  "gadgets-electronics": Zap,
-};
+
 
 const WHY_ICON_MAP = { ShieldCheck, BadgeCheck, MessageCircle };
 
@@ -85,16 +74,6 @@ export default function Home() {
 
   /* ── Derived collections (from the shared pool) ── */
   const newArrivals = pool.slice(0, 8);
-
-  const shelves = tree
-    .map((cat) => {
-      const subSlugs = new Set([cat.slug, ...cat.children.map((c) => c.slug)]);
-      return {
-        ...cat,
-        products: pool.filter((p) => subSlugs.has(p.category)).slice(0, 4),
-      };
-    })
-    .filter((s) => s.products.length > 0);
 
   const brands = (() => {
     const map = new Map();
@@ -179,7 +158,6 @@ export default function Home() {
           <Featured products={featured} />
           <DailyDeals products={deals} />
           <BestSellers products={bestSellers} />
-          <CategoryShelves shelves={shelves} />
           <NewArrivals products={newArrivals} />
           <ShopByBrand brands={brands} />
           <Recommended products={recommended} />
@@ -195,14 +173,27 @@ export default function Home() {
 
 /* ── 1. Hero — Featured Product ───────────────────────────────── */
 function Hero({ products, stats }) {
+  const [images, setImages] = useState([]);
+  const [index, setIndex] = useState(0);
+  useEffect(() => {
+    const load = () => api.getHeroImages().then(r => { setImages(r.images || []); setIndex(0); }).catch(console.error);
+    load();
+    window.addEventListener('hero-updated', load);
+    return () => window.removeEventListener('hero-updated', load);
+  }, []);
+  useEffect(() => {
+    if (images.length < 2) return;
+    const timer = setInterval(() => setIndex(i => (i + 1) % images.length), 6000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+  const image = images[index];
   return (
     <section className="relative w-full min-h-[80vh] sm:min-h-[85vh] flex items-center overflow-hidden bg-surface-dark">
-      <img
-        src={heroBanner}
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover object-center"
-      />
+      <picture className="absolute inset-0 w-full h-full">
+        {image?.mobile_url && <source media="(max-width: 639px)" srcSet={image.mobile_url} />}
+        <img src={image?.desktop_url || heroBanner} alt={image?.alt || ''} className="w-full h-full object-cover object-center" />
+      </picture>
+      {images.length > 1 && <div className="absolute bottom-5 right-5 z-20 flex gap-2">{images.map((item, i) => <button key={item.id} aria-label={`Show hero image ${i + 1}`} aria-pressed={index === i} onClick={() => setIndex(i)} className={`w-3 h-3 rounded-full ${i === index ? 'bg-brand-500' : 'bg-white/50'}`} />)}</div>}
       <div className="absolute inset-0 bg-gradient-to-r from-surface-dark via-surface-dark/75 to-surface-dark/20" />
       <div className="absolute inset-0 bg-gradient-to-t from-surface-dark via-transparent to-surface-dark/40" />
       <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-surface-dark/90 to-transparent" />
@@ -411,65 +402,6 @@ function BestSellers({ products }) {
             View All Best Sellers
             <ArrowRight className="w-4 h-4" />
           </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── 5. Shop by Category ──────────────────────────────────────── */
-function CategoryShelves({ shelves }) {
-  if (!shelves.length) return null;
-  return (
-    <section className="bg-surface py-14 sm:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <SectionHead
-          icon={LayoutGrid}
-          eyebrow="Full Catalog"
-          title="Shop by Category"
-          sub="Five departments — every product quality checked."
-          action={<HeadLink to="/products">View All</HeadLink>}
-        />
-        <div className="space-y-5">
-          {shelves.map((cat) => {
-            const Icon = CATEGORY_ICONS[cat.slug] || Zap;
-            const count =
-              cat.total_count ?? cat.product_count ?? cat.children?.length ?? 0;
-            return (
-              <div
-                key={cat.slug}
-                className="bg-surface-card border border-white/5 rounded-2xl p-5 sm:p-6"
-              >
-                <div className="grid lg:grid-cols-[220px_1fr] gap-5 lg:gap-8">
-                  <div className="flex lg:flex-col items-center lg:items-start gap-4 lg:gap-3 lg:justify-center">
-                    <span className="w-12 h-12 rounded-xl bg-brand-600/10 border border-brand-600/25 flex items-center justify-center shrink-0">
-                      <Icon className="w-6 h-6 text-brand-500" />
-                    </span>
-                    <div className="min-w-0">
-                      <h3 className="text-lg font-bold text-white font-heading truncate">
-                        {cat.name}
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {count} products
-                      </p>
-                      <Link
-                        to={`/products?category=${cat.slug}`}
-                        className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-400 hover:text-brand-300 transition-colors"
-                      >
-                        View all
-                        <ArrowRight className="w-3 h-3" />
-                      </Link>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {cat.products.map((p) => (
-                      <MiniCard key={p.id} product={p} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
     </section>

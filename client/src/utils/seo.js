@@ -1,19 +1,20 @@
+import { CONTACT } from "./contact";
 import { useEffect } from "react";
 
 export const SITE = {
   name: "ElectroGhar",
   tagline: "Good Tech. Better Deals.",
   defaultDescription:
-    "Pakistan's trusted marketplace for quality checked laptops, PCs, monitors, storage and gadgets — new, used and refurbished. Message us on WhatsApp for the latest price.",
-  phone: "+92 339 244435",
+    "Pakistan's trusted marketplace for quality checked laptops, PCs, monitors, storage and gadgets in Karachi — new, used and refurbished. Visit Naaz Digital Plaza or call 03319244435.",
+  phone: CONTACT.internationalPhone,
   address: {
-    street: "",
-    city: "Lahore",
-    region: "Punjab",
+    street: CONTACT.street,
+    city: CONTACT.city,
+    region: CONTACT.region,
     country: "PK",
   },
   social: {
-    whatsapp: "https://wa.me/92339244435",
+    whatsapp: CONTACT.whatsappUrl,
     website: "https://electroghar.pk",
   },
 };
@@ -135,11 +136,20 @@ export function websiteSchema(searchUrl = `${baseUrl()}/products`) {
 export function organizationSchema() {
   return {
     "@context": "https://schema.org",
-    "@type": "Organization",
+    "@type": "Store",
     name: SITE.name,
     url: baseUrl(),
     logo: `${baseUrl()}/logo.png`,
     description: SITE.defaultDescription,
+    telephone: CONTACT.internationalPhone,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: CONTACT.street,
+      addressLocality: CONTACT.city,
+      addressRegion: CONTACT.region,
+      addressCountry: CONTACT.country,
+    },
+    openingHours: CONTACT.openingHours,
     contactPoint: {
       "@type": "ContactPoint",
       telephone: SITE.phone,

@@ -1,3 +1,4 @@
+import { CONTACT } from "../utils/contact";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -18,7 +19,7 @@ import { SEOHead, blogPostingSchema, breadcrumbSchema } from "../utils/seo";
 import { AuthorAvatar, CategoryBadge } from "./Blogs";
 
 const WA_GENERAL =
-  "https://wa.me/92339244435?text=Hi%20ElectroGhar!%20I%20need%20buying%20advice.";
+  `${CONTACT.whatsappUrl}?text=Hi%20ElectroGhar!%20I%20need%20buying%20advice.`;
 
 export default function BlogDetail() {
   const { slug } = useParams();

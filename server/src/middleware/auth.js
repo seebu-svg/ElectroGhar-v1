@@ -18,13 +18,24 @@ export async function requireAdmin(req, res, next) {
       return res.status(401).json({ error: "Invalid or expired token" });
     }
 
-    if (data.user.app_metadata?.role !== "admin") {
-      return res.status(403).json({ error: "Administrator access required" });
-    }
-
+    if (!isAdmin(data.user)) return res.status(403).json({ error: "Administrator permission required" });
     req.user = data.user;
     next();
   } catch (err) {
     next(err);
   }
+}
+
+export function isAdmin(user) { return user?.app_metadata?.role === "admin"; }
+
+export const MAIN_ADMIN_EMAIL = "admin@electroghar.pk";
+export function isMainAdmin(user) {
+  return isAdmin(user) && user?.email?.toLowerCase() === MAIN_ADMIN_EMAIL;
+}
+
+export function requireMainAdmin(req, res, next) {
+  if (!isMainAdmin(req.user)) {
+    return res.status(403).json({ error: "Only the main administrator can manage admin accounts" });
+  }
+  next();
 }
