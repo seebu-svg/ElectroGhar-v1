@@ -1,11 +1,12 @@
+import { SITE_URL, absoluteUrl, canonicalUrl, DEFAULT_DESCRIPTION, organizationSchema, productSchema, articleSchema } from "./seoData.mjs";
+export { organizationSchema, productSchema };
 import { CONTACT } from "./contact";
 import { useEffect } from "react";
 
 export const SITE = {
   name: "ElectroGhar",
   tagline: "Good Tech. Better Deals.",
-  defaultDescription:
-    "Pakistan's trusted marketplace for quality checked laptops, PCs, monitors, storage and gadgets in Karachi , new, used and refurbished. Visit Naaz Digital Plaza or call 03319244435.",
+  defaultDescription: DEFAULT_DESCRIPTION,
   phone: CONTACT.internationalPhone,
   address: {
     street: CONTACT.street,
@@ -19,22 +20,15 @@ export const SITE = {
   },
 };
 
-function baseUrl() {
-  if (typeof window === "undefined") return "https://electroghar.pk";
-  return window.location.origin;
-}
-
-function absoluteImage(path) {
-  if (!path) return `${baseUrl()}/logo-full.png`;
-  if (path.startsWith("http")) return path;
-  return `${baseUrl()}${path}`;
-}
+function baseUrl() { return SITE_URL; }
+function absoluteImage(path) { return absoluteUrl(path || '/logo-full.png'); }
 
 function updateOrCreateMeta(selector, key, value, tag = "meta") {
   let el = document.querySelector(selector);
   if (!el) {
     el = document.createElement(tag);
-    el.setAttribute(key, selector.match(/\[([^=\]]+)=/)[1]);
+    const attributeValue = selector.match(/\[[^=\]]+=["']([^"']+)["']\]/)?.[1];
+    el.setAttribute(key, attributeValue);
     document.head.appendChild(el);
   }
   if (tag === "link") {
@@ -64,14 +58,14 @@ export function SEOHead({
       : `${SITE.name} , ${SITE.tagline}`;
     document.title = fullTitle;
 
-    const url = canonical || (typeof window !== "undefined" ? window.location.href : baseUrl());
+    const url = canonicalUrl(canonical || (typeof window !== "undefined" ? window.location.href : baseUrl()));
     const ogImage = absoluteImage(image);
 
     updateOrCreateMeta('meta[name="description"]', "name", description || SITE.defaultDescription);
     updateOrCreateMeta('link[rel="canonical"]', "rel", url, "link");
 
     updateOrCreateMeta('meta[property="og:url"]', "property", url);
-    updateOrCreateMeta('meta[property="og:type"]', "property", type);
+    updateOrCreateMeta('meta[property="og:type"]', "property", type === "product" ? "website" : type);
     updateOrCreateMeta('meta[property="og:title"]', "property", title || SITE.name);
     updateOrCreateMeta('meta[property="og:description"]', "property", description || SITE.defaultDescription);
     updateOrCreateMeta('meta[property="og:site_name"]', "property", SITE.name);
@@ -83,12 +77,19 @@ export function SEOHead({
     updateOrCreateMeta('meta[name="twitter:description"]', "name", description || SITE.defaultDescription);
     updateOrCreateMeta('meta[name="twitter:image"]', "name", ogImage);
 
-    updateOrCreateMeta('meta[name="robots"]', "name", noIndex ? "noindex, nofollow" : "index, follow");
+    updateOrCreateMeta('meta[name="robots"]', "name", noIndex ? "noindex, follow" : "index, follow, max-image-preview:large");
 
+    const google = import.meta.env.VITE_GOOGLE_SITE_VERIFICATION;
+    const bing = import.meta.env.VITE_BING_SITE_VERIFICATION;
+    if (google) updateOrCreateMeta('meta[name="google-site-verification"]', 'name', google);
+    if (bing) updateOrCreateMeta('meta[name="msvalidate.01"]', 'name', bing);
+    updateOrCreateMeta('meta[name="twitter:url"]', 'name', url);
+    updateOrCreateMeta('meta[property="og:image:alt"]', 'property', title || SITE.name);
     // JSON-LD structured data
     const existing = document.getElementById("structured-data");
-    if (jsonLd) {
-      const payload = Array.isArray(jsonLd) ? { "@context": "https://schema.org", "@graph": jsonLd } : jsonLd;
+    {
+      const graph = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+      const payload = { "@context": "https://schema.org", "@graph": [organizationSchema(), ...graph.filter(node => node?.["@id"] !== absoluteUrl("/#business"))] };
       if (existing) {
         existing.textContent = JSON.stringify(payload);
       } else {
@@ -98,8 +99,6 @@ export function SEOHead({
         script.textContent = JSON.stringify(payload);
         document.head.appendChild(script);
       }
-    } else if (existing) {
-      existing.remove();
     }
 
     return () => {
@@ -132,112 +131,25 @@ export function websiteSchema(searchUrl = `${baseUrl()}/products`) {
   };
 }
 
-/** Build an Organization / LocalBusiness schema. */
-export function organizationSchema() {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Store",
-    name: SITE.name,
-    url: baseUrl(),
-    logo: `${baseUrl()}/logo.png`,
-    description: SITE.defaultDescription,
-    telephone: CONTACT.internationalPhone,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: CONTACT.street,
-      addressLocality: CONTACT.city,
-      addressRegion: CONTACT.region,
-      addressCountry: CONTACT.country,
-    },
-    openingHours: CONTACT.openingHours,
-    contactPoint: {
-      "@type": "ContactPoint",
-      telephone: SITE.phone,
-      contactType: "Customer Service",
-      availableLanguage: ["English", "Urdu"],
-    },
-    sameAs: [SITE.social.whatsapp, SITE.social.website],
-  };
-}
-
-/** Build a Product schema. */
-export function productSchema(product) {
-  const url = `${baseUrl()}/product/${product.slug}`;
-  const image = absoluteImage(product.thumbnail_url || (Array.isArray(product.images) ? product.images[0] : "/product-placeholder.png"));
-  return {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    image,
-    description: product.meta_description || product.description || `${product.name} , ${product.condition_grade} condition`,
-    sku: product.sku || product.slug,
-    brand: {
-      "@type": "Brand",
-      name: product.brand || "ElectroGhar",
-    },
-    url,
-    offers: {
-      "@type": "Offer",
-      url,
-      priceCurrency: "PKR",
-      price: String(product.price || 0),
-      availability: product.is_available && product.stock_qty > 0
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-      itemCondition: product.condition_type === "new"
-        ? "https://schema.org/NewCondition"
-        : "https://schema.org/UsedCondition",
-      seller: {
-        "@type": "Organization",
-        name: SITE.name,
-      },
-    },
-  };
-}
-
 /** Build a BreadcrumbList schema from [{label, to}]. */
 export function breadcrumbSchema(items) {
+  const trail = items[0]?.label === "Home" ? items : [{ label: "Home", to: "/" }, ...items];
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: items.map((item, idx) => ({
+    itemListElement: trail.map((item, idx) => ({
       "@type": "ListItem",
       position: idx + 1,
       name: item.label,
-      item: item.to,
+      item: absoluteUrl(item.to || "/"),
     })),
   };
 }
 
 /** Build a BlogPosting schema. */
 export function blogPostingSchema(blog, categories = []) {
-  const cat = categories.find((c) => c.slug === blog.category);
-  const url = `${baseUrl()}/blogs/${blog.slug}`;
-  return {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: blog.title,
-    description: blog.meta_description || blog.excerpt,
-    image: absoluteImage(blog.cover_image),
-    url,
-    datePublished: blog.published_at || blog.created_at,
-    dateModified: blog.updated_at || blog.published_at || blog.created_at,
-    author: {
-      "@type": "Person",
-      name: blog.author || SITE.name,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: SITE.name,
-      logo: `${baseUrl()}/logo.png`,
-    },
-    articleSection: cat?.name || blog.category,
-    keywords: Array.isArray(blog.tags) ? blog.tags.join(", ") : undefined,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": url,
-    },
-  };
+  const cat = categories.find(c => c.slug === blog.category);
+  return { ...articleSchema(blog), articleSection: cat?.name || blog.category };
 }
 
 /** Build an ItemList schema for paginated product lists. */

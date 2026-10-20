@@ -78,12 +78,13 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  to="/terms"
+                  to="/warranty-policy"
                   className="inline-flex items-center gap-1.5 py-1 hover:text-brand-400 transition-colors"
                 >
                   <ShieldCheck className="w-3.5 h-3.5" /> Warranty & Returns
                 </Link>
               </li>
+              {[['/refund-policy', 'Refund Policy'], ['/return-policy', 'Return Policy'], ['/faqs', 'FAQs']].map(([to, label]) => <li key={to}><Link to={to} className="inline-block py-1 hover:text-brand-400 transition-colors">{label}</Link></li>)}
               <li>
                 <Link
                   to="/contact"

@@ -1,3 +1,4 @@
+import { STATIC_PAGES } from "../utils/seoData.mjs";
 import { CONTACT } from "../utils/contact";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Shield } from "lucide-react";
@@ -12,8 +13,8 @@ export default function PrivacyPolicy() {
   return (
     <div className="bg-surface-alt min-h-screen">
       <SEOHead
-        title="Privacy Policy"
-        description="ElectroGhar's privacy policy explains how we collect, use and protect your personal information when you browse our catalog or message us on WhatsApp."
+        title={STATIC_PAGES["/privacy"].title}
+        description={STATIC_PAGES["/privacy"].description}
         canonical={`${typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk"}/privacy`}
         type="website"
       />

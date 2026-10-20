@@ -8,7 +8,7 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "setup:admin": "node scripts/setup-admin.js",
-    "test": "node test/admin.test.js && node test/client-auth.test.js"
+    "test": "node test/admin.test.js && node test/client-auth.test.js && node test/category-actions.test.js"
   },
   "engines": {
     "node": ">=22"

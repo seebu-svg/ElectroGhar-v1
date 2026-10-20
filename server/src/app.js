@@ -9,6 +9,7 @@ import { productRoutes } from "./routes/products.js";
 import { categoryRoutes } from "./routes/categories.js";
 import { adminRoutes } from "./routes/admin.js";
 import { blogRoutes, blogCategoryRoutes } from "./routes/blogs.js";
+import { pageRoutes } from "./routes/pages.js";
 import { seoRoutes } from "./routes/seo.js";
 import { uploadRoutes } from "./routes/upload.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -22,7 +23,11 @@ import { supabase } from "./config/supabase.js";
 const app = express();
 
 // ── Middleware ──────────────────────────────────────────────────────────────
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: { directives: {
+  "script-src": ["'self'"], "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+  "font-src": ["'self'", "https://fonts.gstatic.com"], "img-src": ["'self'", "data:", "https:"],
+  "connect-src": ["'self'", "https:"], "frame-src": ["https://www.google.com"],
+} } }));
 
 const allowedOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(",").map((s) => s.trim())
@@ -79,6 +84,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/blog-categories", blogCategoryRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use(seoRoutes);
+app.use(pageRoutes);
 
 // ── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((_req, res) => {

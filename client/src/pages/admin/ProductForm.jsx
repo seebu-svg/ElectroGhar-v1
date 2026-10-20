@@ -24,7 +24,7 @@ const EMPTY = {
   compare_at_price: "",
   condition_grade: "Good",
   battery_health: "",
-  warranty: "7-day checking warranty",
+  warranty: "30-Day Checking Warranty",
   stock_qty: 1,
   is_available: true,
   is_featured: false,
@@ -320,7 +320,7 @@ export default function ProductForm() {
               <input value={form.battery_health} onChange={(e) => set("battery_health", e.target.value)} className={inputCls} placeholder="85%" />
             </Field>
             <Field label="Warranty">
-              <input value={form.warranty} onChange={(e) => set("warranty", e.target.value)} className={inputCls} placeholder="7-day checking warranty" />
+              <input value={form.warranty} onChange={(e) => set("warranty", e.target.value)} className={inputCls} placeholder="30-Day Checking Warranty" />
             </Field>
           </div>
           <div className="flex flex-wrap gap-6 pt-2">

@@ -57,6 +57,7 @@ export default function BlogDetail() {
           <div className="mx-auto w-14 h-14 rounded-2xl bg-brand-600/10 border border-brand-600/25 flex items-center justify-center mb-5">
             <SearchX className="w-6 h-6 text-brand-500" />
           </div>
+          <SEOHead title="Article Not Found" noIndex />
           <h1 className="text-2xl font-extrabold text-white font-heading mb-2">
             Article not found
           </h1>

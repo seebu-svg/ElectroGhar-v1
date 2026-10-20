@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 /**
@@ -5,7 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
  * Shows first/last pages, current neighbourhood, and ellipses.
  * All click targets are at least 40×40 px.
  */
-export default function Pagination({ currentPage, totalPages, onPageChange, className = "" }) {
+export default function Pagination({ currentPage, totalPages, onPageChange, pageHref, className = "" }) {
   if (totalPages <= 1) return null;
 
   const pages = getVisiblePages(currentPage, totalPages);
@@ -16,6 +17,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange, clas
       className={`flex items-center justify-center gap-1.5 ${className}`}
     >
       <PageButton
+        href={pageHref?.(currentPage - 1)}
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage <= 1}
         aria-label="Previous page"
@@ -33,8 +35,9 @@ export default function Pagination({ currentPage, totalPages, onPageChange, clas
             …
           </span>
         ) : (
-          <button
+          <PageButton
             key={page}
+            href={pageHref?.(page)}
             onClick={() => onPageChange(page)}
             aria-label={`Page ${page}`}
             aria-current={page === currentPage ? "page" : undefined}
@@ -45,11 +48,12 @@ export default function Pagination({ currentPage, totalPages, onPageChange, clas
             }`}
           >
             {page}
-          </button>
+          </PageButton>
         )
       )}
 
       <PageButton
+        href={pageHref?.(currentPage + 1)}
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
         aria-label="Next page"
@@ -60,18 +64,10 @@ export default function Pagination({ currentPage, totalPages, onPageChange, clas
   );
 }
 
-function PageButton({ children, onClick, disabled, ...props }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="w-10 h-10 rounded-lg bg-surface-card border border-white/10 text-gray-400 hover:border-brand-600/40 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center"
-      {...props}
-    >
-      {children}
-    </button>
-  );
+function PageButton({ children, onClick, disabled, href, className, ...props }) {
+  const classes = className || "w-10 h-10 rounded-lg bg-surface-card border border-white/10 text-gray-400 hover:border-brand-600/40 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center";
+  if (href && !disabled) return <Link to={href} className={`${classes} inline-flex items-center justify-center`} {...props}>{children}</Link>;
+  return <button type="button" onClick={onClick} disabled={disabled} className={classes} {...props}>{children}</button>;
 }
 
 function getVisiblePages(current, total) {

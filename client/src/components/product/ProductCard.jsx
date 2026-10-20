@@ -1,8 +1,9 @@
+import { POLICY, productPolicy } from "../../utils/policies";
 import { CONTACT } from "../../utils/contact";
 import { Link } from "react-router-dom";
 import { Cpu, HardDrive, Monitor, MemoryStick, Phone, Eye, Sparkles, Tag } from "lucide-react";
 import { formatPrice, conditionColor, discountPercent, buildWhatsAppLink } from "../../utils/helpers";
-import placeholderImg from "../../assets/product-placeholder.png";
+import placeholderImg from "../../assets/product-placeholder.webp";
 
 export default function ProductCard({ product, showAskPrice = false }) {
   const {
@@ -21,6 +22,7 @@ export default function ProductCard({ product, showAskPrice = false }) {
     is_featured,
   } = product;
 
+  const policy = productPolicy(product);
   const discount = discountPercent(price, compare_at_price);
   const savings = compare_at_price && compare_at_price > price ? compare_at_price - price : 0;
   const imgUrl = thumbnail_url || (Array.isArray(images) && images[0]) || placeholderImg;
@@ -37,7 +39,8 @@ export default function ProductCard({ product, showAskPrice = false }) {
       <div className="relative aspect-[4/3] bg-gradient-to-br from-surface-dark to-surface-card overflow-hidden">
         <img
           src={imgUrl}
-          alt={name}
+          alt={`${name}${condition_grade ? `, ${condition_grade} condition` : ""}`}
+          width="640" height="480" decoding="async"
           loading="lazy"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
         />
@@ -123,6 +126,9 @@ export default function ProductCard({ product, showAskPrice = false }) {
         <h3 className="text-sm font-semibold text-gray-100 line-clamp-2 min-h-[2.5rem] mb-3 group-hover:text-brand-300 transition-colors leading-snug">
           {name}
         </h3>
+
+        {policy.asIs && <p className="text-xs text-gray-300 mb-3">{POLICY.asIsLabel}. No refunds, subject to applicable consumer protection laws.</p>}
+        {showAskPrice && <p className="text-xs text-gray-400 mb-3">{POLICY.salesLabel}. Exceptions apply where required by law or an expressly stated warranty remedy applies.</p>}
 
         {/* ── Quick Specs ─────────────────────────────────── */}
         <div className="grid grid-cols-2 gap-1.5 mb-4 min-h-[2.5rem]">

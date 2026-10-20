@@ -1,3 +1,4 @@
+import { collectionMetadata, canonicalUrl as buildCanonical, isFilteredSearch } from "../utils/seoData.mjs";
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import {
@@ -173,25 +174,12 @@ export default function Products() {
         ? "Daily Deals"
         : currentSearch
           ? `Search: ${currentSearch}`
-          : "All Products";
+          : currentBrand ? `${currentBrand} Laptops & Electronics` : "All Products";
 
-  const metaDescription = activeCat
-    ? `Buy ${activeCat.name} in Pakistan at ElectroGhar. Quality checked, honestly graded, WhatsApp-confirmed pricing. ${pagination.total || 0}+ items in stock.`
-    : currentFeatured
-      ? "Shop the most popular laptops, PCs, monitors and gadgets at ElectroGhar. Quality checked and WhatsApp-confirmed pricing."
-      : currentDeals
-        ? "Biggest discounts on quality checked tech at ElectroGhar. Laptops, PCs, monitors and gadgets , while stock lasts."
-        : currentSearch
-          ? `Search results for "${currentSearch}" at ElectroGhar. Quality checked laptops, PCs, monitors and gadgets.`
-          : "Browse all quality checked laptops, PCs, monitors, storage and gadgets at ElectroGhar. New, used and refurbished. Message us on WhatsApp.";
-
-  const canonicalUrl = (() => {
-    const base = typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk";
-    if (!currentSearch && !currentCategory && !currentBrand && !currentConditionType && !currentCondition && !currentMaxPrice && !currentFeatured && !currentDeals) {
-      return `${base}/products`;
-    }
-    return `${base}${window.location.pathname}${window.location.search}`;
-  })();
+  const collection = collectionMetadata({ category: activeCat, brand: currentBrand, condition: currentConditionType, featured: currentFeatured, deals: currentDeals, page: currentPage });
+  const metaDescription = currentSearch ? `Search ElectroGhar for ${currentSearch}. Compare product specifications and contact our Karachi store.` : collection.description;
+  const canonicalUrl = buildCanonical(`/products?${searchParams}`);
+  const noIndex = isFilteredSearch(searchParams) || (!loading && (!!error || !products.length));
 
   const breadcrumbItems = [{ label: "Products", to: "/products" }];
   if (activeParent) {
@@ -234,17 +222,19 @@ export default function Products() {
   return (
     <div className="bg-surface-alt min-h-screen">
       <SEOHead
-        title={pageTitle}
+        title={currentSearch ? pageTitle : collection.title}
         description={metaDescription}
         canonical={canonicalUrl}
+        noIndex={noIndex}
         type="website"
         jsonLd={[
           breadcrumbSchema(
             breadcrumbItems.map((i) => ({
               label: i.label,
-              to: i.to ? `${typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk"}${i.to}` : `${typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk"}/products`,
+              to: i.to || canonicalUrl,
             }))
           ),
+          { "@type": "CollectionPage", "@id": canonicalUrl, url: canonicalUrl, name: collection.name, description: metaDescription },
           ...(products.length ? [itemListSchema(products, canonicalUrl)] : []),
         ]}
       />
@@ -295,6 +285,8 @@ export default function Products() {
             ))}
           </div>
         </div>
+
+        {(activeCat || currentBrand) && <p className="relative max-w-[2200px] mx-auto px-4 sm:px-6 lg:px-8 pb-4 text-sm text-gray-400 leading-relaxed">{collection.intro}</p>}
 
         {/* ── Category navigation tabs ─────────────────────────── */}
         <div className="relative border-t border-white/5 bg-black/20">
@@ -480,6 +472,7 @@ export default function Products() {
               </div>
             )}
 
+            <h2 className="sr-only">Browse {pageTitle}</h2>
             {/* Product Grid */}
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1920px]:grid-cols-5 gap-6">
@@ -541,6 +534,7 @@ export default function Products() {
                 className="mt-8"
                 currentPage={currentPage}
                 totalPages={pagination.totalPages}
+                pageHref={(page) => { const params = new URLSearchParams(searchParams); params.set("page", String(page)); return `/products?${params}`; }}
                 onPageChange={(page) => updateParam("page", String(page))}
               />
             )}

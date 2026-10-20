@@ -1,3 +1,5 @@
+import { STATIC_PAGES } from "../utils/seoData.mjs";
+import { POLICY } from "../utils/policies";
 import { CONTACT } from "../utils/contact";
 import { Link } from "react-router-dom";
 import { ArrowLeft, FileText } from "lucide-react";
@@ -12,8 +14,8 @@ export default function TermsOfService() {
   return (
     <div className="bg-surface-alt min-h-screen">
       <SEOHead
-        title="Terms of Service"
-        description="ElectroGhar's terms of service cover orders, pricing, delivery, returns, warranties and your responsibilities when using our catalog or WhatsApp ordering."
+        title={STATIC_PAGES["/terms"].title}
+        description={STATIC_PAGES["/terms"].description}
         canonical={`${typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk"}/terms`}
         type="website"
       />
@@ -36,7 +38,7 @@ export default function TermsOfService() {
               Terms of Service
             </h1>
           </div>
-          <p className="text-sm text-gray-500">Last updated: September 2026</p>
+          <p className="text-sm text-gray-500">Last updated: October 20, 2026</p>
         </div>
       </header>
 
@@ -91,19 +93,17 @@ export default function TermsOfService() {
             4. Returns & Refunds
           </h2>
           <p className="text-gray-400 leading-relaxed">
-            We accept returns only if the product is materially different from the description or is
-            defective upon delivery. You must notify us within 48 hours of receiving the item. The
-            product must be returned in the same condition with all original accessories. Refunds
-            are processed after inspection.
+            {POLICY.refunds} {POLICY.returns}
           </p>
 
           <h2 className="text-xl sm:text-2xl font-bold text-white font-heading mt-10 mb-4">
             5. Warranty
           </h2>
           <p className="text-gray-400 leading-relaxed">
-            Warranty terms, if any, are listed on the individual product page and confirmed on
-            WhatsApp. Warranty coverage does not include physical damage, liquid damage, or
-            unauthorized repairs.
+            {POLICY.warranty} {POLICY.exclusions} {POLICY.claims}
+          </p>
+          <p className="text-gray-400 leading-relaxed mt-4">
+            {POLICY.asIs} {POLICY.rights}
           </p>
 
           <h2 className="text-xl sm:text-2xl font-bold text-white font-heading mt-10 mb-4">

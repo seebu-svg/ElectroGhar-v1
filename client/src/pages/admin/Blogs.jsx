@@ -17,7 +17,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { API_BASE } from "../../utils/api";
 import { formatDate } from "../../utils/helpers";
-import placeholderImg from "../../assets/product-placeholder.png";
+import placeholderImg from "../../assets/product-placeholder.webp";
 
 const STATUS_TABS = [
   { value: "", label: "All" },

@@ -13,7 +13,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { API_BASE } from "../../utils/api";
 import { formatPrice, conditionColor } from "../../utils/helpers";
-import placeholderImg from "../../assets/product-placeholder.png";
+import placeholderImg from "../../assets/product-placeholder.webp";
 
 export default function AdminProducts() {
   const { user } = useAuth();

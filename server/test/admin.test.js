@@ -129,6 +129,24 @@ test('category updates retain slugs and persist ordering/activation', async () =
   const body = calls.find(c => c[0] === 'update')[1];
   assert.equal(body.slug, 'laptops-hp'); assert.equal(body.sort_order, 4); assert.equal(body.is_active, false);
 });
+test('category order and activation changes skip full catalog validation and touch only supplied fields', async () => {
+  for (const patch of [{ sort_order: 3 }, { is_active: false }, { sort_order: 1, is_active: true }]) {
+    const calls = [];
+    supabase.from = () => query({ data: { id: 'c', ...patch }, error: null }, calls);
+    const res = await route('/categories/:id', 'put', { params: { id: 'c' }, body: patch });
+    assert.equal(res.statusCode, 200);
+    assert.deepEqual(calls.map(call => call[0]), ['update', 'eq', 'select', 'single']);
+    assert.deepEqual(calls[0][1], patch);
+  }
+});
+test('lightweight category updates reject invalid order and activation values before database access', async () => {
+  for (const patch of [{ sort_order: '1' }, { sort_order: null }, { sort_order: 1.5 }, { sort_order: 2147483648 }, { is_active: 'false' }, { is_active: null }]) {
+    let queries = 0;
+    supabase.from = () => { queries++; throw new Error('Unexpected database call'); };
+    await assert.rejects(route('/categories/:id', 'put', { params: { id: 'c' }, body: patch }), error => error.status === 400);
+    assert.equal(queries, 0);
+  }
+});
 test('category deletion delegates reassignment to the atomic database function', async () => {
   let args;
   supabase.rpc = async (name, body) => { args = { name, body }; return { error: null }; };

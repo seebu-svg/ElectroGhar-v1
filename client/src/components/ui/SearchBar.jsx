@@ -1,9 +1,10 @@
+import { POLICY, productPolicy } from "../../utils/policies";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Loader2, ArrowRight } from "lucide-react";
 import { api } from "../../utils/api";
 import { formatPrice } from "../../utils/helpers";
-import placeholderImg from "../../assets/product-placeholder.png";
+import placeholderImg from "../../assets/product-placeholder.webp";
 
 /**
  * Search input with live product autocomplete.
@@ -129,6 +130,7 @@ export default function SearchBar({
                     />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-gray-100 truncate">{p.name}</p>
+                      {productPolicy(p).asIs && <p className="text-xs text-gray-300">{POLICY.asIsLabel}. Subject to applicable consumer protection laws.</p>}
                       <p className="text-xs text-gray-500">
                         {p.brand}
                         {p.condition_type && (

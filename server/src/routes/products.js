@@ -163,7 +163,7 @@ productRoutes.get("/suggest", async (req, res, next) => {
 
     const { data, error } = await supabase
       .from("products")
-      .select("id, name, slug, brand, price, thumbnail_url, images, category, condition_type, condition_grade")
+      .select("id, name, slug, description, brand, price, thumbnail_url, images, category, condition_type, condition_grade")
       .eq("is_active", true)
       .in("category", await visibleCategorySlugs())
       .or(`name.ilike.%${q}%,brand.ilike.%${q}%`)
@@ -196,7 +196,7 @@ productRoutes.get("/:slug", async (req, res, next) => {
     const categorySlugs = await getCategoryWithDescendants(data.category);
     const { data: related } = await supabase
       .from("products")
-      .select("id, name, slug, price, images, thumbnail_url, condition_grade, condition_type, brand, category")
+      .select("id, name, slug, price, images, thumbnail_url, condition_grade, condition_type, brand, category, description")
       .eq("is_active", true)
       .in("category", await visibleCategorySlugs())
       .in("category", categorySlugs)

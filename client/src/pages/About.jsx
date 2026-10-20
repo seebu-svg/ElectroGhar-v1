@@ -1,3 +1,4 @@
+import { STATIC_PAGES } from "../utils/seoData.mjs";
 import { CONTACT } from "../utils/contact";
 import { Link } from "react-router-dom";
 import {
@@ -62,8 +63,8 @@ export default function About() {
   return (
     <div className="bg-surface">
       <SEOHead
-        title="About Us"
-        description="ElectroGhar is Pakistan's trusted store for quality checked laptops, PCs, monitors, storage and gadgets. New, used and refurbished , honest grading, fair prices, WhatsApp support."
+        title={STATIC_PAGES["/about"].title}
+        description={STATIC_PAGES["/about"].description}
         canonical={`${canonicalBase}/about`}
         type="website"
         jsonLd={[organizationSchema()]}

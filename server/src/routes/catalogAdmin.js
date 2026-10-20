@@ -3,12 +3,13 @@ import { supabase } from '../config/supabase.js';
 import { requireAdmin } from '../middleware/auth.js';
 export const catalogAdminRoutes = Router();
 catalogAdminRoutes.use(requireAdmin);
+catalogAdminRoutes.use((_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
 const run = fn => async (req, res, next) => { try { await fn(req, res); } catch (e) { next(e); } };
 const fail = message => Object.assign(new Error(message), { status: 400 });
 async function categoryBody(body, id) {
   const name = String(body.name || '').trim();
   if (!name || name.length > 100) throw fail('Category name is required (max 100 characters)');
-  const { data, error } = await supabase.from('categories').select('*');
+  const { data, error } = await supabase.from('categories').select('id,slug,parent_id');
   if (error) throw error;
   const parent = data.find(c => c.id === body.parent_id);
   if (body.parent_id && (!parent || parent.parent_id || parent.id === id || data.some(c => c.parent_id === id))) throw fail('Choose a main category as parent; only two levels are supported');
@@ -20,7 +21,7 @@ async function categoryBody(body, id) {
   return { name, slug, parent_id: body.parent_id || null, sort_order: Number(body.sort_order || 0), is_active: body.is_active !== false };
 }
 catalogAdminRoutes.get('/categories', run(async (_req, res) => {
-  const { data, error } = await supabase.from('categories').select('*').order('sort_order');
+  const { data, error } = await supabase.from('categories').select('*').order('sort_order').order('id');
   if (error) throw error;
   res.json({ categories: data });
 }));
@@ -31,7 +32,22 @@ catalogAdminRoutes.post('/categories', run(async (req, res) => {
   res.status(201).json({ category: data });
 }));
 catalogAdminRoutes.put('/categories/:id', run(async (req, res) => {
-  const body = await categoryBody(req.body, req.params.id);
+  const keys = Object.keys(req.body);
+  const lightweight = keys.length > 0 && keys.every(key => key === 'sort_order' || key === 'is_active');
+  let body;
+  if (lightweight) {
+    body = {};
+    if (Object.hasOwn(req.body, 'sort_order')) {
+      if (typeof req.body.sort_order !== 'number' || !Number.isSafeInteger(req.body.sort_order) || req.body.sort_order < -2147483648 || req.body.sort_order > 2147483647) throw fail('Order must be a valid integer');
+      body.sort_order = req.body.sort_order;
+    }
+    if (Object.hasOwn(req.body, 'is_active')) {
+      if (typeof req.body.is_active !== 'boolean') throw fail('Active must be true or false');
+      body.is_active = req.body.is_active;
+    }
+  } else {
+    body = await categoryBody(req.body, req.params.id);
+  }
   const { data, error } = await supabase.from('categories').update(body).eq('id', req.params.id).select().single();
   if (error) throw error;
   res.json({ category: data });

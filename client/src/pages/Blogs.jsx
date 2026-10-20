@@ -1,3 +1,4 @@
+import { canonicalUrl as buildCanonical, STATIC_PAGES } from "../utils/seoData.mjs";
 import { CONTACT } from "../utils/contact";
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -111,18 +112,15 @@ export default function Blogs() {
     : currentSearch
       ? `Search results for "${currentSearch}" on the ElectroGhar blog. Buying guides, repair tips and honest tech advice for Pakistan.`
       : "Pakistan-focused tech buying guides, repair tips and honest advice from ElectroGhar. Laptops, PCs, monitors and gadgets.";
-  const canonicalUrl = activeCat
-    ? `${canonicalBase}/blogs?category=${encodeURIComponent(activeCat.slug)}`
-    : currentSearch
-      ? `${canonicalBase}/blogs?search=${encodeURIComponent(currentSearch)}`
-      : `${canonicalBase}/blogs`;
+  const canonicalUrl = buildCanonical(`/blogs?${searchParams}`);
 
   return (
     <div className="bg-surface-alt min-h-screen">
       <SEOHead
-        title={pageTitle}
+        title={`${pageTitle === "Blog" ? STATIC_PAGES["/blogs"].title : pageTitle}${currentPage > 1 ? ` – Page ${currentPage}` : ""}`}
         description={metaDescription}
         canonical={canonicalUrl}
+        noIndex={!!currentSearch}
         type="website"
         jsonLd={[
           breadcrumbSchema([
@@ -308,6 +306,7 @@ export default function Blogs() {
             className="mt-10"
             currentPage={currentPage}
             totalPages={pagination.totalPages}
+            pageHref={(page) => { const params = new URLSearchParams(searchParams); params.set("page", String(page)); return `/blogs?${params}`; }}
             onPageChange={(page) => updateParam("page", String(page))}
           />
         )}

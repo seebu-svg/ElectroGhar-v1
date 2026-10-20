@@ -1,3 +1,4 @@
+import { STATIC_PAGES } from "../utils/seoData.mjs";
 import { MapPin, Phone, Clock, MessageCircle } from "lucide-react";
 import WhatsAppFAB from "../components/ui/WhatsAppFAB";
 import { CONTACT } from "../utils/contact";
@@ -9,8 +10,8 @@ export default function Contact() {
   return (
     <div className="bg-surface">
       <SEOHead
-        title="Contact Us , Karachi"
-        description={`Visit ElectroGhar at ${CONTACT.address}. Call ${CONTACT.phone} or message us on WhatsApp. Open ${CONTACT.hours}.`}
+        title={STATIC_PAGES["/contact"].title}
+        description={STATIC_PAGES["/contact"].description}
         canonical={`${origin}/contact`}
         jsonLd={organizationSchema()}
       />
@@ -49,6 +50,10 @@ export default function Contact() {
             </div>
           </div>
         </div>
+        <div className="mt-8 rounded-2xl border border-white/10 overflow-hidden">
+          <iframe title="Find ElectroGhar at Naaz Digital Plaza, Karachi" src={`https://www.google.com/maps?q=${encodeURIComponent(`ElectroGhar, ${CONTACT.address}`)}&output=embed`} width="100%" height="350" loading="lazy" referrerPolicy="no-referrer-when-downgrade" className="border-0" />
+        </div>
+        <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`ElectroGhar, ${CONTACT.address}`)}`} target="_blank" rel="noopener noreferrer" className="inline-block mt-3 text-brand-400">Open directions in Google Maps</a>
       </section>
       <WhatsAppFAB />
     </div>

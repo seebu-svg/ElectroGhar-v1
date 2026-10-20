@@ -5,9 +5,59 @@
   "buildCommand": "cd client && npm run build",
   "outputDirectory": "client/dist",
   "rewrites": [
-    { "source": "/sitemap.xml", "destination": "/api/index.mjs" },
-    { "source": "/robots.txt", "destination": "/api/index.mjs" },
-    { "source": "/api/(.*)", "destination": "/api/index.mjs" },
-    { "source": "/((?!assets|sitemap.xml|robots.txt).*)", "destination": "/index.html" }
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/index.mjs"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/api/index.mjs"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.mjs"
+    },
+    {
+      "source": "/((?!assets/).*)",
+      "destination": "/api/index.mjs"
+    }
+  ],
+  "functions": {
+    "api/index.mjs": {
+      "includeFiles": "client/dist/index.html"
+    }
+  },
+  "headers": [
+    {
+      "source": "/admin/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
+      "source": "/assets/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.electroghar.pk"
+        }
+      ],
+      "destination": "https://electroghar.pk/:path*",
+      "permanent": true
+    }
   ]
 }

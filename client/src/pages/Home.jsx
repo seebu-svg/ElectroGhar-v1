@@ -1,3 +1,5 @@
+import { HOME_TITLE, DEFAULT_DESCRIPTION, faqEntries, faqSchema } from "../utils/seoData.mjs";
+import { POLICY, productPolicy } from "../utils/policies";
 import { CONTACT } from "../utils/contact";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -17,8 +19,8 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
-import heroBanner from "../assets/hero-banner.png";
-import placeholderImg from "../assets/product-placeholder.png";
+import heroBanner from "../assets/hero-banner.webp";
+import placeholderImg from "../assets/product-placeholder.webp";
 import ProductCard from "../components/product/ProductCard";
 import SearchBar from "../components/ui/SearchBar";
 import WhatsAppFAB from "../components/ui/WhatsAppFAB";
@@ -133,12 +135,13 @@ export default function Home() {
   return (
     <>
       <SEOHead
-        title=""
-        description="Pakistan's trusted marketplace for quality checked laptops, PCs, monitors, storage and gadgets , new, used and refurbished. Message us on WhatsApp for the latest price."
+        title={HOME_TITLE}
+        description={DEFAULT_DESCRIPTION}
         canonical={`${canonicalBase}/`}
         type="website"
         jsonLd={[
           organizationSchema(),
+          faqSchema(),
           websiteSchema(`${canonicalBase}/products`),
           ...(featured.length ? [itemListSchema(featured.slice(0, 8), `${canonicalBase}/products`)] : []),
         ]}
@@ -165,6 +168,13 @@ export default function Home() {
           <WhySection products={whyProducts} />
         </>
       )}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white font-heading mb-5">Buying laptops from ElectroGhar in Karachi</h2>
+        <p className="text-gray-400 leading-relaxed mb-6">Compare HP, Dell, Lenovo, Asus, Acer, MSI and other brands in our <Link to="/products?category=laptops" className="text-brand-400">laptop catalog</Link>, subject to availability. Visit <Link to="/contact" className="text-brand-400">our shop at Naaz Digital Plaza</Link> for help choosing a device for study, work or everyday use.</p>
+        <h2 className="text-2xl font-bold text-white font-heading mb-5">Ordering & warranty FAQs</h2>
+        {faqEntries.map(([question, answer]) => <div key={question} className="mb-5"><h3 className="font-semibold text-white mb-2">{question}</h3><p className="text-sm text-gray-400 leading-relaxed">{answer}</p></div>)}
+        <Link to="/faqs" className="text-brand-400 text-sm">Read all FAQs and purchase policies</Link>
+      </section>
       <FinalDiscovery />
       <WhatsAppFAB />
     </>
@@ -191,7 +201,7 @@ function Hero({ products, stats }) {
     <section className="relative w-full min-h-[80vh] sm:min-h-[85vh] flex items-center overflow-hidden bg-surface-dark">
       <picture className="absolute inset-0 w-full h-full">
         {image?.mobile_url && <source media="(max-width: 639px)" srcSet={image.mobile_url} />}
-        <img src={image?.desktop_url || heroBanner} alt={image?.alt || ''} className="w-full h-full object-cover object-center" />
+        <img src={image?.desktop_url || heroBanner} alt={image?.alt || "ElectroGhar laptops and electronics in Karachi"} fetchPriority="high" decoding="async" className="w-full h-full object-cover object-center" />
       </picture>
       {images.length > 1 && <div className="absolute bottom-5 right-5 z-20 flex gap-2">{images.map((item, i) => <button key={item.id} aria-label={`Show hero image ${i + 1}`} aria-pressed={index === i} onClick={() => setIndex(i)} className={`w-3 h-3 rounded-full ${i === index ? 'bg-brand-500' : 'bg-white/50'}`} />)}</div>}
       <div className="absolute inset-0 bg-gradient-to-r from-surface-dark via-surface-dark/75 to-surface-dark/20" />
@@ -211,8 +221,7 @@ function Hero({ products, stats }) {
             <span className="text-brand-500"> Better Deals.</span>
           </h1>
           <p className="mt-4 text-base sm:text-lg text-gray-400 leading-relaxed max-w-md">
-            Laptops, PCs, monitors, storage and gadgets , quality checked,
-            honestly graded, priced to move.
+            Shop affordable new and used laptops in Karachi, desktops, monitors, mobile phones and accessories. Compare second hand laptop specs and order online through WhatsApp for delivery in Pakistan.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <Link
@@ -282,6 +291,7 @@ function HeroCard({ product }) {
         <p className="text-sm font-semibold text-white truncate group-hover:text-brand-300 transition-colors">
           {product.name}
         </p>
+        {productPolicy(product).asIs && <p className="text-xs text-gray-300 mt-1">{POLICY.asIsLabel}. Subject to applicable consumer protection laws.</p>}
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-sm font-bold text-white">
             {formatPrice(product.price)}
@@ -763,6 +773,7 @@ function MiniCard({ product }) {
         <p className="text-sm text-gray-200 font-medium truncate group-hover:text-brand-400 transition-colors">
           {product.name}
         </p>
+        {productPolicy(product).asIs && <p className="text-xs text-gray-300 mt-1">{POLICY.asIsLabel}. Subject to applicable consumer protection laws.</p>}
         <p className="text-sm font-bold text-white mt-0.5">
           {formatPrice(product.price)}
         </p>

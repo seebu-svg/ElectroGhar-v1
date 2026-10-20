@@ -1,3 +1,5 @@
+import { productMetadata } from "../utils/seoData.mjs";
+import { POLICY, productPolicy } from "../utils/policies";
 import { CONTACT } from "../utils/contact";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
@@ -23,7 +25,7 @@ import {
 import ProductCard from "../components/product/ProductCard";
 import WhatsAppFAB from "../components/ui/WhatsAppFAB";
 import Breadcrumb from "../components/ui/Breadcrumb";
-import placeholderImg from "../assets/product-placeholder.png";
+import placeholderImg from "../assets/product-placeholder.webp";
 import { api } from "../utils/api";
 import { formatPrice, conditionColor, buildWhatsAppLink, discountPercent } from "../utils/helpers";
 import { SEOHead, productSchema, breadcrumbSchema } from "../utils/seo";
@@ -42,6 +44,8 @@ export default function ProductDetail() {
   const { slug } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
+  useEffect(() => { api.getCategories().then(r => setCategories(r.categories || [])).catch(console.error); }, []);
   const [activeImage, setActiveImage] = useState(0);
 
   useEffect(() => {
@@ -68,7 +72,8 @@ export default function ProductDetail() {
         <div className="mx-auto w-14 h-14 rounded-2xl bg-brand-600/10 border border-brand-600/25 flex items-center justify-center mb-5">
           <SearchX className="w-6 h-6 text-brand-500" />
         </div>
-        <h2 className="text-xl font-bold text-white mb-2 font-heading">Product not found</h2>
+        <SEOHead title="Product Not Found" noIndex />
+        <h1 className="text-xl font-bold text-white mb-2 font-heading">Product not found</h1>
         <p className="text-sm text-gray-500 mb-6">
           It may have been sold or removed from the catalog.
         </p>
@@ -104,17 +109,16 @@ export default function ProductDetail() {
     product.slug
   );
   const buyLink = whatsappLink.replace("I'm interested in", "I want to BUY");
-  const hasStats = product.battery_health || product.warranty;
+  const policy = productPolicy(product);
+  const meta = productMetadata(product);
+  const categoryName = categories.find(c => c.slug === product.category)?.name || product.category?.replace(/-/g, " ");
+  const hasStats = product.battery_health || policy.warranty;
 
   return (
     <div className="relative bg-surface-alt min-h-screen">
       <SEOHead
-        title={product.meta_title || product.name}
-        description={
-          product.meta_description ||
-          product.description?.slice(0, 160) ||
-          `Buy ${product.name} in ${product.condition_grade} condition at ElectroGhar. WhatsApp us for the latest price and delivery across Pakistan.`
-        }
+        title={meta.title}
+        description={meta.description}
         canonical={productUrl}
         image={product.thumbnail_url || (Array.isArray(product.images) ? product.images[0] : undefined)}
         type="product"
@@ -123,7 +127,7 @@ export default function ProductDetail() {
           breadcrumbSchema([
             { label: "Products", to: `${canonicalBase}/products` },
             ...(product.category
-              ? [{ label: product.category, to: `${canonicalBase}/products?category=${encodeURIComponent(product.category)}` }]
+              ? [{ label: categoryName, to: `${canonicalBase}/products?category=${encodeURIComponent(product.category)}` }]
               : []),
             { label: product.name, to: productUrl },
           ]),
@@ -139,6 +143,7 @@ export default function ProductDetail() {
         <Breadcrumb
           items={[
             { label: "Products", to: "/products" },
+            ...(product.category ? [{ label: categoryName, to: `/products?category=${encodeURIComponent(product.category)}` }] : []),
             { label: product.name },
           ]}
         />
@@ -151,7 +156,8 @@ export default function ProductDetail() {
             <div className="relative bg-surface-card rounded-2xl border border-white/5 overflow-hidden aspect-[4/3] shadow-xl shadow-black/30">
               <img
                 src={images[activeImage]}
-                alt={product.name}
+                alt={`${product.name}${product.condition_grade ? `, ${product.condition_grade} condition` : ""} – image ${activeImage + 1}`}
+                width="800" height="800" fetchPriority="high" decoding="async"
                 className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
               />
               {discount > 0 && (
@@ -194,7 +200,7 @@ export default function ProductDetail() {
                         : "border-white/10 hover:border-white/30"
                     }`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={img} alt={`${product.name} – view ${i + 1}`} width="80" height="80" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -267,6 +273,12 @@ export default function ProductDetail() {
               </p>
             </div>
 
+            <div className="text-sm text-gray-300 leading-relaxed mb-4">
+              <p className="font-bold text-white">{POLICY.salesLabel}</p>
+              <p>{POLICY.refunds} {POLICY.returns}</p>
+              {policy.laptop && <p className="mt-2"><strong>{policy.warranty}</strong> — {policy.asIs ? POLICY.asIs : "Limited coverage for eligible functional defects within 30 days from delivery."}</p>}
+              <p className="mt-2">{POLICY.rights} <Link to="/warranty-policy" className="text-brand-400">Warranty & purchase policies</Link></p>
+            </div>
             {/* WhatsApp CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <a
@@ -297,8 +309,8 @@ export default function ProductDetail() {
                 {product.battery_health && (
                   <InfoBox icon={Battery} label="Battery Health" value={product.battery_health} />
                 )}
-                {product.warranty && (
-                  <InfoBox icon={ShieldCheck} label="Warranty" value={product.warranty} />
+                {policy.warranty && (
+                  <InfoBox icon={ShieldCheck} label="Warranty" value={policy.warranty} />
                 )}
               </div>
             )}
