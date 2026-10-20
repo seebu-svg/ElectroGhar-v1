@@ -16,7 +16,7 @@ export const SITE = {
   },
   social: {
     whatsapp: CONTACT.whatsappUrl,
-    website: "https://electroghar.pk",
+    website: SITE_URL,
   },
 };
 

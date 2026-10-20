@@ -2,7 +2,7 @@ import { CONTACT } from './contact.js';
 import { POLICY, productPolicy } from './policies.js';
 
 // One public origin for canonical URLs, schema and sitemap (never derived from Host).
-export const SITE_URL = (import.meta.env?.VITE_SITE_URL || (typeof process !== 'undefined' && process.env.SITE_URL) || 'https://electroghar.pk').replace(/\/$/, '');
+export const SITE_URL = (import.meta.env?.VITE_SITE_URL || (typeof process !== 'undefined' && process.env.SITE_URL) || 'https://www.electroghar.pk').replace(/\/$/, '');
 export const DEFAULT_DESCRIPTION = 'Shop new, used and refurbished laptops, desktops, monitors, mobile phones and accessories in Karachi at ElectroGhar. Compare specs and order via WhatsApp.';
 export const HOME_TITLE = 'Used Laptops in Karachi & Electronics in Pakistan';
 export const absoluteUrl = (path = '/') => new URL(path, `${SITE_URL}/`).href;

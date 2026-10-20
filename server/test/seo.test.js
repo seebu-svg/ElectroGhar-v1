@@ -95,7 +95,7 @@ test('sitemap includes policies, live products, categories, brands and published
   const xml = sitemapXml(entries);
   assert.match(xml, /<lastmod>2026-10-01T00:00:00.000Z<\/lastmod>/);
   assert(!xml.includes('undefined'));
-  assert(!xml.match(/<loc>https:\/\/electroghar.pk\/<\/loc><lastmod>/));
+  assert.equal(entries.find(entry => entry.loc === `${SITE_URL}/`).updated_at, undefined);
 });
 test('XML escapes query strings and invalid dates are omitted', () => {
   const xml = sitemapXml([{ loc: `${SITE_URL}/products?category=laptops&brand=Dell`, updated_at: 'bad' }]);
@@ -191,4 +191,22 @@ test('SPA head manager creates correctly named canonical and social tags without
   assert.equal(nodes[0].attrs.href, `${SITE_URL}/products?page=2`);
   assert.equal(nodes[1].attrs.property, 'og:url');
   assert.equal(nodes[2].attrs.name, 'robots');
+});
+
+test('deployment config does not redirect www assets against the live apex-to-www domain redirect', async () => {
+  const config = JSON.parse(await readFile(new URL('../../vercel.json', import.meta.url), 'utf8'));
+  const wwwRedirects = (config.redirects || []).filter(rule => rule.has?.some(condition => condition.type === 'host' && condition.value === 'www.electroghar.pk'));
+  assert(!wwwRedirects.some(rule => new URL(rule.destination, SITE_URL).hostname === 'electroghar.pk'));
+  assert.equal(new URL(SITE_URL).hostname, 'www.electroghar.pk');
+});
+
+test('built module and stylesheet URLs stay same-origin and resolve to real files', async () => {
+  const html = await readFile(new URL('../../client/dist/index.html', import.meta.url), 'utf8');
+  const assets = [...html.matchAll(/(?:src|href)="([^"\s]+\.(?:js|css))"/g)].map(match => match[1]).filter(path => !path.startsWith('https://fonts.'));
+  assert(assets.some(path => path.endsWith('.js')));
+  assert(assets.some(path => path.endsWith('.css')));
+  for (const asset of assets) {
+    assert(asset.startsWith('/assets/'), `Expected same-origin bundled asset: ${asset}`);
+    await readFile(new URL(`../../client/dist${asset}`, import.meta.url));
+  }
 });
