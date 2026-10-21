@@ -71,7 +71,7 @@ app.get("/api/logo", async (_req, res, next) => {
 });
 app.get("/api/hero-images", async (_req, res, next) => {
   try {
-    const { data, error } = await supabase.from("hero_images").select("*").eq("is_active", true).order("sort_order");
+    const { data, error } = await supabase.from("hero_images").select("*").eq("is_active", true).order("sort_order").limit(3);
     // Older databases can serve the default homepage hero until the upgrade runs.
     if (error?.code === "PGRST205" || error?.code === "42P01") {
       return res.json({ images: [] });

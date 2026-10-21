@@ -2,12 +2,12 @@ export const POLICY = {
   warrantyLabel: "30-Day Checking Warranty",
   asIsLabel: "AS IS | No Returns | No Checking Warranty",
   salesLabel: "No Refunds or Returns",
-  warranty: "ElectroGhar provides a limited 30-day checking warranty on eligible functional laptops, starting from the delivery date. It covers eligible functional defects identified within those 30 days. Laptops sold as dead, faulty, non-working, or for parts are not eligible.",
-  exclusions: "Physical damage, liquid damage, misuse, unauthorized repairs, and accidental damage are excluded from the checking warranty.",
+  warranty: "ElectroGhar provides a limited 30-day checking warranty on eligible working laptops, starting from the delivery date. It covers eligible functional defects identified within those 30 days. Laptops sold as dead, faulty, non-working, or for parts are not eligible.",
+  exclusions: "The checking warranty excludes physical or liquid damage, misuse, power-related damage, unrelated software issues, disclosed cosmetic wear, normal battery wear, incompatible accessories, and unauthorized repairs or modifications that cause or contribute to the reported problem.",
   claims: "Contact ElectroGhar within 30 days of delivery with your order number and details of the issue. Eligible claims will be assessed for repair or another applicable warranty remedy. Contact us before sending a product for warranty assessment.",
-  refunds: "All sales are final. ElectroGhar does not offer refunds for purchased products, except where required by applicable law.",
-  returns: "Products cannot be returned or exchanged after purchase, except where required by applicable law or an expressly stated warranty remedy applies.",
-  asIs: "Laptops sold as dead, faulty, non-working, or for parts are strictly sold AS IS, without returns, refunds, or checking warranty, subject to applicable consumer protection laws.",
+  refunds: "All sales are final. ElectroGhar does not offer refunds for change-of-mind purchases. Refunds and other remedies required by applicable Pakistani consumer protection laws remain available.",
+  returns: "ElectroGhar does not accept voluntary product returns or exchanges after purchase. Warranty inspection does not automatically entitle customers to a refund, exchange, or replacement. Mandatory consumer rights remain unaffected.",
+  asIs: "Laptops sold as dead, faulty, non-working, or for parts are sold AS IS with their disclosed condition and limitations, without voluntary returns, exchanges, refunds for disclosed faults, or the voluntary checking warranty. Non-excludable rights under applicable Pakistani consumer protection laws remain unaffected.",
   rights: "Nothing in these policies limits any rights or remedies that cannot be excluded under applicable Pakistani consumer protection laws.",
 };
 

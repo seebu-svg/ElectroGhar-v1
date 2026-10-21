@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { adminFetch } from '../../utils/adminFetch';
 import { API_BASE } from '../../utils/api';
 import SiteLogo from '../ui/SiteLogo';
-import logo from '../../assets/logo.png';
 
 export default function LogoSettings() {
   const [busy, setBusy] = useState(false);
@@ -21,12 +20,12 @@ export default function LogoSettings() {
       setSuccess('Website logo replaced successfully.');
     } catch (e) { setError(e.message); } finally { setBusy(false); }
   }
-  return <section className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
-    <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Website logo</h2>
-    <SiteLogo fallback={logo} alt="Current ElectroGhar logo" className="h-20 max-w-full object-contain bg-gray-900 rounded p-2" />
-    <p className="text-sm text-gray-500">Replace the logo used across the website. PNG with a transparent background is recommended. JPEG, PNG, WebP or GIF, up to 5 MB.</p>
-    {error && <p role="alert" className="text-red-600">{error}</p>}
-    {success && <p role="status" className="text-green-600">{success}</p>}
+  return <section className="bg-surface-card rounded-xl border border-line p-5 space-y-4">
+    <h2 className="text-sm font-bold text-content uppercase tracking-wider">Website logo</h2>
+    <SiteLogo alt="Current ElectroGhar logo" className="h-20 max-w-full object-contain bg-surface-card rounded p-2" />
+    <p className="text-sm text-muted">Replace the logo used across the website. PNG with a transparent background is recommended. JPEG, PNG, WebP or GIF, up to 5 MB.</p>
+    {error && <p role="alert" className="text-error">{error}</p>}
+    {success && <p role="status" className="text-success">{success}</p>}
     <label className="block text-sm font-medium">{busy ? 'Replacing logo…' : 'Replace logo'}<input type="file" disabled={busy} accept="image/jpeg,image/png,image/webp,image/gif" className="block mt-2" onChange={e => { replace(e.target.files[0]); e.target.value = ''; }} /></label>
   </section>;
 }

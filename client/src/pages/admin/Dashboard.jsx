@@ -22,10 +22,10 @@ export default function AdminDashboard() {
 
   const cards = stats
     ? [
-        { icon: Package, label: "Total Products", value: stats.totalProducts, color: "bg-blue-50 text-blue-600" },
-        { icon: Star, label: "Featured", value: stats.featuredProducts, color: "bg-amber-50 text-amber-600" },
-        { icon: FolderOpen, label: "Categories", value: stats.totalCategories, color: "bg-emerald-50 text-emerald-600" },
-        { icon: FileText, label: "Blog Posts", value: stats.totalBlogs, color: "bg-brand-50 text-brand-600", to: "/admin/blogs" },
+        { icon: Package, label: "Total Products", value: stats.totalProducts, color: "bg-action/10 text-brand-300" },
+        { icon: Star, label: "Featured", value: stats.featuredProducts, color: "bg-action/10 text-brand-300" },
+        { icon: FolderOpen, label: "Categories", value: stats.totalCategories, color: "bg-action/10 text-brand-300" },
+        { icon: FileText, label: "Blog Posts", value: stats.totalBlogs, color: "bg-action/10 text-brand-300", to: "/admin/blogs" },
         { icon: FileText, label: "Published Blogs", value: stats.publishedBlogs, color: "bg-purple-50 text-purple-600", to: "/admin/blogs" },
       ]
     : [];
@@ -33,13 +33,13 @@ export default function AdminDashboard() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Welcome back, {user.email}</p>
+        <h1 className="text-2xl font-bold text-content">Dashboard</h1>
+        <p className="text-sm text-muted mt-0.5">Welcome back, {user.email}</p>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
+          <Loader2 className="w-8 h-8 text-brand-300 animate-spin" />
         </div>
       ) : (
         <>
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
             {cards.map(({ icon: Icon, label, value, color, to }) => {
               const inner = (
                 <div
-                  className={`bg-white rounded-xl border border-gray-200 p-5 flex items-center gap-4 ${
+                  className={`bg-surface-card rounded-xl border border-line p-5 flex items-center gap-4 ${
                     to ? "hover:border-brand-300 hover:shadow-sm transition-all" : ""
                   }`}
                 >
@@ -56,8 +56,8 @@ export default function AdminDashboard() {
                     <Icon className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-gray-900">{value}</p>
-                    <p className="text-xs text-gray-500">{label}</p>
+                    <p className="text-2xl font-bold text-content">{value}</p>
+                    <p className="text-xs text-muted">{label}</p>
                   </div>
                 </div>
               );
@@ -72,42 +72,42 @@ export default function AdminDashboard() {
           </div>
 
           {/* Quick actions */}
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-bold text-content mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Link
               to="/admin/products/new"
-              className="flex items-center gap-3 bg-white rounded-xl border border-gray-200 p-5 hover:border-brand-300 hover:shadow-sm transition-all group"
+              className="flex items-center gap-3 bg-surface-card rounded-xl border border-line p-5 hover:border-brand-300 hover:shadow-sm transition-all group"
             >
-              <div className="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center group-hover:bg-brand-100 transition-colors">
-                <PlusCircle className="w-5 h-5 text-brand-600" />
+              <div className="w-10 h-10 rounded-lg bg-action/10 flex items-center justify-center group-hover:bg-action/10 transition-colors">
+                <PlusCircle className="w-5 h-5 text-brand-300" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-900">Add New Laptop</p>
-                <p className="text-xs text-gray-500">Create a new product listing</p>
+                <p className="text-sm font-semibold text-content">Add New Laptop</p>
+                <p className="text-xs text-muted">Create a new product listing</p>
               </div>
             </Link>
             <Link
               to="/admin/products"
-              className="flex items-center gap-3 bg-white rounded-xl border border-gray-200 p-5 hover:border-brand-300 hover:shadow-sm transition-all group"
+              className="flex items-center gap-3 bg-surface-card rounded-xl border border-line p-5 hover:border-brand-300 hover:shadow-sm transition-all group"
             >
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                <Package className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 rounded-lg bg-action/10 flex items-center justify-center group-hover:bg-action/10 transition-colors">
+                <Package className="w-5 h-5 text-brand-300" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-900">Manage Products</p>
-                <p className="text-xs text-gray-500">Edit, delete or view all laptops</p>
+                <p className="text-sm font-semibold text-content">Manage Products</p>
+                <p className="text-xs text-muted">Edit, delete or view all laptops</p>
               </div>
             </Link>
             <Link
               to="/admin/blogs/new"
-              className="flex items-center gap-3 bg-white rounded-xl border border-gray-200 p-5 hover:border-brand-300 hover:shadow-sm transition-all group"
+              className="flex items-center gap-3 bg-surface-card rounded-xl border border-line p-5 hover:border-brand-300 hover:shadow-sm transition-all group"
             >
-              <div className="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center group-hover:bg-brand-100 transition-colors">
-                <FileText className="w-5 h-5 text-brand-600" />
+              <div className="w-10 h-10 rounded-lg bg-action/10 flex items-center justify-center group-hover:bg-action/10 transition-colors">
+                <FileText className="w-5 h-5 text-brand-300" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-900">Write a Blog Post</p>
-                <p className="text-xs text-gray-500">Publish guides and tech tips</p>
+                <p className="text-sm font-semibold text-content">Write a Blog Post</p>
+                <p className="text-xs text-muted">Publish guides and tech tips</p>
               </div>
             </Link>
           </div>

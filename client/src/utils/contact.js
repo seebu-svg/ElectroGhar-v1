@@ -1,4 +1,5 @@
 export const CONTACT = {
+  email: "electroghar.pk@gmail.com",
   phone: "03319244435",
   internationalPhone: "+923319244435",
   callUrl: "tel:+923319244435",

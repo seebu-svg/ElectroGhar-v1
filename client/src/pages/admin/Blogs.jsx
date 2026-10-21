@@ -92,8 +92,8 @@ export default function AdminBlogs() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Blog Posts</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-content">Blog Posts</h1>
+          <p className="text-sm text-muted">
             {blogs.length} post{blogs.length !== 1 ? "s" : ""} · {publishedCount} published
           </p>
         </div>
@@ -102,8 +102,8 @@ export default function AdminBlogs() {
             onClick={() => setShowCats((v) => !v)}
             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-semibold transition-colors ${
               showCats
-                ? "border-brand-300 bg-brand-50 text-brand-700"
-                : "border-gray-200 bg-white text-gray-700 hover:border-brand-300 hover:text-brand-700"
+                ? "border-brand-300 bg-action/10 text-brand-300"
+                : "border-line bg-surface-card text-muted hover:border-brand-300 hover:text-brand-300"
             }`}
           >
             {showCats ? <X className="w-4 h-4" /> : <FolderOpen className="w-4 h-4" />}
@@ -111,7 +111,7 @@ export default function AdminBlogs() {
           </button>
           <Link
             to="/admin/blogs/new"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-action text-content text-sm font-semibold hover:bg-action-hover transition-colors"
           >
             <PlusCircle className="w-4 h-4" /> Add Blog
           </Link>
@@ -124,7 +124,7 @@ export default function AdminBlogs() {
       {/* ── Toolbar ───────────────────────────────────────────── */}
       <div className={`flex flex-col sm:flex-row sm:items-center gap-3 mb-5 ${showCats ? "mt-6" : ""}`}>
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
           <input
             type="text"
             placeholder="Search posts by title or author..."
@@ -139,10 +139,10 @@ export default function AdminBlogs() {
                 fetchBlogs(e.target.value, status);
               }
             }}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-control bg-surface-card text-content text-sm focus:outline-none focus:ring-2 focus:ring-control"
           />
         </div>
-        <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+        <div className="flex rounded-lg border border-line overflow-hidden">
           {STATUS_TABS.map((t) => (
             <button
               key={t.value}
@@ -152,8 +152,8 @@ export default function AdminBlogs() {
               }}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 status === t.value
-                  ? "bg-brand-500 text-white"
-                  : "bg-white text-gray-600 hover:bg-gray-50"
+                  ? "bg-action text-content"
+                  : "bg-surface-card text-muted hover:bg-surface"
               }`}
             >
               {t.label}
@@ -165,21 +165,21 @@ export default function AdminBlogs() {
       {/* ── Posts table ───────────────────────────────────────── */}
       {loading ? (
         <div className="flex justify-center py-20">
-          <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
+          <Loader2 className="w-8 h-8 text-brand-300 animate-spin" />
         </div>
       ) : blogs.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-gray-500 mb-2">No blog posts found.</p>
-          <Link to="/admin/blogs/new" className="text-brand-600 font-semibold text-sm">
+          <p className="text-muted mb-2">No blog posts found.</p>
+          <Link to="/admin/blogs/new" className="text-brand-300 font-semibold text-sm">
             Write your first post
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-surface-card rounded-xl border border-line overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[720px]">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <tr className="bg-surface border-b border-line text-left text-xs font-medium text-muted uppercase tracking-wider">
                   <th className="px-4 py-3">Post</th>
                   <th className="px-4 py-3">Category</th>
                   <th className="px-4 py-3">Stats</th>
@@ -187,7 +187,7 @@ export default function AdminBlogs() {
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-line">
                 {blogs.map((b) => (
                   <BlogRow
                     key={b.id}
@@ -210,32 +210,32 @@ export default function AdminBlogs() {
 function BlogRow({ blog, busy, onDelete, onTogglePublish }) {
   const img = blog.cover_image || placeholderImg;
   return (
-    <tr className={`hover:bg-gray-50 transition-colors ${busy ? "opacity-50" : ""}`}>
+    <tr className={`hover:bg-surface transition-colors ${busy ? "opacity-50" : ""}`}>
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
           <img
             src={img}
             alt=""
-            className="w-14 h-10 rounded-lg object-cover bg-gray-100 shrink-0"
+            className="w-14 h-10 rounded-lg object-cover bg-surface-card shrink-0"
             loading="lazy"
           />
           <div className="min-w-0">
-            <p className="font-semibold text-gray-900 truncate max-w-[280px] flex items-center gap-1.5">
+            <p className="font-semibold text-content truncate max-w-[280px] flex items-center gap-1.5">
               {blog.title}
               {blog.is_featured && (
-                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" title="Featured" />
+                <Star className="w-3.5 h-3.5 text-warning fill-amber-500 shrink-0" title="Featured" />
               )}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted">
               {blog.author} · {formatDate(blog.published_at || blog.created_at)}
             </p>
           </div>
         </div>
       </td>
-      <td className="px-4 py-3 text-gray-600">
+      <td className="px-4 py-3 text-muted">
         <span className="capitalize">{(blog.category || ",").replace(/-/g, " ")}</span>
       </td>
-      <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
+      <td className="px-4 py-3 text-muted text-xs whitespace-nowrap">
         <span className="inline-flex items-center gap-1">
           <Eye className="w-3.5 h-3.5" /> {blog.views || 0}
         </span>
@@ -246,8 +246,8 @@ function BlogRow({ blog, busy, onDelete, onTogglePublish }) {
           disabled={busy}
           className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-colors inline-flex items-center gap-1 ${
             blog.is_published
-              ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-              : "bg-amber-50 text-amber-700 hover:bg-amber-100"
+              ? "bg-success/10 text-success hover:bg-success/10"
+              : "bg-warning/10 text-warning hover:bg-warning/10"
           }`}
           title={blog.is_published ? "Click to unpublish" : "Click to publish"}
         >
@@ -259,7 +259,7 @@ function BlogRow({ blog, busy, onDelete, onTogglePublish }) {
         <div className="flex items-center justify-end gap-1.5">
           <Link
             to={`/admin/blogs/${blog.id}/edit`}
-            className="p-1.5 rounded-lg text-gray-500 hover:bg-brand-50 hover:text-brand-700 transition-colors"
+            className="p-1.5 rounded-lg text-muted hover:bg-action/10 hover:text-brand-300 transition-colors"
             title="Edit"
           >
             <Pencil className="w-4 h-4" />
@@ -267,7 +267,7 @@ function BlogRow({ blog, busy, onDelete, onTogglePublish }) {
           <button
             onClick={() => onDelete(blog.id, blog.title)}
             disabled={busy}
-            className="p-1.5 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
+            className="p-1.5 rounded-lg text-muted hover:bg-error/10 hover:text-error transition-colors"
             title="Delete"
           >
             <Trash2 className="w-4 h-4" />
@@ -342,9 +342,9 @@ function CategoryManager({ authHeaders }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2 mb-4">
-        <Tag className="w-4 h-4 text-brand-500" /> Blog Categories
+    <div className="bg-surface-card rounded-xl border border-line p-5">
+      <h2 className="text-sm font-bold text-content uppercase tracking-wider flex items-center gap-2 mb-4">
+        <Tag className="w-4 h-4 text-brand-300" /> Blog Categories
       </h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -355,7 +355,7 @@ function CategoryManager({ authHeaders }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Category name (e.g. Repair Guides)"
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full px-3 py-2 rounded-lg border border-control bg-surface-card text-content text-sm focus:outline-none focus:ring-2 focus:ring-control"
             required
           />
           <input
@@ -363,13 +363,13 @@ function CategoryManager({ authHeaders }) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Short description (optional)"
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full px-3 py-2 rounded-lg border border-control bg-surface-card text-content text-sm focus:outline-none focus:ring-2 focus:ring-control"
           />
-          {error && <p className="text-xs text-red-600">{error}</p>}
+          {error && <p className="text-xs text-error">{error}</p>}
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action text-content text-sm font-semibold hover:bg-action-hover disabled:opacity-50 transition-colors"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusCircle className="w-4 h-4" />}
             Add Category
@@ -380,23 +380,23 @@ function CategoryManager({ authHeaders }) {
         <div className="lg:col-span-2">
           {loading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="w-6 h-6 text-brand-500 animate-spin" />
+              <Loader2 className="w-6 h-6 text-brand-300 animate-spin" />
             </div>
           ) : cats.length === 0 ? (
-            <p className="text-sm text-gray-500 py-4">No categories yet , add the first one.</p>
+            <p className="text-sm text-muted py-4">No categories yet , add the first one.</p>
           ) : (
-            <ul className="divide-y divide-gray-100 border border-gray-100 rounded-lg">
+            <ul className="divide-y divide-line border border-line rounded-lg">
               {cats.map((c) => (
                 <li key={c.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900">{c.name}</p>
-                    <p className="text-xs text-gray-500 truncate max-w-sm">
+                    <p className="text-sm font-semibold text-content">{c.name}</p>
+                    <p className="text-xs text-muted truncate max-w-sm">
                       /{c.slug} · {c.post_count || 0} post{(c.post_count || 0) !== 1 ? "s" : ""}
                     </p>
                   </div>
                   <button
                     onClick={() => deleteCategory(c)}
-                    className="p-1.5 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors shrink-0"
+                    className="p-1.5 rounded-lg text-muted hover:bg-error/10 hover:text-error transition-colors shrink-0"
                     title="Delete category"
                   >
                     <Trash2 className="w-4 h-4" />

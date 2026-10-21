@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import logo from "../../assets/logo.png";
 import SiteLogo from '../ui/SiteLogo';
 
 const NAV = [
@@ -29,35 +28,35 @@ export default function AdminLayout() {
   if (!user) return <Navigate to="/admin/login" replace state={{ from: location }} />;
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-surface">
       {/* ── Sidebar (desktop) ─────────────────────────────────── */}
-      <aside className="hidden lg:flex flex-col w-64 bg-gray-900 text-white">
+      <aside className="hidden lg:flex flex-col w-64 bg-surface-card text-content">
         <SidebarContent logout={logout} />
       </aside>
 
       {/* ── Sidebar (mobile drawer) ──────────────────────────── */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div className="w-64 bg-gray-900 text-white flex flex-col">
+          <div className="w-64 bg-surface-card text-content flex flex-col">
             <SidebarContent logout={logout} onClose={() => setSidebarOpen(false)} />
           </div>
-          <div className="flex-1 bg-black/40" onClick={() => setSidebarOpen(false)} />
+          <div className="flex-1 bg-midnight/40" onClick={() => setSidebarOpen(false)} />
         </div>
       )}
 
       {/* ── Main Content ──────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 shrink-0">
+        <header className="h-14 bg-surface-card border-b border-line flex items-center justify-between px-4 sm:px-6 shrink-0">
           <button
-            className="lg:hidden p-2 -ml-2 rounded-lg text-gray-600 hover:bg-gray-100"
+            className="lg:hidden p-2 -ml-2 rounded-lg text-muted hover:bg-surface-card"
             onClick={() => setSidebarOpen(true)}
             aria-label="Open sidebar"
           >
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-3 ml-auto">
-            <span className="text-sm text-gray-500">{user.email}</span>
+            <span className="text-sm text-muted">{user.email}</span>
           </div>
         </header>
 
@@ -74,12 +73,12 @@ function SidebarContent({ logout, onClose }) {
   return (
     <>
       {/* Logo */}
-      <div className="h-14 flex items-center gap-2 px-5 border-b border-gray-800 shrink-0">
+      <div className="h-14 flex items-center gap-2 px-5 border-b border-line shrink-0">
         <Link to="/admin" className="flex items-center gap-2" onClick={onClose}>
-          <SiteLogo fallback={logo} alt="ElectroGhar" className="h-8 w-auto" />
+          <SiteLogo alt="ElectroGhar" className="h-8 w-auto" />
         </Link>
         {onClose && (
-          <button className="ml-auto p-1 text-gray-400 hover:text-white" onClick={onClose}>
+          <button className="ml-auto p-1 text-muted hover:text-content" onClick={onClose}>
             <X className="w-5 h-5" />
           </button>
         )}
@@ -96,8 +95,8 @@ function SidebarContent({ logout, onClose }) {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-brand-600 text-white"
-                  : "text-gray-400 hover:bg-gray-800 hover:text-white"
+                  ? "bg-action text-content"
+                  : "text-muted hover:bg-surface-card hover:text-content"
               }`
             }
           >
@@ -108,10 +107,10 @@ function SidebarContent({ logout, onClose }) {
       </nav>
 
       {/* Logout */}
-      <div className="px-3 py-4 border-t border-gray-800 shrink-0">
+      <div className="px-3 py-4 border-t border-line shrink-0">
         <button
           onClick={logout}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-red-400 transition-colors"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-muted hover:bg-surface-card hover:text-error transition-colors"
         >
           <LogOut className="w-4.5 h-4.5" />
           Logout

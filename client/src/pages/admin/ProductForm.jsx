@@ -229,7 +229,7 @@ export default function ProductForm() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-brand-300 animate-spin" />
       </div>
     );
   }
@@ -238,17 +238,17 @@ export default function ProductForm() {
     <div className="max-w-3xl">
       <button
         onClick={() => navigate("/admin/products")}
-        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-brand-600 mb-4"
+        className="flex items-center gap-1.5 text-sm text-muted hover:text-brand-300 mb-4"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Products
       </button>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
+      <h1 className="text-2xl font-bold text-content mb-6">
         {isEdit ? "Edit Product" : "Add New Product"}
       </h1>
 
       {error && (
-        <div className="mb-4 text-sm text-red-600 bg-red-50 rounded-lg px-4 py-2.5 border border-red-100">
+        <div className="mb-4 text-sm text-error bg-error/10 rounded-lg px-4 py-2.5 border border-error/40">
           {error}
         </div>
       )}
@@ -345,7 +345,7 @@ export default function ProductForm() {
               />
               <label
                 htmlFor="product-image-upload"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 cursor-pointer transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action text-content text-sm font-medium hover:bg-action-hover cursor-pointer transition-colors"
               >
                 {uploading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -354,10 +354,10 @@ export default function ProductForm() {
                 )}
                 {uploading ? "Uploading..." : "Upload Images"}
               </label>
-              <span className="text-xs text-gray-400">Select up to 6 images (max 5 MB each)</span>
+              <span className="text-xs text-muted">Select up to 6 images (max 5 MB each)</span>
             </div>
             {uploadError && (
-              <p className="mt-2 text-sm text-red-500">{uploadError}</p>
+              <p className="mt-2 text-sm text-error">{uploadError}</p>
             )}
           </div>
 
@@ -365,7 +365,7 @@ export default function ProductForm() {
           {form.images.filter(Boolean).length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {form.images.filter(Boolean).map((url, i) => (
-                <div key={i} className="relative group bg-gray-50 rounded-lg p-2 border border-gray-200">
+                <div key={i} className="relative group bg-surface rounded-lg p-2 border border-line">
                   <img
                     src={url}
                     alt={`Product image ${i + 1}`}
@@ -374,13 +374,13 @@ export default function ProductForm() {
                   <button
                     type="button"
                     onClick={() => removeImage(form.images.indexOf(url))}
-                    className="absolute top-3 right-3 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                    className="absolute top-3 right-3 p-1.5 bg-error-solid text-content rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
                     title="Remove image"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                   {i === 0 && (
-                    <span className="absolute bottom-3 left-3 px-2 py-0.5 bg-brand-500 text-white text-xs rounded-full font-medium">
+                    <span className="absolute bottom-3 left-3 px-2 py-0.5 bg-action text-content text-xs rounded-full font-medium">
                       Thumbnail
                     </span>
                   )}
@@ -390,7 +390,7 @@ export default function ProductForm() {
           )}
 
           {form.images.filter(Boolean).length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-6 border-2 border-dashed border-gray-200 rounded-lg">
+            <p className="text-sm text-muted text-center py-6 border-2 border-dashed border-line rounded-lg">
               No images uploaded yet. Click "Upload Images" to add product photos.
             </p>
           )}
@@ -413,13 +413,13 @@ export default function ProductForm() {
                 placeholder="Value (e.g. Intel Core i7)"
               />
               {form.specs.length > 1 && (
-                <button type="button" onClick={() => removeSpec(i)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                <button type="button" onClick={() => removeSpec(i)} className="p-2 text-error hover:bg-error/10 rounded-lg">
                   <Trash2 className="w-4 h-4" />
                 </button>
               )}
             </div>
           ))}
-          <button type="button" onClick={addSpec} className="text-sm text-brand-600 font-medium flex items-center gap-1">
+          <button type="button" onClick={addSpec} className="text-sm text-brand-300 font-medium flex items-center gap-1">
             <Plus className="w-3.5 h-3.5" /> Add spec
           </button>
         </Section>
@@ -439,7 +439,7 @@ export default function ProductForm() {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-brand-500 text-white font-semibold text-sm hover:bg-brand-600 disabled:opacity-60 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-action text-content font-semibold text-sm hover:bg-action-hover disabled:opacity-60 transition-colors"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {saving ? "Saving..." : isEdit ? "Update Product" : "Create Product"}
@@ -447,7 +447,7 @@ export default function ProductForm() {
           <button
             type="button"
             onClick={() => navigate("/admin/products")}
-            className="px-4 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            className="px-4 py-2.5 rounded-lg border border-line text-sm font-medium text-muted hover:bg-surface transition-colors"
           >
             Cancel
           </button>
@@ -458,12 +458,12 @@ export default function ProductForm() {
 }
 
 const inputCls =
-  "w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500";
+  "w-full px-3 py-2 rounded-lg border border-control bg-surface-card text-content text-sm focus:outline-none focus:ring-2 focus:ring-control focus:border-brand-500";
 
 function Section({ title, children }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
-      <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">{title}</h2>
+    <div className="bg-surface-card rounded-xl border border-line p-5 space-y-4">
+      <h2 className="text-sm font-bold text-content uppercase tracking-wider">{title}</h2>
       {children}
     </div>
   );
@@ -472,7 +472,7 @@ function Section({ title, children }) {
 function Field({ label, children, full }) {
   return (
     <div className={full ? "" : ""}>
-      <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-muted mb-1">{label}</label>
       {children}
     </div>
   );
@@ -485,9 +485,9 @@ function Check({ label, checked, onChange }) {
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="w-4 h-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500"
+        className="w-4 h-4 rounded border-line text-brand-300 focus:ring-control"
       />
-      <span className="text-sm text-gray-700">{label}</span>
+      <span className="text-sm text-muted">{label}</span>
     </label>
   );
 }

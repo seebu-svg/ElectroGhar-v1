@@ -1,9 +1,11 @@
+import { BRANDING } from './branding.mjs';
+import { BRAND_TAGLINE } from './brand.mjs';
 import { CONTACT } from './contact.js';
 import { POLICY, productPolicy } from './policies.js';
 
 // One public origin for canonical URLs, schema and sitemap (never derived from Host).
 export const SITE_URL = (import.meta.env?.VITE_SITE_URL || (typeof process !== 'undefined' && process.env.SITE_URL) || 'https://www.electroghar.pk').replace(/\/$/, '');
-export const DEFAULT_DESCRIPTION = 'Shop new, used and refurbished laptops, desktops, monitors, mobile phones and accessories in Karachi at ElectroGhar. Compare specs and order via WhatsApp.';
+export const DEFAULT_DESCRIPTION = `ElectroGhar: ${BRAND_TAGLINE} Shop new, used and refurbished laptops, desktops, monitors, mobile phones and accessories in Karachi. Order via WhatsApp.`;
 export const HOME_TITLE = 'Used Laptops in Karachi & Electronics in Pakistan';
 export const absoluteUrl = (path = '/') => new URL(path, `${SITE_URL}/`).href;
 export const cleanText = (value = '') => String(value).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -45,7 +47,7 @@ export function collectionMetadata({ category, brand = '', condition = '', featu
 export function organizationSchema() {
   return {
     '@context': 'https://schema.org', '@type': ['Organization', 'ElectronicsStore'], '@id': absoluteUrl('/#business'),
-    name: 'ElectroGhar', url: absoluteUrl('/'), logo: absoluteUrl('/logo.png'), image: absoluteUrl('/logo-full.png'),
+    name: 'ElectroGhar', url: absoluteUrl('/'), logo: absoluteUrl(BRANDING.logo), image: absoluteUrl(BRANDING.logo),
     description: DEFAULT_DESCRIPTION, telephone: CONTACT.internationalPhone,
     address: { '@type': 'PostalAddress', streetAddress: CONTACT.street, addressLocality: CONTACT.city, addressRegion: CONTACT.region, addressCountry: CONTACT.country },
     openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], opens: '12:00', closes: '23:00' }],
@@ -88,7 +90,7 @@ export const faqEntries = [
 export const faqSchema = () => ({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqEntries.map(([name, text]) => ({ '@type': 'Question', name, acceptedAnswer: { '@type': 'Answer', text } })) });
 export const STATIC_PAGES = {
   '/': { title: HOME_TITLE, description: DEFAULT_DESCRIPTION },
-  '/about': { title: 'About ElectroGhar | Electronics Store in Karachi', description: 'Meet ElectroGhar, your local electronics store at Naaz Digital Plaza, Karachi. Explore new, used and refurbished tech with clear condition information.' },
+  '/about': { title: 'About ElectroGhar | Electronics Store in Karachi', description: `ElectroGhar: ${BRAND_TAGLINE} Your electronics store at Naaz Digital Plaza, Karachi for new, used and refurbished laptops and tech with clear condition details.` },
   '/contact': { title: 'Contact ElectroGhar in Karachi | Shop & Hours', description: `Visit ${CONTACT.address}. Call ${CONTACT.phone}. Open Monday to Saturday, 12 PM to 11 PM.` },
   '/blogs': { title: 'Laptop Buying Guides & Tech Advice in Pakistan', description: 'Explore ElectroGhar laptop buying guides, product comparisons and practical electronics advice for shoppers in Karachi and across Pakistan.' },
   '/privacy': { title: 'Privacy Policy', description: 'How ElectroGhar handles your contact details, product inquiries and website data when you browse or order electronics via WhatsApp.' },

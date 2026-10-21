@@ -29,7 +29,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange, page
         page === "..." ? (
           <span
             key={`ellipsis-${idx}`}
-            className="w-10 h-10 flex items-center justify-center text-sm text-gray-500 select-none"
+            className="w-10 h-10 flex items-center justify-center text-sm text-muted select-none"
             aria-hidden="true"
           >
             …
@@ -43,8 +43,8 @@ export default function Pagination({ currentPage, totalPages, onPageChange, page
             aria-current={page === currentPage ? "page" : undefined}
             className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
               page === currentPage
-                ? "bg-brand-600 text-white shadow-lg shadow-brand-600/30"
-                : "bg-surface-card border border-white/10 text-gray-400 hover:border-brand-600/40 hover:text-white"
+                ? "bg-action text-content shadow-lg shadow-brand-600/30"
+                : "bg-surface-card border border-line text-muted hover:border-brand-600/40 hover:text-content"
             }`}
           >
             {page}
@@ -65,7 +65,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange, page
 }
 
 function PageButton({ children, onClick, disabled, href, className, ...props }) {
-  const classes = className || "w-10 h-10 rounded-lg bg-surface-card border border-white/10 text-gray-400 hover:border-brand-600/40 hover:text-white transition-colors disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center";
+  const classes = className || "w-10 h-10 rounded-lg bg-surface-card border border-line text-muted hover:border-brand-600/40 hover:text-content transition-colors disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center";
   if (href && !disabled) return <Link to={href} className={`${classes} inline-flex items-center justify-center`} {...props}>{children}</Link>;
   return <button type="button" onClick={onClick} disabled={disabled} className={classes} {...props}>{children}</button>;
 }

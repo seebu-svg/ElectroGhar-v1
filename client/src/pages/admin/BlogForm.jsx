@@ -6,7 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import { API_BASE } from "../../utils/api";
 
 const INPUT_CLS =
-  "w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500";
+  "w-full px-3 py-2 rounded-lg border border-control bg-surface-card text-content text-sm focus:outline-none focus:ring-2 focus:ring-control";
 
 export default function BlogForm() {
   const { user } = useAuth();
@@ -160,7 +160,7 @@ export default function BlogForm() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-brand-300 animate-spin" />
       </div>
     );
   }
@@ -175,11 +175,11 @@ export default function BlogForm() {
         <div>
           <button
             onClick={() => navigate("/admin/blogs")}
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-brand-600 mb-1.5 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-brand-300 mb-1.5 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Blogs
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-content">
             {isEdit ? "Edit Blog Post" : "New Blog Post"}
           </h1>
         </div>
@@ -188,7 +188,7 @@ export default function BlogForm() {
             href={`/blogs/${form.slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:border-brand-300 hover:text-brand-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-line bg-surface-card text-muted text-sm font-medium hover:border-brand-300 hover:text-brand-300 transition-colors"
           >
             <Eye className="w-4 h-4" /> View Live
           </a>
@@ -197,15 +197,15 @@ export default function BlogForm() {
 
       <form onSubmit={(e) => handleSubmit(e, null)} className="space-y-5">
         {error && (
-          <div className="rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3">
+          <div className="rounded-lg bg-error/10 border border-error/40 text-error text-sm px-4 py-3">
             {error}
           </div>
         )}
 
         {/* Main column */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 sm:p-6 space-y-5">
+        <div className="bg-surface-card rounded-xl border border-line p-5 sm:p-6 space-y-5">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
               Title *
             </label>
             <input
@@ -219,7 +219,7 @@ export default function BlogForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
               Excerpt
             </label>
             <textarea
@@ -233,10 +233,10 @@ export default function BlogForm() {
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-muted uppercase tracking-wider">
                 Content
               </label>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-muted">
                 {wordCount} words · ~{readTime} min read
               </span>
             </div>
@@ -251,14 +251,14 @@ export default function BlogForm() {
         </div>
 
         {/* Sidebar-ish settings */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 sm:p-6 space-y-5">
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+        <div className="bg-surface-card rounded-xl border border-line p-5 sm:p-6 space-y-5">
+          <h2 className="text-sm font-bold text-content uppercase tracking-wider">
             Post Settings
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
                 Category
               </label>
               <select
@@ -276,7 +276,7 @@ export default function BlogForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
                 Author
               </label>
               <input
@@ -289,7 +289,7 @@ export default function BlogForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
                 Author Role
               </label>
               <input
@@ -303,7 +303,7 @@ export default function BlogForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
               Cover Image
             </label>
             <div className="flex items-center gap-3 mb-2">
@@ -317,7 +317,7 @@ export default function BlogForm() {
               />
               <label
                 htmlFor="blog-cover-upload"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 cursor-pointer transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-line bg-surface-card text-muted text-sm font-medium hover:bg-surface cursor-pointer transition-colors"
               >
                 {uploading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -330,15 +330,15 @@ export default function BlogForm() {
                 <button
                   type="button"
                   onClick={() => set("cover_image", "")}
-                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-2 text-error hover:bg-error/10 rounded-lg transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
               )}
             </div>
-            <span className="text-xs text-gray-400">JPEG, PNG, WebP, GIF (max 5 MB)</span>
+            <span className="text-xs text-muted">JPEG, PNG, WebP, GIF (max 5 MB)</span>
             {uploadError && (
-              <p className="mt-1.5 text-xs text-red-500">{uploadError}</p>
+              <p className="mt-1.5 text-xs text-error">{uploadError}</p>
             )}
             <input
               type="text"
@@ -352,13 +352,13 @@ export default function BlogForm() {
                 <img
                   src={form.cover_image}
                   alt="Cover preview"
-                  className="w-full max-w-sm aspect-video object-cover rounded-lg border border-gray-200"
+                  className="w-full max-w-sm aspect-video object-cover rounded-lg border border-line"
                   onError={(e) => (e.currentTarget.style.display = "none")}
                 />
                 <button
                   type="button"
                   onClick={() => set("cover_image", "")}
-                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 p-1.5 bg-error-solid text-content rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -367,7 +367,7 @@ export default function BlogForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
               Tags (comma separated)
             </label>
             <input
@@ -382,7 +382,7 @@ export default function BlogForm() {
                 {form.tags.map((t) => (
                   <span
                     key={t}
-                    className="px-2 py-0.5 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-xs font-medium"
+                    className="px-2 py-0.5 rounded-full bg-action/10 border border-brand-200 text-brand-300 text-xs font-medium"
                   >
                     {t}
                   </span>
@@ -398,29 +398,29 @@ export default function BlogForm() {
                 type="checkbox"
                 checked={form.is_published}
                 onChange={(e) => set("is_published", e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                className="w-4 h-4 rounded border-line text-brand-300 focus:ring-control"
               />
-              <span className="text-sm font-medium text-gray-700">Published</span>
+              <span className="text-sm font-medium text-muted">Published</span>
             </label>
             <label className="flex items-center gap-2.5 cursor-pointer">
               <input
                 type="checkbox"
                 checked={form.is_featured}
                 onChange={(e) => set("is_featured", e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                className="w-4 h-4 rounded border-line text-brand-300 focus:ring-control"
               />
-              <span className="text-sm font-medium text-gray-700">Featured</span>
+              <span className="text-sm font-medium text-muted">Featured</span>
             </label>
           </div>
         </div>
 
         {/* SEO */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 sm:p-6 space-y-4">
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-brand-500" /> SEO
+        <div className="bg-surface-card rounded-xl border border-line p-5 sm:p-6 space-y-4">
+          <h2 className="text-sm font-bold text-content uppercase tracking-wider flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-brand-300" /> SEO
           </h2>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
               Meta Title
             </label>
             <input
@@ -432,7 +432,7 @@ export default function BlogForm() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">
               Meta Description
             </label>
             <textarea
@@ -450,7 +450,7 @@ export default function BlogForm() {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-action text-content text-sm font-semibold hover:bg-action-hover disabled:opacity-50 transition-colors"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -464,7 +464,7 @@ export default function BlogForm() {
               type="button"
               onClick={(e) => handleSubmit(e, true)}
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-semibold hover:border-brand-300 hover:text-brand-700 disabled:opacity-50 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-line bg-surface-card text-muted text-sm font-semibold hover:border-brand-300 hover:text-brand-300 disabled:opacity-50 transition-colors"
             >
               <Sparkles className="w-4 h-4" /> Create & Publish
             </button>
@@ -472,7 +472,7 @@ export default function BlogForm() {
           <button
             type="button"
             onClick={() => navigate("/admin/blogs")}
-            className="px-5 py-2.5 rounded-lg text-gray-500 text-sm font-semibold hover:text-gray-700 transition-colors"
+            className="px-5 py-2.5 rounded-lg text-muted text-sm font-semibold hover:text-muted transition-colors"
           >
             Cancel
           </button>

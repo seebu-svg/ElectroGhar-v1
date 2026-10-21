@@ -52,21 +52,21 @@ export default function BlogDetail() {
 
   if (notFound || !blog) {
     return (
-      <div className="bg-surface-alt min-h-screen flex items-center justify-center px-4">
+      <div className="bg-surface min-h-screen flex items-center justify-center px-4">
         <div className="text-center py-20">
           <div className="mx-auto w-14 h-14 rounded-2xl bg-brand-600/10 border border-brand-600/25 flex items-center justify-center mb-5">
-            <SearchX className="w-6 h-6 text-brand-500" />
+            <SearchX className="w-6 h-6 text-brand-300" />
           </div>
           <SEOHead title="Article Not Found" noIndex />
-          <h1 className="text-2xl font-extrabold text-white font-heading mb-2">
+          <h1 className="text-2xl font-extrabold text-content font-heading mb-2">
             Article not found
           </h1>
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-muted mb-6">
             It may have been unpublished or the link is wrong.
           </p>
           <Link
             to="/blogs"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-brand-600 text-white text-sm font-bold uppercase tracking-wide hover:bg-brand-500 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-action text-content text-sm font-bold uppercase tracking-wide hover:bg-action-hover transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Blog
           </Link>
@@ -80,7 +80,7 @@ export default function BlogDetail() {
   const categoryName = categories.find((c) => c.slug === blog.category)?.name || blog.category;
 
   return (
-    <div className="bg-surface-alt min-h-screen">
+    <div className="bg-surface min-h-screen">
       <SEOHead
         title={blog.meta_title || blog.title}
         description={blog.meta_description || blog.excerpt}
@@ -99,7 +99,7 @@ export default function BlogDetail() {
         ]}
       />
       {/* ── Article header ─────────────────────────────────────── */}
-      <header className="relative bg-surface-dark border-b border-white/5 overflow-hidden">
+      <header className="relative bg-surface-dark border-b border-line overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-30" />
         <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-600/50 to-transparent" />
 
@@ -117,15 +117,15 @@ export default function BlogDetail() {
 
           <div className="flex items-center gap-3 mb-4">
             <CategoryBadge category={blog.category} categories={categories} />
-            <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted">
               <Clock className="w-3.5 h-3.5" /> {blog.read_time} min read
             </span>
-            <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted">
               <Eye className="w-3.5 h-3.5" /> {blog.views || 0} views
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white font-heading leading-[1.15] mb-6">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-content font-heading leading-[1.15] mb-6">
             {blog.title}
           </h1>
 
@@ -133,8 +133,8 @@ export default function BlogDetail() {
           <div className="flex flex-wrap items-center gap-3">
             <AuthorAvatar name={blog.author} size="lg" />
             <div>
-              <p className="text-sm font-bold text-gray-100">{blog.author}</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm font-bold text-content">{blog.author}</p>
+              <p className="text-xs text-muted">
                 {blog.author_role || "ElectroGhar"} · {formatDate(blog.published_at || blog.created_at)}
               </p>
             </div>
@@ -145,7 +145,7 @@ export default function BlogDetail() {
       {/* ── Cover image ────────────────────────────────────────── */}
       {blog.cover_image && (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-0 sm:-mt-8 relative z-10">
-          <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/50">
+          <div className="relative rounded-2xl overflow-hidden border border-line shadow-2xl shadow-midnight/50">
             <img
               src={blog.cover_image}
               alt={blog.title}
@@ -157,18 +157,18 @@ export default function BlogDetail() {
 
       {/* ── Body ───────────────────────────────────────────────── */}
       <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-        <div className="text-[15px] sm:text-base text-gray-300 leading-[1.85] space-y-6">
+        <div className="text-[15px] sm:text-base text-muted leading-[1.85] space-y-6">
           <BlogContent content={blog.content} />
         </div>
 
         {/* Tags */}
         {Array.isArray(blog.tags) && blog.tags.length > 0 && (
-          <div className="mt-10 pt-8 border-t border-white/5 flex flex-wrap items-center gap-2">
-            <Tag className="w-3.5 h-3.5 text-gray-600" />
+          <div className="mt-10 pt-8 border-t border-line flex flex-wrap items-center gap-2">
+            <Tag className="w-3.5 h-3.5 text-muted" />
             {blog.tags.map((t) => (
               <span
                 key={t}
-                className="px-2.5 py-1 rounded-full bg-surface-card border border-white/10 text-xs text-gray-400"
+                className="px-2.5 py-1 rounded-full bg-surface-card border border-line text-xs text-muted"
               >
                 {t}
               </span>
@@ -181,13 +181,13 @@ export default function BlogDetail() {
       {related.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-extrabold text-white font-heading flex items-center gap-2.5">
-              <FileText className="w-5 h-5 text-brand-500" />
+            <h2 className="text-xl font-extrabold text-content font-heading flex items-center gap-2.5">
+              <FileText className="w-5 h-5 text-brand-300" />
               Keep Reading
             </h2>
             <Link
               to="/blogs"
-              className="text-xs font-bold text-brand-400 uppercase tracking-wider hover:text-brand-300 transition-colors inline-flex items-center gap-1"
+              className="text-xs font-bold text-brand-300 uppercase tracking-wider hover:text-brand-300 transition-colors inline-flex items-center gap-1"
             >
               All posts <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -201,13 +201,13 @@ export default function BlogDetail() {
       )}
 
       {/* ── CTA ────────────────────────────────────────────────── */}
-      <section className="relative bg-gradient-to-br from-surface-dark via-brand-950/60 to-surface-dark overflow-hidden border-t border-white/5">
+      <section className="relative bg-gradient-to-br from-surface-dark via-brand-950/60 to-surface-dark overflow-hidden border-t border-line">
         <div className="absolute inset-0 grid-bg opacity-40" />
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 py-14 text-center">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-heading mb-3">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-content font-heading mb-3">
             Need This Fixed or Found For You?
           </h2>
-          <p className="text-gray-400 mb-7">
+          <p className="text-muted mb-7">
             Our workshop checks every machine we sell. Tell us what you need ,
             we will match you with the right one.
           </p>
@@ -216,13 +216,13 @@ export default function BlogDetail() {
               href={WA_GENERAL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-green-600 text-white font-bold hover:bg-green-500 transition-colors shadow-lg shadow-green-600/30"
+              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-success-solid text-content font-bold hover:bg-success-solid transition-colors shadow-lg shadow-green-600/30"
             >
               <Phone className="w-4 h-4" /> Ask on WhatsApp
             </a>
             <Link
               to="/products"
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-brand-600 text-white font-bold hover:bg-brand-500 transition-colors glow-red"
+              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-action text-content font-bold hover:bg-action-hover transition-colors glow-red"
             >
               Browse Products <ArrowRight className="w-4 h-4" />
             </Link>
@@ -253,7 +253,7 @@ function BlogContent({ content }) {
         <ul key={`ul-${out.length}`} className="space-y-2.5 pl-1">
           {list.map((item, i) => (
             <li key={i} className="flex gap-3">
-              <span className="mt-2.5 w-1.5 h-1.5 rounded-full bg-brand-500 shrink-0" />
+              <span className="mt-2.5 w-1.5 h-1.5 rounded-full bg-action shrink-0" />
               <span>{item}</span>
             </li>
           ))}
@@ -277,7 +277,7 @@ function BlogContent({ content }) {
 
     if (block.startsWith("### ")) {
       out.push(
-        <h3 key={idx} className="text-lg font-bold text-white font-heading pt-4">
+        <h3 key={idx} className="text-lg font-bold text-content font-heading pt-4">
           {block.slice(4)}
         </h3>
       );
@@ -285,9 +285,9 @@ function BlogContent({ content }) {
       out.push(
         <h2
           key={idx}
-          className="text-xl sm:text-2xl font-extrabold text-white font-heading pt-6 pb-1 flex items-start gap-3"
+          className="text-xl sm:text-2xl font-extrabold text-content font-heading pt-6 pb-1 flex items-start gap-3"
         >
-          <span className="mt-2 w-6 h-0.5 rounded-full bg-brand-600 shrink-0" />
+          <span className="mt-2 w-6 h-0.5 rounded-full bg-action shrink-0" />
           {block.slice(3)}
         </h2>
       );
@@ -305,7 +305,7 @@ function RelatedCard({ post, categories }) {
   return (
     <Link
       to={`/blogs/${post.slug}`}
-      className="group flex flex-col bg-surface-card rounded-2xl border border-white/5 shadow-lg shadow-black/30 hover:border-brand-600/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+      className="group flex flex-col bg-surface-card rounded-2xl border border-line shadow-lg shadow-midnight/30 hover:border-brand-600/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
     >
       <div className="relative aspect-[16/9] bg-surface-dark overflow-hidden">
         <img
@@ -318,10 +318,10 @@ function RelatedCard({ post, categories }) {
       </div>
       <div className="p-4 flex flex-col flex-1">
         <CategoryBadge category={post.category} categories={categories} />
-        <h3 className="text-sm font-bold text-white font-heading leading-snug mt-2.5 mb-2 line-clamp-2 group-hover:text-brand-300 transition-colors">
+        <h3 className="text-sm font-bold text-content font-heading leading-snug mt-2.5 mb-2 line-clamp-2 group-hover:text-brand-300 transition-colors">
           {post.title}
         </h3>
-        <p className="text-[11px] text-gray-600 mt-auto pt-2 border-t border-white/5">
+        <p className="text-[11px] text-muted mt-auto pt-2 border-t border-line">
           {formatDate(post.published_at)} · {post.views || 0} views
         </p>
       </div>
@@ -332,17 +332,17 @@ function RelatedCard({ post, categories }) {
 /* ── Skeleton ──────────────────────────────────────────────────── */
 function BlogDetailSkeleton() {
   return (
-    <div className="bg-surface-alt min-h-screen animate-pulse">
-      <div className="bg-surface-dark border-b border-white/5">
+    <div className="bg-surface min-h-screen animate-pulse">
+      <div className="bg-surface-dark border-b border-line">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 space-y-5">
-          <div className="h-3 w-40 bg-white/5 rounded" />
-          <div className="h-10 w-3/4 bg-white/5 rounded" />
-          <div className="h-10 w-1/2 bg-white/5 rounded" />
+          <div className="h-3 w-40 bg-arctic/5 rounded" />
+          <div className="h-10 w-3/4 bg-arctic/5 rounded" />
+          <div className="h-10 w-1/2 bg-arctic/5 rounded" />
           <div className="flex items-center gap-3 pt-2">
-            <div className="w-12 h-12 rounded-full bg-white/5" />
+            <div className="w-12 h-12 rounded-full bg-arctic/5" />
             <div className="space-y-2">
-              <div className="h-3 w-32 bg-white/5 rounded" />
-              <div className="h-2.5 w-24 bg-white/5 rounded" />
+              <div className="h-3 w-32 bg-arctic/5 rounded" />
+              <div className="h-2.5 w-24 bg-arctic/5 rounded" />
             </div>
           </div>
         </div>
@@ -351,7 +351,7 @@ function BlogDetailSkeleton() {
         {Array.from({ length: 10 }).map((_, i) => (
           <div
             key={i}
-            className="h-3.5 bg-white/5 rounded"
+            className="h-3.5 bg-arctic/5 rounded"
             style={{ width: `${60 + ((i * 37) % 40)}%` }}
           />
         ))}

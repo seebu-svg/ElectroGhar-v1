@@ -38,7 +38,7 @@ async function route(path, method, req) {
 }
 function query(result, calls) {
   const q = {};
-  for (const method of ['select','eq','order','insert','update','delete','single','maybeSingle','ilike']) q[method] = (...args) => { calls.push([method, ...args]); return q; };
+  for (const method of ['select','eq','order','limit','insert','update','delete','single','maybeSingle','ilike']) q[method] = (...args) => { calls.push([method, ...args]); return q; };
   q.then = (resolve, reject) => Promise.resolve(result).then(resolve, reject);
   return q;
 }
@@ -114,6 +114,7 @@ test('public hero images return configured active images in order', async () => 
   assert.deepEqual(res.body, { images });
   assert(calls.some(c => c[0] === 'eq' && c[1] === 'is_active' && c[2] === true));
   assert(calls.some(c => c[0] === 'order' && c[1] === 'sort_order'));
+  assert(calls.some(c => c[0] === 'limit' && c[1] === 3));
 });
 test('product editing strips generated fields and validates category', async () => {
   const calls = [];
@@ -164,6 +165,22 @@ test('hero images reject unsafe URLs', async () => {
   await assert.rejects(route('/hero-images', 'post', { body: { desktop_url: 'javascript:alert(1)' } }), /HTTPS/);
 });
 
+test('hero slide content and presentation settings are persisted', async () => {
+  const calls = [];
+  supabase.from = () => query({ data: { id: 'hero' }, error: null }, calls);
+  await route('/hero-images', 'post', { body: { desktop_url: 'https://example.com/hero.webp', title: 'New laptops', button_label: 'Shop', button_url: '/products?category=laptops', desktop_position: 'right center', mobile_position: 'center center', overlay_opacity: 20 } });
+  const body = calls.find(c => c[0] === 'insert')[1];
+  assert.equal(body.title, 'New laptops');
+  assert.equal(body.button_url, '/products?category=laptops');
+  assert.equal(body.overlay_opacity, 20);
+  assert.equal(body.mobile_position, 'center center');
+});
+test('hero slides reject unsafe destinations and invalid presentation settings', async () => {
+  for (const patch of [{ button_url: '//example.com' }, { button_url: 'javascript:alert(1)' }, { button_url: '/\\evil.com' }, { overlay_opacity: 80 }, { desktop_position: 'invalid' }]) {
+    await assert.rejects(route('/hero-images', 'post', { body: { desktop_url: 'https://example.com/hero.webp', ...patch } }), error => error.status === 400);
+  }
+});
+
 test('hero image replacement and removal use the persisted record', async () => {
   const calls = [];
   supabase.from = () => query({ data: { id: 'hero' }, error: null }, calls);
@@ -211,4 +228,31 @@ test('hidden parent categories suppress children in product visibility', async (
   const { visibleCategorySlugs } = await import('../src/services/catalog.js');
   supabase.from = () => query({ data: [{ id: 'root', slug: 'laptops', parent_id: null }, { id: 'a', slug: 'laptops-hp', parent_id: 'root' }, { id: 'b', slug: 'hidden-child', parent_id: 'inactive-parent' }], error: null }, []);
   assert.deepEqual(await visibleCategorySlugs(), ['laptops','laptops-hp']);
+});
+
+
+test('hero videos persist and can be removed without replacing the poster', async () => {
+  const calls = [];
+  supabase.from = () => query({ data: { id: 'hero' }, error: null }, calls);
+  await route('/hero-images/:id', 'put', { params: { id: 'hero' }, body: { desktop_url: 'https://example.com/poster.webp', video_url: 'https://example.com/hero.mp4', mobile_video_url: '' } });
+  assert.equal(calls.find(c => c[0] === 'update')[1].video_url, 'https://example.com/hero.mp4');
+  assert.equal(calls.find(c => c[0] === 'update')[1].mobile_video_url, null);
+  await assert.rejects(route('/hero-images', 'post', { body: { desktop_url: 'https://example.com/poster.webp', video_url: 'javascript:alert(1)' } }), /HTTPS/);
+});
+test('hero video upload rejects forged content and missing files', async () => {
+  assert.equal((await route('/hero-video', 'post', {})).statusCode, 400);
+  assert.equal((await route('/hero-video', 'post', { file: { mimetype: 'video/mp4', buffer: Buffer.from('not a video') } })).statusCode, 400);
+});
+test('hero video upload uses the dedicated video bucket and correct content type', async () => {
+  let uploaded;
+  supabase.storage.from = bucket => ({
+    upload: async (path, buffer, options) => { uploaded = { bucket, path, options }; return { data: { path }, error: null }; },
+    getPublicUrl: path => ({ data: { publicUrl: `https://example.com/${path}` } }),
+  });
+  const buffer = Buffer.concat([Buffer.from([0, 0, 0, 24]), Buffer.from('ftypisom')]);
+  const res = await route('/hero-video', 'post', { file: { mimetype: 'video/mp4', buffer } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(uploaded.bucket, 'hero-videos');
+  assert.equal(uploaded.options.contentType, 'video/mp4');
+  assert.match(res.body.url, /\.mp4$/);
 });

@@ -1,156 +1,41 @@
+import BrandTagline from "../ui/BrandTagline";
 import { CONTACT } from "../../utils/contact";
 import { useEffect, useState } from "react";
 import { api } from "../../utils/api";
-import { Link, useLocation } from "react-router-dom";
-import { MapPin, Phone, Mail, Clock, ShieldCheck, FileText, MessageCircle, Globe } from "lucide-react";
-import logoFull from "../../assets/logo-full.png";
+import { Link } from "react-router-dom";
+import { MapPin, Phone, Mail, Clock, MessageCircle, ArrowRight, ArrowUpRight } from "lucide-react";
 import SiteLogo from '../ui/SiteLogo';
 
+const focus = 'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control';
+const linkClass = `inline-flex min-h-11 items-center rounded-md text-sm text-muted transition-colors hover:text-content ${focus}`;
+function FooterLinks({ title, links }) {
+  return <nav aria-label={`Footer ${title}`}><h2 className="mb-3 text-sm font-semibold text-content">{title}</h2><ul>{links.map(([to, label]) => <li key={to}><Link to={to} className={linkClass}>{label}</Link></li>)}</ul></nav>;
+}
 export default function Footer() {
   const [tree, setTree] = useState([]);
-  const location = useLocation();
-  useEffect(() => { api.getCategories().then(r => setTree(r.tree || [])).catch(console.error); }, [location.pathname]);
-  const year = new Date().getFullYear();
-
-  return (
-    <footer className="relative bg-surface-dark text-gray-300">
-      {/* Red glow top edge */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-600/70 to-transparent" />
-      <div className="absolute -top-20 inset-x-0 h-40 glow-blob pointer-events-none" />
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 lg:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-          {/* ── Brand ──────────────────────────────────────────── */}
-          <div>
-            <Link to="/" className="inline-block mb-4">
-              <SiteLogo
-                fallback={logoFull}
-                alt="ElectroGhar"
-                className="h-16 sm:h-20 w-auto"
-                loading="lazy"
-              />
-            </Link>
-            <p className="text-sm leading-relaxed text-gray-400">
-              Pakistan&apos;s trusted store for quality checked laptops, PCs,
-              monitors, storage and gadgets , new, used and refurbished.
-            </p>
-          </div>
-
-          {/* ── Quick Links ────────────────────────────────────── */}
-          <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Shop
-            </h3>
-            <ul className="space-y-1 text-sm">
-              {[
-                ...tree.map(c => ({ label: c.name, to: `/products?category=${c.slug}` })),
-                { label: "Best Sellers", to: "/products?featured=1" },
-                { label: "Daily Deals", to: "/products?deals=1" },
-                { label: "All Products", to: "/products" },
-              ].map((item) => (
-                <li key={item.to}>
-                  <Link
-                    to={item.to}
-                    className="inline-block py-1 hover:text-brand-400 transition-colors"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* ── Support ────────────────────────────────────────── */}
-          <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Support
-            </h3>
-            <ul className="space-y-1 text-sm">
-              <li>
-                <Link to="/about" className="inline-block py-1 hover:text-brand-400 transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/blogs" className="inline-block py-1 hover:text-brand-400 transition-colors">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/warranty-policy"
-                  className="inline-flex items-center gap-1.5 py-1 hover:text-brand-400 transition-colors"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5" /> Warranty & Returns
-                </Link>
-              </li>
-              {[['/refund-policy', 'Refund Policy'], ['/return-policy', 'Return Policy'], ['/faqs', 'FAQs']].map(([to, label]) => <li key={to}><Link to={to} className="inline-block py-1 hover:text-brand-400 transition-colors">{label}</Link></li>)}
-              <li>
-                <Link
-                  to="/contact"
-                  className="inline-flex items-center gap-1.5 py-1 hover:text-brand-400 transition-colors"
-                >
-                  <MessageCircle className="w-3.5 h-3.5" /> Contact Us
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* ── Contact ────────────────────────────────────────── */}
-          <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Contact
-            </h3>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 mt-0.5 text-brand-400 shrink-0" />
-                <span>{CONTACT.address}</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-brand-400 shrink-0" />
-                <a href={CONTACT.callUrl} className="hover:text-brand-400 transition-colors">
-                  {CONTACT.phone}
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-brand-400 shrink-0" />
-                <a href={CONTACT.whatsappUrl} target="_blank" rel="noopener noreferrer" className="hover:text-brand-400 transition-colors">
-                  Chat on WhatsApp
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-brand-400 shrink-0" />
-                <a href="mailto:hello@electroghar.pk" className="hover:text-brand-400 transition-colors">
-                  hello@electroghar.pk
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-brand-400 shrink-0" />
-                <a href="https://electroghar.pk" target="_blank" rel="noopener noreferrer" className="hover:text-brand-400 transition-colors">
-                  electroghar.pk
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-brand-400 shrink-0" />
-                <span>{CONTACT.hours}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* ── Bottom Bar ─────────────────────────────────────── */}
-        <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-          <p>&copy; {year} ElectroGhar. All rights reserved.</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/privacy" className="inline-flex items-center gap-1 hover:text-brand-400 transition-colors">
-              <FileText className="w-3.5 h-3.5" /> Privacy Policy
-            </Link>
-            <Link to="/terms" className="inline-flex items-center gap-1 hover:text-brand-400 transition-colors">
-              <ShieldCheck className="w-3.5 h-3.5" /> Terms of Service
-            </Link>
-          </div>
-        </div>
+  useEffect(() => {
+    let active = true;
+    const load = () => api.getCategories().then(r => { if (active) setTree(r.tree || []); }).catch(() => {});
+    load(); window.addEventListener('catalog-updated', load);
+    return () => { active = false; window.removeEventListener('catalog-updated', load); };
+  }, []);
+  return <footer className="border-t border-line bg-surface-dark text-muted">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="flex flex-col justify-between gap-5 border-b border-line py-8 sm:flex-row sm:items-center sm:py-10"><div><p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-300">Let’s find your next upgrade</p><h2 className="mt-2 text-xl font-semibold tracking-tight text-content sm:text-2xl">Good tech starts with the right advice.</h2><p className="mt-2 text-sm leading-6 text-muted">Tell us what you need and we’ll help you explore your options.</p></div><a href={CONTACT.whatsappUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex min-h-12 shrink-0 items-center justify-center gap-3 self-start rounded-xl border border-line bg-arctic/5 px-5 text-sm font-semibold text-content transition-colors hover:border-brand-400/40 hover:bg-brand-500/10 sm:self-auto ${focus}`}><MessageCircle size={18} />Talk to our team<ArrowUpRight size={16} /><span className="sr-only"> (opens in a new tab)</span></a></div>
+      <div className="grid gap-x-8 gap-y-10 py-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1.3fr] lg:gap-x-10 lg:py-14">
+        <div><Link to="/" aria-label="ElectroGhar home" className={`inline-block rounded-lg ${focus}`}><SiteLogo alt="ElectroGhar" className="h-16 w-auto sm:h-20" loading="lazy" /></Link><BrandTagline footer className="mt-3 !text-xs" /><p className="mt-5 max-w-xs text-sm leading-7 text-muted">Laptops, desktops, monitors and everyday tech. Explore new, used and refurbished options with clear condition details and personal buying support.</p><Link to="/about" className={`mt-4 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-brand-300 hover:text-content ${focus}`}>Get to know ElectroGhar<ArrowRight size={15} /></Link></div>
+        <FooterLinks title="Explore the store" links={[
+          ['/products', 'All products'],
+          ...tree.map(c => [`/products?category=${encodeURIComponent(c.slug)}`, c.name]),
+          ['/products?featured=1', 'Best sellers'],
+          ['/products?deals=1', 'Daily deals'],
+        ]} />
+        <FooterLinks title="Help & information" links={[
+          ['/faqs', 'FAQs'], ['/warranty-policy', 'Warranty policy'], ['/refund-policy', 'Refund policy'], ['/return-policy', 'Return policy'], ['/contact', 'Contact us'], ['/blogs', 'Buying guides & blog'],
+        ]} />
+        <section aria-labelledby="footer-store-heading" className="self-start rounded-2xl border border-line bg-arctic/[0.025] p-5 sm:p-6"><h2 id="footer-store-heading" className="text-sm font-semibold text-content">Visit our Karachi store</h2><address className="mt-5 space-y-4 text-sm not-italic"><div className="flex items-start gap-3"><MapPin size={17} className="mt-1 shrink-0 text-brand-300" /><p className="leading-6 text-muted">{CONTACT.address}</p></div><div className="flex items-start gap-3"><Clock size={17} className="mt-1 shrink-0 text-muted" /><p className="leading-6 text-muted">{CONTACT.hours}</p></div><a href={CONTACT.callUrl} className={`flex min-h-11 items-center gap-3 rounded-lg text-content hover:text-brand-300 ${focus}`}><Phone size={17} className="shrink-0 text-muted" />{CONTACT.phone}</a><a href={`mailto:${CONTACT.email}`} className={`flex min-h-11 items-start gap-3 break-all rounded-lg py-2 text-muted hover:text-content ${focus}`}><Mail size={17} className="mt-0.5 shrink-0 text-muted" />{CONTACT.email}</a></address><Link to="/contact" className={`mt-4 flex min-h-11 items-center justify-between gap-2 rounded-xl border border-line px-3 text-sm font-medium text-content hover:bg-arctic/5 ${focus}`}>Store details & directions<ArrowUpRight size={16} /></Link></section>
       </div>
-    </footer>
-  );
+      <div className="flex flex-col gap-4 border-t border-line py-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between"><p>&copy; {new Date().getFullYear()} ElectroGhar. All rights reserved.</p><nav aria-label="Legal information" className="flex flex-wrap gap-x-6"><Link to="/privacy" className={`inline-flex min-h-11 items-center rounded-md hover:text-content ${focus}`}>Privacy policy</Link><Link to="/terms" className={`inline-flex min-h-11 items-center rounded-md hover:text-content ${focus}`}>Terms of service</Link><a href="https://electroghar.pk" className={`inline-flex min-h-11 items-center rounded-md hover:text-content ${focus}`}>electroghar.pk</a></nav></div>
+    </div>
+  </footer>;
 }

@@ -64,16 +64,43 @@ catalogAdminRoutes.get('/hero-images', run(async (_req, res) => {
   res.json({ images: data });
 }));
 function heroBody(body) {
-  for (const key of ['desktop_url', 'mobile_url']) {
-    if (key === 'mobile_url' && !body[key]) continue;
+  for (const key of ['desktop_url', 'mobile_url', 'video_url', 'mobile_video_url']) {
+    if (key !== 'desktop_url' && !body[key]) continue;
     let url; try { url = new URL(body[key]); } catch { throw fail('Upload a desktop image before saving'); }
     if (url.protocol !== 'https:') throw fail('Images must use HTTPS');
   }
   if (!Number.isInteger(Number(body.sort_order ?? 0))) throw fail('Order must be an integer');
-  return { desktop_url: body.desktop_url, mobile_url: body.mobile_url || null, alt: String(body.alt || '').slice(0, 200), sort_order: Number(body.sort_order || 0), is_active: body.is_active !== false };
+  const extra = {};
+  for (const key of ['video_url', 'mobile_video_url']) {
+    if (body[key] !== undefined) extra[key] = body[key] || null;
+  }
+  for (const [key, limit] of Object.entries({ eyebrow: 80, title: 120, description: 350, button_label: 60 })) {
+    if (body[key] !== undefined) extra[key] = String(body[key]).trim().slice(0, limit);
+  }
+  if (body.button_url !== undefined) {
+    const path = String(body.button_url).trim();
+    if (path && (!path.startsWith('/') || path.startsWith('//') || /[\\\s]/.test(path))) throw fail('Button destination must be a local path such as /products');
+    extra.button_url = path;
+  }
+  for (const key of ['desktop_position', 'mobile_position']) {
+    if (body[key] !== undefined) {
+      if (!['left center', 'center center', 'right center', '65% center'].includes(body[key])) throw fail('Choose a valid image focal point');
+      extra[key] = body[key];
+    }
+  }
+  if (body.overlay_opacity !== undefined) {
+    const opacity = Number(body.overlay_opacity);
+    if (!Number.isInteger(opacity) || opacity < 0 || opacity > 60) throw fail('Overlay must be between 0 and 60');
+    extra.overlay_opacity = opacity;
+  }
+  return { desktop_url: body.desktop_url, mobile_url: body.mobile_url || null, alt: String(body.alt || '').slice(0, 200), sort_order: Number(body.sort_order || 0), is_active: body.is_active !== false, ...extra };
 }
 catalogAdminRoutes.post('/hero-images', run(async (req, res) => {
+  const { count, error: countError } = await supabase.from('hero_images').select('id', { count: 'exact', head: true });
+  if (countError) throw countError;
+  if (count >= 3) return res.status(409).json({ error: 'Maximum 3 hero slides allowed, including images and videos. Edit or remove an existing slide.' });
   const { data, error } = await supabase.from('hero_images').insert(heroBody(req.body)).select().single();
+  if (error?.code === '23514') return res.status(409).json({ error: error.message });
   if (error) throw error;
   res.status(201).json({ image: data });
 }));

@@ -1,194 +1,48 @@
-import { POLICY, productPolicy } from "../../utils/policies";
-import { CONTACT } from "../../utils/contact";
-import { Link } from "react-router-dom";
-import { Cpu, HardDrive, Monitor, MemoryStick, Phone, Eye, Sparkles, Tag } from "lucide-react";
-import { formatPrice, conditionColor, discountPercent, buildWhatsAppLink } from "../../utils/helpers";
-import placeholderImg from "../../assets/product-placeholder.webp";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Cpu, HardDrive, MemoryStick, MessageCircle, ShieldCheck } from 'lucide-react';
+import { CONTACT } from '../../utils/contact';
+import { buildWhatsAppLink, formatPrice } from '../../utils/helpers';
+import { productCardData } from '../../utils/productCardData.mjs';
+import placeholderImg from '../../assets/product-placeholder.webp';
 
-export default function ProductCard({ product, showAskPrice = false }) {
-  const {
-    name,
-    slug,
-    brand,
-    price,
-    compare_at_price,
-    images,
-    thumbnail_url,
-    condition_grade,
-    condition_type,
-    specs,
-    is_available,
-    stock_qty,
-    is_featured,
-  } = product;
+const focus = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-control';
 
-  const policy = productPolicy(product);
-  const discount = discountPercent(price, compare_at_price);
-  const savings = compare_at_price && compare_at_price > price ? compare_at_price - price : 0;
-  const imgUrl = thumbnail_url || (Array.isArray(images) && images[0]) || placeholderImg;
-  const imageCount = Array.isArray(images) ? images.filter(Boolean).length : 0;
-  const isLowStock = is_available && stock_qty > 0 && stock_qty <= 3;
-  const isOutOfStock = !is_available || stock_qty === 0;
-
-  return (
-    <Link
-      to={`/product/${slug}`}
-      className="group relative flex flex-col bg-surface-card rounded-2xl border border-white/5 shadow-lg shadow-black/30 hover:border-brand-500/40 hover:shadow-brand-600/10 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 overflow-hidden"
-    >
-      {/* ── Image Area ─────────────────────────────────────── */}
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-surface-dark to-surface-card overflow-hidden">
-        <img
-          src={imgUrl}
-          alt={`${name}${condition_grade ? `, ${condition_grade} condition` : ""}`}
-          width="640" height="480" decoding="async"
-          loading="lazy"
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-        />
-
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-          <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 flex gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 text-gray-900 text-xs font-semibold shadow-lg">
-              <Eye className="w-3.5 h-3.5" />
-              View Details
-            </span>
-          </div>
-        </div>
-
-        {/* Top badges row */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-          {discount > 0 && (
-            <span className="inline-flex items-center gap-1 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg shadow-red-500/30">
-              <Tag className="w-3 h-3" />
-              -{discount}%
-            </span>
-          )}
-          {condition_type === "new" && (
-            <span className="inline-flex items-center gap-1 bg-emerald-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg shadow-emerald-500/30">
-              <Sparkles className="w-3 h-3" />
-              New
-            </span>
-          )}
-          {is_featured && (
-            <span className="inline-flex items-center gap-1 bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg shadow-amber-500/30">
-              <Sparkles className="w-3 h-3" />
-              Popular
-            </span>
-          )}
-        </div>
-
-        {/* Condition badge (top right) */}
-        <span className={`absolute top-3 right-3 text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-wide shadow-md ${conditionColor(condition_grade)}`}>
-          {condition_grade}
-        </span>
-
-        {/* Image count badge */}
-        {imageCount > 1 && (
-          <span className="absolute bottom-3 right-3 flex items-center gap-1 px-2 py-1 rounded-lg bg-black/60 backdrop-blur-sm text-white text-[10px] font-medium">
-            <Eye className="w-3 h-3" />
-            {imageCount}
-          </span>
-        )}
-
-        {/* Cinematic bottom fade */}
-        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-surface-card via-surface-card/80 to-transparent pointer-events-none" />
-
-        {/* Stock indicator */}
-        {isOutOfStock && (
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center">
-            <span className="px-4 py-2 rounded-xl bg-red-500/90 text-white text-sm font-bold uppercase tracking-wide">
-              Sold Out
-            </span>
-          </div>
-        )}
-        {isLowStock && (
-          <span className="absolute bottom-3 left-3 px-2 py-1 rounded-lg bg-amber-500/90 text-white text-[10px] font-bold uppercase tracking-wide">
-            Only {stock_qty} left
-          </span>
-        )}
-      </div>
-
-      {/* ── Content ────────────────────────────────────────── */}
-      <div className="p-4 flex flex-col flex-1">
-        {/* Brand + Condition type */}
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className="text-xs font-bold text-brand-400 uppercase tracking-wider truncate">
-            {brand}
-          </span>
-          {condition_type && condition_type !== "new" && (
-            <span className="text-[10px] text-gray-500 bg-white/5 px-1.5 py-0.5 rounded capitalize">
-              {condition_type}
-            </span>
-          )}
-        </div>
-
-        {/* Product name */}
-        <h3 className="text-sm font-semibold text-gray-100 line-clamp-2 min-h-[2.5rem] mb-3 group-hover:text-brand-300 transition-colors leading-snug">
-          {name}
-        </h3>
-
-        {policy.asIs && <p className="text-xs text-gray-300 mb-3">{POLICY.asIsLabel}. No refunds, subject to applicable consumer protection laws.</p>}
-        {showAskPrice && <p className="text-xs text-gray-400 mb-3">{POLICY.salesLabel}. Exceptions apply where required by law or an expressly stated warranty remedy applies.</p>}
-
-        {/* ── Quick Specs ─────────────────────────────────── */}
-        <div className="grid grid-cols-2 gap-1.5 mb-4 min-h-[2.5rem]">
-          {specs?.processor && (
-            <SpecPill icon={<Cpu className="w-3 h-3 text-brand-400" />} text={specs.processor} />
-          )}
-          {specs?.ram && (
-            <SpecPill icon={<MemoryStick className="w-3 h-3 text-brand-400" />} text={specs.ram} />
-          )}
-          {specs?.storage && (
-            <SpecPill icon={<HardDrive className="w-3 h-3 text-brand-400" />} text={specs.storage} />
-          )}
-          {specs?.display && (
-            <SpecPill icon={<Monitor className="w-3 h-3 text-brand-400" />} text={specs.display} />
-          )}
-        </div>
-
-        {/* ── Price & Actions ─────────────────────────────── */}
-        <div className="pt-3 border-t border-white/5 mt-auto">
-          <div className="flex items-end justify-between gap-2">
-            <div className="flex flex-col min-w-0">
-              <span className="text-lg font-extrabold text-white leading-none">
-                {formatPrice(price)}
-              </span>
-              {compare_at_price && compare_at_price > price && (
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[11px] text-gray-500 line-through">
-                    {formatPrice(compare_at_price)}
-                  </span>
-                  <span className="text-[10px] font-semibold text-emerald-400">
-                    Save {formatPrice(savings)}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {showAskPrice && !isOutOfStock && (
-              <a
-                href={buildWhatsAppLink(CONTACT.internationalPhone, product.name, product.slug)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center justify-center w-10 h-10 rounded-xl bg-green-600 text-white hover:bg-green-500 hover:shadow-lg hover:shadow-green-600/30 hover:scale-110 transition-all shrink-0"
-                aria-label="Ask price on WhatsApp"
-              >
-                <Phone className="w-4 h-4" />
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
+export default function ProductCard({ product, badge }) {
+  const card = productCardData(product);
+  return <Card key={`${product.id || product.slug}:${card.images.join('|')}`} product={product} card={card} badge={badge} />;
 }
 
-function SpecPill({ icon, text }) {
-  return (
-    <div className="flex items-center gap-1.5 text-[11px] text-gray-400 bg-white/[0.03] rounded-md px-2 py-1 truncate border border-white/5">
-      {icon}
-      <span className="truncate font-medium">{text}</span>
+function Card({ product, card, badge }) {
+  const [activeImage, setActiveImage] = useState(0);
+  const images = card.images.length ? card.images : [placeholderImg];
+  const url = `/product/${product.slug}`;
+  const specs = [['Processor', product.specs?.processor, Cpu], ['RAM', product.specs?.ram, MemoryStick], ['Storage', product.specs?.storage, HardDrive]].filter(([, value]) => (typeof value === 'string' && value.trim()) || (typeof value === 'number' && Number.isFinite(value) && value > 0));
+  const inquiry = buildWhatsAppLink(CONTACT.internationalPhone, card.name, product.slug);
+  return <article className="product-card group flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-line bg-surface-card transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-brand-400/30 hover:shadow-xl hover:shadow-midnight/20 motion-reduce:transition-none">
+    <div className="product-card-media border-b border-line bg-surface-card">
+      <Link to={url} aria-label={`View ${card.title}`} className={`absolute inset-0 ${focus}`}>
+        <img key={images[activeImage]} src={images[activeImage]} alt={`${card.title}${images.length > 1 ? ` — view ${activeImage + 1}` : ''}`} width="640" height="480" loading="lazy" decoding="async" onError={e => { if (e.currentTarget.getAttribute('src') !== placeholderImg) e.currentTarget.src = placeholderImg; }} className={`product-card-image ${card.soldOut ? 'opacity-65' : ''}`} />
+      </Link>
+      {badge && <span className="pointer-events-none absolute right-2.5 top-2.5 rounded-md border border-brand-400/25 bg-surface-dark/95 px-2 py-1 text-[10px] font-semibold text-brand-300">{badge}</span>}
+      {card.hasDiscount && card.discount > 0 && <span className="pointer-events-none absolute left-2.5 top-2.5 rounded-md bg-action px-2 py-1 text-[11px] font-semibold text-content">−{card.discount}%</span>}
+      {images.length > 1 && <><div className="product-image-controls absolute bottom-2 right-2 flex items-center gap-1 rounded-full border border-line bg-surface-dark/90 p-0.5 text-content"><button type="button" onClick={() => setActiveImage(i => (i - 1 + images.length) % images.length)} title="Previous image" aria-label={`Previous image of ${card.name}`} className={`flex h-9 w-9 items-center justify-center rounded-full hover:bg-arctic/10 ${focus}`}><ChevronLeft size={15} /></button><span aria-live="polite" className="min-w-6 text-center text-[10px] tabular-nums text-muted">{activeImage + 1}/{images.length}</span><button type="button" onClick={() => setActiveImage(i => (i + 1) % images.length)} title="Next image" aria-label={`Next image of ${card.name}`} className={`flex h-9 w-9 items-center justify-center rounded-full hover:bg-arctic/10 ${focus}`}><ChevronRight size={15} /></button></div></>}
     </div>
-  );
+    <div className="flex flex-1 flex-col p-3 sm:p-4">
+      <h3 className="min-h-10 text-sm font-semibold leading-5 tracking-tight text-content sm:min-h-11 sm:text-[15px] sm:leading-[22px]"><Link to={url} title={card.title} className={`line-clamp-2 rounded transition-colors hover:text-brand-300 ${focus}`}>{card.title}</Link></h3>
+      <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+        <p className="product-card-price font-bold leading-tight tracking-tight text-content">{card.hasPrice ? formatPrice(card.price) : 'Contact for price'}</p>
+        {card.hasDiscount && <p className="text-[11px] leading-4 text-muted line-through"><span className="sr-only">Original price </span>{formatPrice(card.original)}</p>}
+      </div>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[11px] leading-4">
+        {card.condition && <p title={card.condition} className="min-w-0 truncate capitalize text-muted">{card.condition}</p>}
+        <p className={`flex items-center gap-1.5 ${card.inStock ? 'text-success' : 'text-muted'}`}><span aria-hidden="true" className={`h-1.5 w-1.5 shrink-0 rounded-full ${card.inStock ? 'bg-success' : 'bg-surface-card'}`} />{card.stock}</p>
+      </div>
+      {specs.length > 0 && <dl className="mt-2 flex flex-wrap gap-1.5">{specs.map(([label, value, Icon]) => <div key={label} title={`${label}: ${value}`} className="flex min-w-0 max-w-full items-center gap-1 rounded-md border border-line bg-arctic/[0.03] px-1.5 py-1 text-[10px] leading-3.5"><dt className="shrink-0 text-muted"><Icon size={11} aria-hidden="true" /><span className="sr-only">{label}: </span></dt><dd className="truncate text-muted">{value}</dd></div>)}</dl>}
+      {(card.warranty === '30-Day Checking Warranty' || card.asIs) && <p className="mt-2 flex items-center gap-1.5 text-[10px] leading-4 text-muted"><ShieldCheck size={12} aria-hidden="true" />{card.warranty}</p>}
+      <div className="mt-auto pt-1">
+        <div className="mt-3 flex gap-2"><Link to={url} title="View Details" aria-label={`View details of ${card.title}`} className={`flex min-h-11 min-w-0 flex-1 items-center justify-center rounded-lg bg-action px-2 text-center text-xs font-semibold text-content transition-colors hover:bg-action-hover ${focus}`}>View Details</Link><a href={inquiry} target="_blank" rel="noopener noreferrer" title="Inquire on WhatsApp" aria-label={`Inquire about ${card.title} on WhatsApp (opens in a new tab)`} className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-line bg-arctic/[0.03] text-muted transition-colors hover:border-success/40 hover:bg-success/10 hover:text-success ${focus}`}><MessageCircle size={17} aria-hidden="true" /></a></div>
+      </div>
+    </div>
+  </article>;
 }

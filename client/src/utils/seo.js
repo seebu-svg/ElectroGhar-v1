@@ -1,3 +1,5 @@
+import { BRANDING } from './branding.mjs';
+import { BRAND_TAGLINE } from "./brand.mjs";
 import { SITE_URL, absoluteUrl, canonicalUrl, DEFAULT_DESCRIPTION, organizationSchema, productSchema, articleSchema } from "./seoData.mjs";
 export { organizationSchema, productSchema };
 import { CONTACT } from "./contact";
@@ -5,7 +7,7 @@ import { useEffect } from "react";
 
 export const SITE = {
   name: "ElectroGhar",
-  tagline: "Good Tech. Better Deals.",
+  tagline: BRAND_TAGLINE,
   defaultDescription: DEFAULT_DESCRIPTION,
   phone: CONTACT.internationalPhone,
   address: {
@@ -21,7 +23,7 @@ export const SITE = {
 };
 
 function baseUrl() { return SITE_URL; }
-function absoluteImage(path) { return absoluteUrl(path || '/logo-full.png'); }
+function absoluteImage(path) { return absoluteUrl(path || BRANDING.logo); }
 
 function updateOrCreateMeta(selector, key, value, tag = "meta") {
   let el = document.querySelector(selector);

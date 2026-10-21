@@ -48,6 +48,35 @@ async function ensureBucket() {
   return true;
 }
 
+// Hero videos use a separate bucket so product images retain their 5 MB limit.
+const videoUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => cb(['video/mp4', 'video/webm'].includes(file.mimetype) ? null : Object.assign(new Error('Choose an MP4 or WebM video'), { status: 400 }), ['video/mp4', 'video/webm'].includes(file.mimetype)),
+}).single('video');
+router.post('/hero-video', requireAdmin, (req, res, next) => {
+  videoUpload(req, res, error => {
+    if (error) return res.status(400).json({ error: error.code === 'LIMIT_FILE_SIZE' ? 'Video must be 20 MB or smaller' : error.message });
+    next();
+  });
+}, async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Choose a video file' });
+    const b = req.file.buffer;
+    if (b.length > 20 * 1024 * 1024) return res.status(400).json({ error: 'Video must be 20 MB or smaller' });
+    const valid = req.file.mimetype === 'video/mp4'
+      ? b.length >= 12 && b.subarray(4, 8).toString() === 'ftyp'
+      : b.length >= 4 && b.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3]));
+    if (!valid) return res.status(400).json({ error: 'Video content does not match the selected file format' });
+    const ext = req.file.mimetype === 'video/mp4' ? 'mp4' : 'webm';
+    const fileName = `hero/${crypto.randomUUID()}.${ext}`;
+    const { data, error } = await supabase.storage.from('hero-videos').upload(fileName, b, { contentType: req.file.mimetype, upsert: false });
+    if (error) throw error;
+    const { data: url } = supabase.storage.from('hero-videos').getPublicUrl(data.path);
+    res.json({ url: url.publicUrl, path: data.path });
+  } catch (error) { next(error); }
+});
+
 // ── POST /api/upload , upload a single image ─────────────────────────────
 // Body: multipart/form-data with field "image"
 // Returns: { url: "https://.../uploads/products/abc-123.jpg" }
@@ -85,6 +114,7 @@ router.post("/", requireAdmin, upload.single("image"), async (req, res, next) =>
       .upload(fileName, req.file.buffer, {
         contentType: req.file.mimetype,
         upsert: replacingLogo,
+        cacheControl: replacingLogo ? "0" : "3600",
       });
 
     if (error) {

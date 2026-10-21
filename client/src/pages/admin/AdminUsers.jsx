@@ -6,7 +6,7 @@ import { API_BASE } from "../../utils/api";
 import LogoSettings from '../../components/admin/LogoSettings';
 
 const inputCls =
-  "w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500";
+  "w-full px-3 py-2 rounded-lg border border-control bg-surface-card text-content text-sm focus:outline-none focus:ring-2 focus:ring-control";
 
 export default function AdminUsers() {
   const { user } = useAuth();
@@ -162,46 +162,46 @@ export default function AdminUsers() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <Loader2 className="w-8 h-8 text-brand-500 animate-spin" />
+        <Loader2 className="w-8 h-8 text-brand-300 animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Admin Management</h1>
+      <h1 className="text-2xl font-bold text-content">Admin Management</h1>
       <LogoSettings />
 
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 rounded-lg px-4 py-2.5 border border-red-100">
+        <div className="text-sm text-error bg-error/10 rounded-lg px-4 py-2.5 border border-error/40">
           {error}
         </div>
       )}
       {success && (
-        <div className="text-sm text-green-600 bg-green-50 rounded-lg px-4 py-2.5 border border-green-100">
+        <div className="text-sm text-success bg-success/10 rounded-lg px-4 py-2.5 border border-success/40">
           {success}
         </div>
       )}
 
       {/* ── Change Password ─────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
-        <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-          <Key className="w-4 h-4 text-brand-500" />
+      <div className="bg-surface-card rounded-xl border border-line p-5 space-y-4">
+        <h2 className="text-sm font-bold text-content uppercase tracking-wider flex items-center gap-2">
+          <Key className="w-4 h-4 text-brand-300" />
           Change Your Password
         </h2>
         <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
           {passwordError && (
-            <div className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 border border-red-100">
+            <div className="text-sm text-error bg-error/10 rounded-lg px-3 py-2 border border-error/40">
               {passwordError}
             </div>
           )}
           {passwordSuccess && (
-            <div className="text-sm text-green-600 bg-green-50 rounded-lg px-3 py-2 border border-green-100">
+            <div className="text-sm text-success bg-success/10 rounded-lg px-3 py-2 border border-success/40">
               {passwordSuccess}
             </div>
           )}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Current Password</label>
+            <label className="block text-xs font-medium text-muted mb-1">Current Password</label>
             <input
               type="password"
               required
@@ -212,7 +212,7 @@ export default function AdminUsers() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">New Password</label>
+            <label className="block text-xs font-medium text-muted mb-1">New Password</label>
             <input
               type="password"
               required
@@ -223,7 +223,7 @@ export default function AdminUsers() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Confirm New Password</label>
+            <label className="block text-xs font-medium text-muted mb-1">Confirm New Password</label>
             <input
               type="password"
               required
@@ -236,7 +236,7 @@ export default function AdminUsers() {
           <button
             type="submit"
             disabled={changingPassword}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action text-content text-sm font-semibold hover:bg-action-hover disabled:opacity-50 transition-colors"
           >
             {changingPassword ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -249,24 +249,24 @@ export default function AdminUsers() {
       </div>
 
       {/* ── Create New Admin ────────────────────────────────────── */}
-      {canManageUsers && <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
-        <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-          <UserPlus className="w-4 h-4 text-brand-500" />
+      {canManageUsers && <div className="bg-surface-card rounded-xl border border-line p-5 space-y-4">
+        <h2 className="text-sm font-bold text-content uppercase tracking-wider flex items-center gap-2">
+          <UserPlus className="w-4 h-4 text-brand-300" />
           Create New Admin
         </h2>
         <form onSubmit={handleCreateAdmin} className="space-y-4 max-w-md">
           {createError && (
-            <div className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 border border-red-100">
+            <div className="text-sm text-error bg-error/10 rounded-lg px-3 py-2 border border-error/40">
               {createError}
             </div>
           )}
           {createSuccess && (
-            <div className="text-sm text-green-600 bg-green-50 rounded-lg px-3 py-2 border border-green-100">
+            <div className="text-sm text-success bg-success/10 rounded-lg px-3 py-2 border border-success/40">
               {createSuccess}
             </div>
           )}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
+            <label className="block text-xs font-medium text-muted mb-1">Email</label>
             <input
               type="email"
               required
@@ -277,7 +277,7 @@ export default function AdminUsers() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Password</label>
+            <label className="block text-xs font-medium text-muted mb-1">Password</label>
             <input
               type="password"
               required
@@ -288,7 +288,7 @@ export default function AdminUsers() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Confirm Password</label>
+            <label className="block text-xs font-medium text-muted mb-1">Confirm Password</label>
             <input
               type="password"
               required
@@ -301,7 +301,7 @@ export default function AdminUsers() {
           <button
             type="submit"
             disabled={creating}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action text-content text-sm font-semibold hover:bg-action-hover disabled:opacity-50 transition-colors"
           >
             {creating ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -315,44 +315,44 @@ export default function AdminUsers() {
 
       }
       {/* ── Admin Users List ────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
-        <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-          <Shield className="w-4 h-4 text-brand-500" />
+      <div className="bg-surface-card rounded-xl border border-line p-5 space-y-4">
+        <h2 className="text-sm font-bold text-content uppercase tracking-wider flex items-center gap-2">
+          <Shield className="w-4 h-4 text-brand-300" />
           Admin Users ({users.length})
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+              <tr className="text-left text-xs font-semibold text-muted uppercase tracking-wider border-b border-line">
                 <th className="pb-3 pr-4">Email</th>
                 <th className="pb-3 pr-4">Created</th>
                 <th className="pb-3 pr-4">Last Sign In</th>
                 <th className="pb-3">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-line">
               {users.map((u) => (
-                <tr key={u.id} className="hover:bg-gray-50">
-                  <td className="py-3 pr-4 font-medium text-gray-900">
+                <tr key={u.id} className="hover:bg-surface">
+                  <td className="py-3 pr-4 font-medium text-content">
                     {u.email}
-                    {u.is_main_admin && <span className="ml-2 text-xs text-brand-600">Main admin · Protected</span>}
+                    {u.is_main_admin && <span className="ml-2 text-xs text-brand-300">Main admin · Protected</span>}
                     {u.id === user.id && (
-                      <span className="ml-2 text-xs text-brand-600 font-normal">(you)</span>
+                      <span className="ml-2 text-xs text-brand-300 font-normal">(you)</span>
                     )}
                   </td>
-                  <td className="py-3 pr-4 text-gray-500">{formatDate(u.created_at)}</td>
-                  <td className="py-3 pr-4 text-gray-500">{formatDate(u.last_sign_in_at)}</td>
+                  <td className="py-3 pr-4 text-muted">{formatDate(u.created_at)}</td>
+                  <td className="py-3 pr-4 text-muted">{formatDate(u.last_sign_in_at)}</td>
                   <td className="py-3">
                     {canManageUsers && !u.is_main_admin && u.id !== user.id ? (
                       <button
                         onClick={() => handleDelete(u.id, u.email)}
-                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors"
                         title="Delete admin"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     ) : (
-                      <span className="text-xs text-gray-400">{u.is_main_admin ? "Protected account" : "Current user"}</span>
+                      <span className="text-xs text-muted">{u.is_main_admin ? "Protected account" : "Current user"}</span>
                     )}
                   </td>
                 </tr>

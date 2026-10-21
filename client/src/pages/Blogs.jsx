@@ -115,7 +115,7 @@ export default function Blogs() {
   const canonicalUrl = buildCanonical(`/blogs?${searchParams}`);
 
   return (
-    <div className="bg-surface-alt min-h-screen">
+    <div className="bg-surface min-h-screen">
       <SEOHead
         title={`${pageTitle === "Blog" ? STATIC_PAGES["/blogs"].title : pageTitle}${currentPage > 1 ? ` – Page ${currentPage}` : ""}`}
         description={metaDescription}
@@ -131,23 +131,23 @@ export default function Blogs() {
         ]}
       />
       {/* ── Hero band ─────────────────────────────────────────────── */}
-      <div className="relative bg-surface-dark border-b border-white/5 overflow-hidden">
+      <div className="relative bg-surface-dark border-b border-line overflow-hidden">
         <div className="absolute inset-0 grid-bg opacity-30" />
         <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-600/50 to-transparent" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-14 pb-6 sm:pb-8">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-600/10 border border-brand-600/40 text-brand-400 text-xs font-semibold mb-5 tracking-wide">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-600/10 border border-brand-600/40 text-brand-300 text-xs font-semibold mb-5 tracking-wide">
               <BookOpen className="w-3.5 h-3.5" />
               ElectroGhar Blog
             </div>
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-white font-heading leading-tight mb-4">
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-content font-heading leading-tight mb-4">
               Guides, Tips &amp;{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-brand-500 to-brand-700 text-glow">
                 Honest Advice
               </span>
             </h1>
-            <p className="text-gray-400 leading-relaxed">
+            <p className="text-muted leading-relaxed">
               Everything we have learned about buying and fixing tech in
               Pakistan , straight from the shop floor.
             </p>
@@ -156,13 +156,13 @@ export default function Blogs() {
           {/* Search , the primary tool on this page */}
           <div className="mt-7 max-w-xl">
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-500 group-focus-within:text-brand-400 transition-colors pointer-events-none" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted group-focus-within:text-brand-300 transition-colors pointer-events-none" />
               <input
                 type="text"
                 value={searchText}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Search guides, fixes, comparisons…"
-                className="w-full pl-12 pr-4 py-3 rounded-xl bg-surface-card border border-white/10 text-gray-100 placeholder:text-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 transition-all"
+                className="w-full pl-12 pr-4 py-3 rounded-xl bg-surface-card border border-control text-content placeholder:text-muted text-sm focus:outline-none focus:ring-2 focus:ring-control focus:border-brand-600 transition-all"
                 aria-label="Search blog posts"
               />
             </div>
@@ -170,7 +170,7 @@ export default function Blogs() {
         </div>
 
         {/* Category chips */}
-        <div className="relative border-t border-white/5 bg-black/20">
+        <div className="relative border-t border-line bg-midnight/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 py-2.5">
               <CatChip label="All Posts" active={!currentCategory} onClick={() => updateParam("category", "")} />
@@ -192,12 +192,12 @@ export default function Blogs() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         {/* Results line */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted">
             {loading ? (
               "Loading posts…"
             ) : (
               <>
-                <span className="font-semibold text-gray-300">{pagination.total || 0}</span>{" "}
+                <span className="font-semibold text-muted">{pagination.total || 0}</span>{" "}
                 {pagination.total === 1 ? "article" : "articles"}
                 {activeCat && <span> in {activeCat.name}</span>}
                 {currentSearch && <span> matching “{currentSearch}”</span>}
@@ -210,7 +210,7 @@ export default function Blogs() {
                 setSearchText("");
                 setSearchParams({});
               }}
-              className="text-xs font-semibold text-gray-500 hover:text-brand-400 transition-colors"
+              className="text-xs font-semibold text-muted hover:text-brand-300 transition-colors"
             >
               Clear filters
             </button>
@@ -221,7 +221,7 @@ export default function Blogs() {
         {showFeatured && !loading && (
           <Link
             to={`/blogs/${featured.slug}`}
-            className="group grid lg:grid-cols-2 bg-surface-card border border-white/5 rounded-2xl overflow-hidden hover:border-brand-600/40 transition-all mb-10"
+            className="group grid lg:grid-cols-2 bg-surface-card border border-line rounded-2xl overflow-hidden hover:border-brand-600/40 transition-all mb-10"
           >
             <div className="relative aspect-[16/10] lg:aspect-auto lg:min-h-[22rem] bg-surface-dark overflow-hidden">
               <img
@@ -230,35 +230,35 @@ export default function Blogs() {
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-surface-card via-transparent to-transparent lg:bg-gradient-to-r" />
-              <span className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-brand-600 text-white text-[11px] font-bold uppercase tracking-wider shadow-lg shadow-brand-600/40">
+              <span className="absolute top-4 left-4 px-3 py-1.5 rounded-full bg-action text-content text-[11px] font-bold uppercase tracking-wider shadow-lg shadow-brand-600/40">
                 Featured
               </span>
             </div>
             <div className="p-6 sm:p-10 flex flex-col justify-center">
               <div className="flex items-center gap-3 mb-4">
                 <CategoryBadge category={featured.category} categories={categories} />
-                <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                <span className="inline-flex items-center gap-1.5 text-xs text-muted">
                   <Clock className="w-3.5 h-3.5" /> {featured.read_time} min read
                 </span>
               </div>
-              <h2 className="text-xl sm:text-3xl font-extrabold text-white font-heading leading-snug mb-4 group-hover:text-brand-300 transition-colors">
+              <h2 className="text-xl sm:text-3xl font-extrabold text-content font-heading leading-snug mb-4 group-hover:text-brand-300 transition-colors">
                 {featured.title}
               </h2>
-              <p className="text-sm text-gray-400 leading-relaxed mb-6 line-clamp-3">
+              <p className="text-sm text-muted leading-relaxed mb-6 line-clamp-3">
                 {featured.excerpt}
               </p>
               <div className="flex items-center gap-3">
                 <AuthorAvatar name={featured.author} />
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-200 truncate">{featured.author}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-semibold text-content truncate">{featured.author}</p>
+                  <p className="text-xs text-muted">
                     {formatDate(featured.published_at)} ·{" "}
                     <span className="inline-flex items-center gap-1">
                       <Eye className="w-3 h-3" /> {featured.views || 0}
                     </span>
                   </p>
                 </div>
-                <span className="ml-auto hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-brand-400 uppercase tracking-wider">
+                <span className="ml-auto hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-brand-300 uppercase tracking-wider">
                   Read <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </span>
               </div>
@@ -276,10 +276,10 @@ export default function Blogs() {
         ) : gridPosts.length === 0 ? (
           <div className="text-center py-20">
             <div className="mx-auto w-14 h-14 rounded-2xl bg-brand-600/10 border border-brand-600/25 flex items-center justify-center mb-5">
-              <SearchX className="w-6 h-6 text-brand-500" />
+              <SearchX className="w-6 h-6 text-brand-300" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1.5 font-heading">No articles found</h3>
-            <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+            <h3 className="text-lg font-bold text-content mb-1.5 font-heading">No articles found</h3>
+            <p className="text-sm text-muted mb-6 max-w-sm mx-auto">
               Nothing matches your search. Try a different term or browse all posts.
             </p>
             <button
@@ -287,7 +287,7 @@ export default function Blogs() {
                 setSearchText("");
                 setSearchParams({});
               }}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-brand-600 text-white text-sm font-bold uppercase tracking-wide hover:bg-brand-500 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-action text-content text-sm font-bold uppercase tracking-wide hover:bg-action-hover transition-colors"
             >
               View All Posts
             </button>
@@ -313,13 +313,13 @@ export default function Blogs() {
       </div>
 
       {/* ── CTA ──────────────────────────────────────────────────── */}
-      <section className="relative bg-gradient-to-br from-surface-dark via-brand-950/60 to-surface-dark overflow-hidden border-t border-white/5">
+      <section className="relative bg-gradient-to-br from-surface-dark via-brand-950/60 to-surface-dark overflow-hidden border-t border-line">
         <div className="absolute inset-0 grid-bg opacity-40" />
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 py-16 text-center">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-heading mb-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-content font-heading mb-4">
             Want Buying Advice?
           </h2>
-          <p className="text-gray-400 mb-8">
+          <p className="text-muted mb-8">
             Skip the research rabbit hole. Tell us your budget and what you
             need , we will point you to the right machine.
           </p>
@@ -328,13 +328,13 @@ export default function Blogs() {
               href={WA_GENERAL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-green-600 text-white font-bold hover:bg-green-500 transition-colors shadow-lg shadow-green-600/30"
+              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-success-solid text-content font-bold hover:bg-success-solid transition-colors shadow-lg shadow-green-600/30"
             >
               <Phone className="w-4 h-4" /> Ask on WhatsApp
             </a>
             <Link
               to="/products"
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-brand-600 text-white font-bold hover:bg-brand-500 transition-colors glow-red"
+              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-action text-content font-bold hover:bg-action-hover transition-colors glow-red"
             >
               Browse Products <ArrowRight className="w-4 h-4" />
             </Link>
@@ -352,7 +352,7 @@ function BlogCard({ post, categories }) {
   return (
     <Link
       to={`/blogs/${post.slug}`}
-      className="group flex flex-col bg-surface-card rounded-2xl border border-white/5 shadow-lg shadow-black/30 hover:border-brand-600/50 hover:shadow-brand-600/15 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+      className="group flex flex-col bg-surface-card rounded-2xl border border-line shadow-lg shadow-midnight/30 hover:border-brand-600/50 hover:shadow-brand-600/15 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden"
     >
       <div className="relative aspect-[16/9] bg-surface-dark overflow-hidden">
         <img
@@ -363,7 +363,7 @@ function BlogCard({ post, categories }) {
         />
         <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-surface-card to-transparent pointer-events-none" />
         {post.is_featured && (
-          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-brand-600 text-white text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-brand-600/40">
+          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-action text-content text-[10px] font-bold uppercase tracking-wider shadow-lg shadow-brand-600/40">
             Featured
           </span>
         )}
@@ -371,23 +371,23 @@ function BlogCard({ post, categories }) {
       <div className="p-5 flex flex-col flex-1">
         <div className="flex items-center gap-2.5 mb-3">
           <CategoryBadge category={post.category} categories={categories} />
-          <span className="inline-flex items-center gap-1 text-[11px] text-gray-500">
+          <span className="inline-flex items-center gap-1 text-[11px] text-muted">
             <Clock className="w-3 h-3" /> {post.read_time} min
           </span>
         </div>
-        <h3 className="text-base font-bold text-white font-heading leading-snug mb-2 line-clamp-2 min-h-11 group-hover:text-brand-300 transition-colors">
+        <h3 className="text-base font-bold text-content font-heading leading-snug mb-2 line-clamp-2 min-h-11 group-hover:text-brand-300 transition-colors">
           {post.title}
         </h3>
-        <p className="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2">
+        <p className="text-sm text-muted leading-relaxed mb-4 line-clamp-2">
           {post.excerpt}
         </p>
-        <div className="pt-3 border-t border-white/5 mt-auto flex items-center gap-2.5">
+        <div className="pt-3 border-t border-line mt-auto flex items-center gap-2.5">
           <AuthorAvatar name={post.author} />
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-gray-300 truncate">{post.author}</p>
-            <p className="text-[11px] text-gray-600">{formatDate(post.published_at)}</p>
+            <p className="text-xs font-semibold text-muted truncate">{post.author}</p>
+            <p className="text-[11px] text-muted">{formatDate(post.published_at)}</p>
           </div>
-          <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-brand-400 group-hover:translate-x-1 transition-all shrink-0" />
+          <ArrowRight className="w-4 h-4 text-muted group-hover:text-brand-300 group-hover:translate-x-1 transition-all shrink-0" />
         </div>
       </div>
     </Link>
@@ -401,15 +401,15 @@ function CatChip({ label, count, active, onClick }) {
       onClick={onClick}
       className={`inline-flex items-center gap-1.5 whitespace-nowrap px-4 py-2.5 rounded-full text-sm font-medium border transition-all shrink-0 min-h-[44px] ${
         active
-          ? "bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-600/25"
-          : "bg-surface-card/60 text-gray-400 border-white/10 hover:text-white hover:border-brand-600/40"
+          ? "bg-action text-content border-brand-600 shadow-lg shadow-brand-600/25"
+          : "bg-surface-card/60 text-muted border-line hover:text-content hover:border-brand-600/40"
       }`}
     >
       {label}
       {count !== undefined && (
         <span
           className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-            active ? "bg-white/20 text-white" : "bg-white/5 text-gray-500"
+            active ? "bg-arctic/20 text-content" : "bg-arctic/5 text-muted"
           }`}
         >
           {count}
@@ -436,7 +436,7 @@ export function AuthorAvatar({ name, size = "md" }) {
         : "w-8 h-8 text-xs";
   return (
     <span
-      className={`${dims} rounded-full bg-brand-600/15 border border-brand-600/30 text-brand-400 font-bold flex items-center justify-center shrink-0 select-none`}
+      className={`${dims} rounded-full bg-brand-600/15 border border-brand-600/30 text-brand-300 font-bold flex items-center justify-center shrink-0 select-none`}
     >
       {initials}
     </span>
@@ -446,7 +446,7 @@ export function AuthorAvatar({ name, size = "md" }) {
 export function CategoryBadge({ category, categories }) {
   const cat = categories.find((c) => c.slug === category);
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-600/10 border border-brand-600/30 text-brand-400 text-[10px] font-bold uppercase tracking-wider">
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-600/10 border border-brand-600/30 text-brand-300 text-[10px] font-bold uppercase tracking-wider">
       <PenLine className="w-2.5 h-2.5" />
       {cat?.name || category || "General"}
     </span>
@@ -455,19 +455,19 @@ export function CategoryBadge({ category, categories }) {
 
 function BlogSkeleton() {
   return (
-    <div className="bg-surface-card rounded-2xl border border-white/5 overflow-hidden animate-pulse">
+    <div className="bg-surface-card rounded-2xl border border-line overflow-hidden animate-pulse">
       <div className="aspect-[16/9] bg-surface-dark" />
       <div className="p-5 space-y-3">
-        <div className="h-3 w-24 bg-white/5 rounded" />
-        <div className="h-5 w-full bg-white/5 rounded" />
-        <div className="h-5 w-3/4 bg-white/5 rounded" />
-        <div className="h-3 w-full bg-white/5 rounded" />
-        <div className="h-3 w-2/3 bg-white/5 rounded" />
+        <div className="h-3 w-24 bg-arctic/5 rounded" />
+        <div className="h-5 w-full bg-arctic/5 rounded" />
+        <div className="h-5 w-3/4 bg-arctic/5 rounded" />
+        <div className="h-3 w-full bg-arctic/5 rounded" />
+        <div className="h-3 w-2/3 bg-arctic/5 rounded" />
         <div className="pt-3 flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-white/5" />
+          <div className="w-8 h-8 rounded-full bg-arctic/5" />
           <div className="flex-1 space-y-1.5">
-            <div className="h-2.5 w-20 bg-white/5 rounded" />
-            <div className="h-2.5 w-14 bg-white/5 rounded" />
+            <div className="h-2.5 w-20 bg-arctic/5 rounded" />
+            <div className="h-2.5 w-14 bg-arctic/5 rounded" />
           </div>
         </div>
       </div>

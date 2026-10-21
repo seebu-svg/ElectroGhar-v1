@@ -1,45 +1,39 @@
+import BrandTagline from "../components/ui/BrandTagline";
 import { HOME_TITLE, DEFAULT_DESCRIPTION, faqEntries, faqSchema } from "../utils/seoData.mjs";
-import { POLICY, productPolicy } from "../utils/policies";
 import { CONTACT } from "../utils/contact";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  Award,
-  BadgeCheck,
   ChevronLeft,
   ChevronRight,
   Flame,
   MessageCircle,
-  Phone,
-  Search,
+  MapPin,
+  Laptop,
+  Pause,
+  Play,
   ShieldCheck,
   Sparkles,
   ThumbsUp,
-  TrendingUp,
   Wallet,
 } from "lucide-react";
 import heroBanner from "../assets/hero-banner.webp";
-import placeholderImg from "../assets/product-placeholder.webp";
+import arrivalsBanner from "../assets/hero-performance.webp";
+import { DEFAULT_SLIDES } from "../utils/heroSlides";
 import ProductCard from "../components/product/ProductCard";
-import SearchBar from "../components/ui/SearchBar";
 import WhatsAppFAB from "../components/ui/WhatsAppFAB";
 import { api } from "../utils/api";
 import { discountPercent, formatPrice } from "../utils/helpers";
 import { SEOHead, organizationSchema, websiteSchema, itemListSchema } from "../utils/seo";
-import { BUDGETS, WHY_ITEMS } from "./homeData";
+import { BUDGETS } from "./homeData";
 
 const WA_GENERAL =
   `${CONTACT.whatsappUrl}?text=Hi%20ElectroGhar!%20I%27m%20looking%20for%20a%20product%2C%20can%20you%20help%3F`;
 
-
-
-const WHY_ICON_MAP = { ShieldCheck, BadgeCheck, MessageCircle };
-
 /* ────────────────────────────────────────────────────────────────
    Home , product-focused marketplace homepage.
-   One parallel fetch supplies every section; light sections are
-   derived client-side from the shared pool.
+   Shared catalog requests supply the shopping collections.
    ──────────────────────────────────────────────────────────────── */
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -47,58 +41,39 @@ export default function Home() {
   const [pool, setPool] = useState([]);
   const [featured, setFeatured] = useState([]);
   const [deals, setDeals] = useState([]);
-  const [bestSellers, setBestSellers] = useState([]);
+  const [brands, setBrands] = useState([]);
 
   useEffect(() => {
-    Promise.all([
+    let active = true;
+    // Independent collections remain usable if another request fails.
+    Promise.allSettled([
       api.getCategories(),
       api.getProducts({ limit: 100, sort: "created_at", order: "desc" }),
       api.getProducts({ featured: 1, limit: 8, sort: "created_at", order: "desc" }),
       api.getProducts({ deals: 1, limit: 12 }),
-      api.getProducts({ featured: 1, limit: 8, sort: "stock_qty", order: "desc" }),
-    ])
-      .then(([catRes, poolRes, featRes, dealsRes, bestRes]) => {
-        setTree(catRes.tree || []);
-        setPool(poolRes.products || []);
-        setFeatured(featRes.products || []);
-        setDeals(
-          [...(dealsRes.products || [])].sort(
-            (a, b) =>
-              discountPercent(b.price, b.compare_at_price) -
-              discountPercent(a.price, a.compare_at_price)
-          )
-        );
-        setBestSellers(bestRes.products || []);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      api.getBrands(),
+    ]).then((results) => {
+      if (!active) return;
+      const [categories, inventory, selected, discounted, brandData] = results.map(result => result.status === "fulfilled" ? result.value : {});
+      setTree(categories.tree || []);
+      setPool(inventory.products || []);
+      setFeatured(selected.products || []);
+      setDeals((discounted.products || []).filter(p => Number(p.price) > 0 && Number(p.compare_at_price) > Number(p.price))
+        .sort((a, b) => discountPercent(b.price, b.compare_at_price) - discountPercent(a.price, a.compare_at_price)));
+      setBrands((brandData.brands || []).slice(0, 8));
+      setLoading(false);
+    });
+    return () => { active = false; };
   }, []);
 
   /* ── Derived collections (from the shared pool) ── */
   const newArrivals = pool.slice(0, 8);
 
-  const brands = (() => {
-    const map = new Map();
-    pool.forEach((p) => {
-      if (!p.brand) return;
-      if (!map.has(p.brand)) map.set(p.brand, []);
-      map.get(p.brand).push(p);
-    });
-    return [...map.entries()]
-      .map(([brand, products]) => ({
-        brand,
-        count: products.length,
-        preview: products.slice(0, 3),
-      }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 8);
-  })();
-
   const recommended = (() => {
     const used = new Set([...featured, ...deals.slice(0, 4)].map((p) => p.id));
     const picks = [];
     tree.forEach((cat) => {
-      const subSlugs = new Set([cat.slug, ...cat.children.map((c) => c.slug)]);
+      const subSlugs = new Set([cat.slug, ...(cat.children || []).map((c) => c.slug)]);
       const pick = pool.find((p) => subSlugs.has(p.category) && !used.has(p.id));
       if (pick) {
         picks.push(pick);
@@ -113,22 +88,6 @@ export default function Home() {
     });
     return picks.slice(0, 4);
   })();
-
-  const budgets = BUDGETS.map(({ max }) => {
-    const items = pool.filter((p) => Number(p.price) > 0 && Number(p.price) <= max);
-    return { max, count: items.length, preview: items.slice(0, 3) };
-  });
-
-  const whyProducts =
-    featured.length >= 6 ? featured.slice(3, 6) : pool.slice(0, 3);
-
-  const brandCount = new Set(
-    pool.map((p) => p.brand).filter(Boolean)
-  ).size;
-  const categoryCount = tree.reduce(
-    (n, c) => n + (c.children?.length || 0),
-    0
-  );
 
   const canonicalBase = typeof window !== "undefined" ? window.location.origin : "https://electroghar.pk";
 
@@ -146,177 +105,143 @@ export default function Home() {
           ...(featured.length ? [itemListSchema(featured.slice(0, 8), `${canonicalBase}/products`)] : []),
         ]}
       />
-      <Hero
-        products={featured.slice(0, 3)}
-        stats={{
-          products: pool.length,
-          brands: brandCount,
-          categories: categoryCount,
-        }}
-      />
-      {loading ? (
-        <HomeSkeleton />
-      ) : (
-        <>
-          <Featured products={featured} />
-          <DailyDeals products={deals} />
-          <BestSellers products={bestSellers} />
+      <Hero />
+      <div className="home-content">
+        {loading ? <HomeSkeleton /> : <Featured products={featured} />}
+        <Budgets />
+        {!loading && <>
           <NewArrivals products={newArrivals} />
+          <DailyDeals products={deals} />
           <ShopByBrand brands={brands} />
           <Recommended products={recommended} />
-          <Budgets budgets={budgets} />
-          <WhySection products={whyProducts} />
-        </>
-      )}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white font-heading mb-5">Buying laptops from ElectroGhar in Karachi</h2>
-        <p className="text-gray-400 leading-relaxed mb-6">Compare HP, Dell, Lenovo, Asus, Acer, MSI and other brands in our <Link to="/products?category=laptops" className="text-brand-400">laptop catalog</Link>, subject to availability. Visit <Link to="/contact" className="text-brand-400">our shop at Naaz Digital Plaza</Link> for help choosing a device for study, work or everyday use.</p>
-        <h2 className="text-2xl font-bold text-white font-heading mb-5">Ordering & warranty FAQs</h2>
-        {faqEntries.map(([question, answer]) => <div key={question} className="mb-5"><h3 className="font-semibold text-white mb-2">{question}</h3><p className="text-sm text-gray-400 leading-relaxed">{answer}</p></div>)}
-        <Link to="/faqs" className="text-brand-400 text-sm">Read all FAQs and purchase policies</Link>
-      </section>
-      <FinalDiscovery />
+        </>}
+        <LocalShopping />
+        <HomeFAQ />
+        <FinalDiscovery />
+      </div>
       <WhatsAppFAB />
     </>
   );
 }
 
-/* ── 1. Hero , Featured Product ───────────────────────────────── */
-function Hero({ products, stats }) {
-  const [images, setImages] = useState([]);
-  const [index, setIndex] = useState(0);
-  useEffect(() => {
-    const load = () => api.getHeroImages().then(r => { setImages(r.images || []); setIndex(0); }).catch(console.error);
-    load();
-    window.addEventListener('hero-updated', load);
-    return () => window.removeEventListener('hero-updated', load);
-  }, []);
-  useEffect(() => {
-    if (images.length < 2) return;
-    const timer = setInterval(() => setIndex(i => (i + 1) % images.length), 6000);
-    return () => clearInterval(timer);
-  }, [images.length]);
-  const image = images[index];
+function HomeFAQ() {
   return (
-    <section className="relative w-full min-h-[80vh] sm:min-h-[85vh] flex items-center overflow-hidden bg-surface-dark">
-      <picture className="absolute inset-0 w-full h-full">
-        {image?.mobile_url && <source media="(max-width: 639px)" srcSet={image.mobile_url} />}
-        <img src={image?.desktop_url || heroBanner} alt={image?.alt || "ElectroGhar laptops and electronics in Karachi"} fetchPriority="high" decoding="async" className="w-full h-full object-cover object-center" />
-      </picture>
-      {images.length > 1 && <div className="absolute bottom-5 right-5 z-20 flex gap-2">{images.map((item, i) => <button key={item.id} aria-label={`Show hero image ${i + 1}`} aria-pressed={index === i} onClick={() => setIndex(i)} className={`w-3 h-3 rounded-full ${i === index ? 'bg-brand-500' : 'bg-white/50'}`} />)}</div>}
-      <div className="absolute inset-0 bg-gradient-to-r from-surface-dark via-surface-dark/75 to-surface-dark/20" />
-      <div className="absolute inset-0 bg-gradient-to-t from-surface-dark via-transparent to-surface-dark/40" />
-      <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-surface-dark/90 to-transparent" />
-      <div className="absolute inset-0 grid-bg opacity-40" />
-      <div className="absolute -left-40 bottom-0 w-[34rem] h-[34rem] glow-blob pointer-events-none" />
+    <section aria-labelledby="home-faq-heading" className="relative border-y border-line bg-surface-alt">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+          <div>
+            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-action" aria-hidden="true" />
+              Buying with confidence
+            </span>
+            <h2 id="home-faq-heading" className="mt-4 max-w-sm text-2xl sm:text-3xl font-bold font-heading tracking-tight leading-tight text-content">Questions before you buy?</h2>
+            <p className="mt-4 max-w-sm text-base leading-7 text-muted">Get clear answers about ordering, checking warranties and purchase policies.</p>
 
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 pt-28 sm:pt-36 pb-16 sm:pb-24">
-        <div className="max-w-xl">
-          <p className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-600/10 border border-brand-600/30 text-brand-400 text-xs font-semibold tracking-wide uppercase">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
-            Pakistan&rsquo;s Trusted Tech Store
-          </p>
-          <h1 className="mt-6 text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white font-heading leading-[1.05]">
-            Good Tech.
-            <span className="text-brand-500"> Better Deals.</span>
-          </h1>
-          <p className="mt-4 text-base sm:text-lg text-gray-400 leading-relaxed max-w-md">
-            Shop affordable new and used laptops in Karachi, desktops, monitors, mobile phones and accessories. Compare second hand laptop specs and order online through WhatsApp for delivery in Pakistan.
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <Link
-              to="/products"
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-brand-600 text-white text-sm font-bold tracking-wide uppercase hover:bg-brand-500 transition-colors"
-            >
-              <Search className="w-4 h-4" />
-              Browse Products
-            </Link>
-            <a
-              href={WA_GENERAL}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-green-600 text-white text-sm font-bold tracking-wide uppercase hover:bg-green-500 transition-colors"
-            >
-              <Phone className="w-4 h-4" />
-              WhatsApp Us
-            </a>
+          </div>
+          <div>
+            <div className="space-y-3">
+              {faqEntries.map(([question, answer], index) => (
+                <details key={question} open={index === 0} className="group rounded-2xl border border-line bg-surface-card transition-colors open:border-brand-400/30 hover:border-line">
+                  <summary className="flex min-h-15 cursor-pointer list-none items-center justify-between gap-5 rounded-2xl px-5 py-4 text-base font-semibold leading-6 text-content focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control sm:px-6 [&::-webkit-details-marker]:hidden">
+                    <h3>{question}</h3>
+                    <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-arctic/5 text-muted group-open:bg-brand-500/10 group-open:text-brand-300" aria-hidden="true">
+                      <span className="absolute h-0.5 w-3 bg-current" />
+                      <span className="absolute h-3 w-0.5 bg-current transition-transform duration-200 group-open:rotate-90 motion-reduce:transition-none" />
+                    </span>
+                  </summary>
+                  <div className="px-5 pb-6 sm:px-6"><p className="border-t border-line pt-4 text-base leading-7 text-muted">{answer}</p></div>
+                </details>
+              ))}
+            </div>
+            <Link to="/faqs" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg px-1 text-sm font-semibold text-muted transition-colors hover:text-brand-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control">View all FAQs & policies <ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
         </div>
-
-        {stats && stats.products > 0 && (
-          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
-            <HeroStat value={`${stats.products}+`} label="Products in Stock" />
-            <span className="hidden sm:block w-px h-10 bg-white/10" />
-            <HeroStat value={stats.brands} label="Top Brands" />
-            <span className="hidden sm:block w-px h-10 bg-white/10" />
-            <HeroStat value={stats.categories} label="Categories" />
-          </div>
-        )}
-
-        {products.length > 0 && (
-          <div className="mt-10 flex sm:grid sm:grid-cols-3 gap-4 max-w-3xl overflow-x-auto sm:overflow-visible pb-2 sm:pb-0 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
-            {products.map((p) => (
-              <div key={p.id} className="min-w-[270px] sm:min-w-0 shrink-0">
-                <HeroCard product={p} />
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </section>
   );
 }
 
-function HeroCard({ product }) {
-  const img =
-    product.thumbnail_url ||
-    (Array.isArray(product.images) && product.images[0]) ||
-    placeholderImg;
-  const discount = discountPercent(product.price, product.compare_at_price);
-  return (
-    <Link
-      to={`/product/${product.slug}`}
-      className="group flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] backdrop-blur-md border border-white/10 hover:border-brand-600/50 transition-colors"
-    >
-      <img
-        src={img}
-        alt={product.name}
-        loading="lazy"
-        className="w-16 h-16 rounded-lg object-cover bg-surface-dark shrink-0"
-      />
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-bold text-brand-400 uppercase tracking-wider truncate">
-          {product.brand}
-        </p>
-        <p className="text-sm font-semibold text-white truncate group-hover:text-brand-300 transition-colors">
-          {product.name}
-        </p>
-        {productPolicy(product).asIs && <p className="text-xs text-gray-300 mt-1">{POLICY.asIsLabel}. Subject to applicable consumer protection laws.</p>}
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-sm font-bold text-white">
-            {formatPrice(product.price)}
-          </span>
-          {discount > 0 && (
-            <span className="text-[11px] font-bold text-brand-400">
-              -{discount}%
-            </span>
-          )}
-        </div>
-      </div>
-    </Link>
-  );
+/* ── 1. Hero , Featured Product ───────────────────────────────── */
+function HeroVideo({ slide, playing, reducedMotion }) {
+  const ref = useRef(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    if (playing && !reducedMotion) video.play().catch(() => setFailed(true));
+    else video.pause();
+  }, [playing, reducedMotion]);
+  if (reducedMotion || failed) return null;
+  return <video ref={ref} muted loop playsInline preload="none" poster={slide.desktop_url} aria-hidden="true" onError={() => setFailed(true)} style={{ '--hero-desktop-position': slide.desktop_position || '65% center', '--hero-mobile-position': slide.mobile_position || '65% center' }} className="hero-slide-image absolute inset-0 h-full w-full object-cover">
+    {slide.mobile_video_url && <source src={slide.mobile_video_url} media="(max-width: 639px)" />}
+    {slide.video_url && <source src={slide.video_url} />}
+  </video>;
 }
 
-function HeroStat({ value, label }) {
+
+
+function Hero() {
+  const [images, setImages] = useState([]);
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [interacting, setInteracting] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const configured = images.slice(0, 3);
+  const slides = [...configured, ...DEFAULT_SLIDES.slice(configured.length)];
+  useEffect(() => {
+    let active = true;
+    const load = () => api.getHeroImages().then(r => { if (active) { setImages(r.images || []); setIndex(0); } }).catch(() => {});
+    load();
+    window.addEventListener('hero-updated', load);
+    return () => { active = false; window.removeEventListener('hero-updated', load); };
+  }, []);
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReducedMotion(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  useEffect(() => {
+    if (slides.length < 2 || paused || interacting || reducedMotion) return;
+    const timer = setTimeout(() => setIndex(i => (i + 1) % slides.length), 7000);
+    return () => clearTimeout(timer);
+  }, [index, slides.length, paused, interacting, reducedMotion]);
+  const change = (next) => { setIndex((next + slides.length) % slides.length); setPaused(true); };
+  const current = slides[index] || slides[0];
+  const fallback = DEFAULT_SLIDES[index % DEFAULT_SLIDES.length];
+  const control = 'flex h-11 w-11 items-center justify-center rounded-full border border-line bg-midnight/30 text-content backdrop-blur-sm transition-colors hover:bg-arctic/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control';
   return (
-    <div>
-      <p className="text-2xl sm:text-3xl font-extrabold text-white font-heading">
-        {value}
-      </p>
-      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mt-0.5">
-        {label}
-      </p>
-    </div>
+    <section aria-roledescription="carousel" aria-label="Featured collections" onMouseEnter={() => setInteracting(true)} onMouseLeave={() => setInteracting(false)} onFocusCapture={() => setInteracting(true)} onBlurCapture={e => { if (!e.currentTarget.contains(e.relatedTarget)) setInteracting(false); }} className="relative isolate w-full overflow-hidden bg-surface-dark">
+      {slides.map((slide, i) => (
+        <div key={slide.id} aria-hidden="true" className={`absolute inset-0 -z-10 transition-opacity duration-700 motion-reduce:transition-none ${index === i ? 'opacity-100' : 'opacity-0'}`}>
+          <picture>
+            {slide.mobile_url && <source media="(max-width: 639px)" srcSet={slide.mobile_url} />}
+            <img src={slide.desktop_url} alt="" loading={i === 0 ? 'eager' : 'lazy'} fetchPriority={i === 0 ? 'high' : 'low'} decoding="async" onError={e => { e.currentTarget.onerror = null; e.currentTarget.parentElement.querySelector('source')?.remove(); e.currentTarget.srcset = ''; e.currentTarget.src = heroBanner; }} style={{ '--hero-desktop-position': slide.desktop_position || '65% center', '--hero-mobile-position': slide.mobile_position || '65% center' }} className="hero-slide-image h-full w-full object-cover" />
+          </picture>
+          {index === i && (slide.video_url || slide.mobile_video_url) && <HeroVideo slide={slide} playing={!paused && !interacting} reducedMotion={reducedMotion} />}
+          <div className="absolute inset-0 bg-gradient-to-r from-midnight/85 via-midnight/35 to-transparent" />
+          <div className="absolute inset-0 bg-midnight" style={{ opacity: Number(slide.overlay_opacity ?? 10) / 100 }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-midnight/65 via-transparent to-midnight/15" />
+        </div>
+      ))}
+      <div className="mx-auto flex min-h-[640px] max-w-7xl flex-col justify-between px-4 pb-7 pt-28 sm:min-h-[700px] sm:px-6 sm:pt-36 lg:min-h-[760px]">
+        <div className="max-w-xl py-10 sm:py-14" aria-live={paused ? 'polite' : 'off'} aria-atomic="true">
+          <p className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-content/85"><span className="h-px w-8 bg-brand-400" />{current.eyebrow || fallback.eyebrow}</p>
+          <BrandTagline className="mb-4" />
+          <h1 className="max-w-xl text-4xl font-bold leading-[1.08] tracking-tight text-content sm:text-6xl lg:text-7xl">{current.title || fallback.title}</h1>
+          <p className="mt-5 max-w-md text-base leading-7 text-content sm:text-lg">{current.description || fallback.description}</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to={current.button_url || fallback.button_url} className="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-action px-6 py-3 text-sm font-semibold text-content hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control">{current.button_label || fallback.button_label}<ArrowRight size={18} aria-hidden="true" /></Link>
+            <a href={WA_GENERAL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-line bg-midnight/20 px-5 py-3 text-sm font-semibold text-content backdrop-blur-sm hover:bg-arctic/15 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control"><MessageCircle size={18} aria-hidden="true" />Ask our team<span className="sr-only"> (opens in a new tab)</span></a>
+          </div>
+          <p className="mt-7 flex items-center gap-2 text-xs text-muted"><ShieldCheck size={16} aria-hidden="true" />Clear condition details. Personal buying support.</p>
+        </div>
+        {slides.length > 1 && <div className="flex flex-wrap items-center justify-between gap-5 border-t border-line pt-5">
+          <div className="flex gap-2">{slides.map((slide, i) => <button key={slide.id} onClick={() => change(i)} aria-label={`Show slide ${i + 1}: ${slide.title || DEFAULT_SLIDES[i].title}`} aria-pressed={index === i} className="group flex h-11 items-center gap-2 rounded-lg px-2 text-xs text-content focus-visible:outline-2 focus-visible:outline-control"><span className={`h-0.5 transition-all motion-reduce:transition-none ${index === i ? 'w-10 bg-brand-400' : 'w-5 bg-arctic/40 group-hover:bg-surface-card'}`} />{String(i + 1).padStart(2, '0')}</button>)}</div>
+          <div className="flex items-center gap-2"><span className="mr-2 text-xs tabular-nums text-muted">{index + 1} / {slides.length}</span><button type="button" className={control} aria-label="Previous slide" onClick={() => change(index - 1)}><ChevronLeft size={19} /></button><button type="button" className={control} aria-label="Next slide" onClick={() => change(index + 1)}><ChevronRight size={19} /></button><button type="button" className={control} aria-label={paused || reducedMotion ? 'Play slideshow' : 'Pause slideshow'} onClick={() => { setPaused(!(paused || reducedMotion)); setReducedMotion(false); }}>{paused || reducedMotion ? <Play size={16} /> : <Pause size={16} />}</button></div>
+        </div>}
+      </div>
+    </section>
   );
 }
 
@@ -324,20 +249,21 @@ function HeroStat({ value, label }) {
 function Featured({ products }) {
   if (!products.length) return null;
   return (
-    <section className="bg-surface-alt py-14 sm:py-16">
+    <section aria-labelledby="featured-products-heading" className="home-section border-b border-line bg-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <SectionHead
-          icon={Award}
-          eyebrow="Handpicked"
-          title="Featured Products"
-          sub="The best laptops, PCs, monitors and gadgets on our shelf right now."
-          action={<HeadLink to="/products">View All</HeadLink>}
-        />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.slice(0, 8).map((p) => (
-            <ProductCard key={p.id} product={p} showAskPrice />
-          ))}
+        <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-300"><span className="h-px w-7 bg-brand-400" aria-hidden="true" />Handpicked</p>
+            <h2 id="featured-products-heading" className="mt-2 text-2xl font-bold tracking-tight text-content sm:text-3xl">Featured Products</h2>
+            <p className="mt-3 max-w-lg text-sm leading-6 text-muted sm:text-base">A closer look at selected laptops and everyday tech. Compare the specs, find your fit.</p>
+          </div>
+          <Link to="/products" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-3 self-start rounded-xl border border-line bg-arctic/[0.03] px-4 text-sm font-semibold text-content transition-colors hover:border-brand-400/40 hover:text-content focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control sm:self-auto">Browse all products<ArrowRight size={16} aria-hidden="true" /></Link>
         </div>
+        <Carousel label="Featured Products">
+          {products.slice(0, 8).map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </Carousel>
       </div>
     </section>
   );
@@ -346,72 +272,14 @@ function Featured({ products }) {
 /* ── 3. Daily Deals ───────────────────────────────────────────── */
 function DailyDeals({ products }) {
   if (!products.length) return null;
-  const items = products.slice(0, 10);
   return (
-    <section className="relative bg-surface py-14 sm:py-16 overflow-hidden">
-      <div className="absolute inset-0 grid-bg opacity-25" />
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-end justify-between gap-4 mb-8">
-          <div>
-            <div className="flex items-center gap-2.5 mb-1.5">
-              <span className="w-8 h-8 rounded-lg bg-brand-600/15 border border-brand-600/30 flex items-center justify-center">
-                <Flame className="w-4 h-4 text-brand-500" />
-              </span>
-              <p className="text-xs font-bold text-brand-500 uppercase tracking-widest">
-                Limited Time
-              </p>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white font-heading">
-              Daily Deals
-            </h2>
-            <p className="text-sm text-gray-400 mt-1">
-              The biggest discounts live right now , while stock lasts.
-            </p>
-          </div>
-          <HeadLink to="/products?deals=1">All Deals</HeadLink>
-        </div>
-        <Carousel>
-          {items.map((p) => (
-            <div key={p.id} className="w-72 shrink-0 snap-start">
-              <ProductCard product={p} showAskPrice />
-            </div>
-          ))}
-        </Carousel>
-      </div>
-    </section>
-  );
-}
-
-/* ── 4. Best Sellers ──────────────────────────────────────────── */
-function BestSellers({ products }) {
-  if (!products.length) return null;
-  return (
-    <section className="bg-surface-alt py-14 sm:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <SectionHead
-          icon={TrendingUp}
-          eyebrow="Most Popular"
-          title="Best Sellers"
-          sub="The products our customers ask about the most."
-        />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.slice(0, 8).map((p, i) => (
-            <div key={p.id} className="relative">
-              <span className="absolute -top-2.5 -left-2.5 z-10 w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-extrabold flex items-center justify-center shadow-lg shadow-brand-600/30 border-2 border-surface-alt">
-                {i + 1}
-              </span>
-              <ProductCard product={p} showAskPrice />
-            </div>
-          ))}
-        </div>
-        <div className="mt-10 text-center">
-          <Link
-            to="/products?featured=1"
-            className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-brand-600 text-white text-sm font-bold tracking-wide uppercase hover:bg-brand-500 transition-colors"
-          >
-            View All Best Sellers
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+    <section aria-labelledby="deals-heading" className="home-section bg-surface">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="deals-panel rounded-2xl border border-line bg-surface-card p-4 sm:p-6">
+          <SectionHead id="deals-heading" icon={Flame} eyebrow="Current offers" title="Daily Deals" sub="Compare current prices and savings across the catalog." action={<HeadLink to="/products?deals=1">All deals</HeadLink>} />
+          <Carousel label="Daily Deals">
+            {products.slice(0, 8).map(p => <ProductCard key={p.id} product={p} />)}
+          </Carousel>
         </div>
       </div>
     </section>
@@ -422,25 +290,25 @@ function BestSellers({ products }) {
 function NewArrivals({ products }) {
   if (!products.length) return null;
   return (
-    <section className="bg-surface-alt py-14 sm:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <SectionHead
-          icon={Sparkles}
-          eyebrow="Fresh Stock"
-          title="New Arrivals"
-          sub="Recently added inventory , first come, first served."
-          action={<HeadLink to="/products?sort=created_at&order=desc">View All</HeadLink>}
-        />
-        <Carousel>
-          {products.map((p) => (
-            <div key={p.id} className="w-72 shrink-0 snap-start">
-              <span className="inline-flex items-center gap-1.5 mb-2 px-2.5 py-1 rounded-full bg-brand-600/10 border border-brand-600/25 text-brand-400 text-[10px] font-bold uppercase tracking-wider">
-                Fresh Stock
-              </span>
-              <ProductCard product={p} showAskPrice />
-            </div>
-          ))}
-        </Carousel>
+    <section aria-labelledby="new-arrivals-heading" className="home-section new-arrivals bg-surface-alt">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="arrivals-banner relative isolate overflow-hidden rounded-2xl border border-line bg-surface-dark">
+          <div className="arrivals-art" aria-hidden="true"><img src={arrivalsBanner} alt="" width="1536" height="1024" loading="lazy" decoding="async" className="h-full w-full object-cover" /></div>
+          <div className="arrivals-banner-content relative px-6 py-7 sm:px-8 sm:py-6">
+            <p className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-300"><Sparkles size={14} aria-hidden="true" />JUST LANDED</p>
+            <h2 id="new-arrivals-heading" className="max-w-xl text-3xl font-bold leading-[1.12] tracking-tight text-content sm:text-4xl">Fresh Tech.<br className="lg:hidden" /><span className="hidden lg:inline"> </span>New Arrivals.</h2>
+            <p className="mt-3 max-w-lg text-sm leading-6 text-muted">Discover recently added laptops and electronics at ElectroGhar.</p>
+            <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-[11px] font-medium text-muted">
+              {[{ icon: ShieldCheck, label: 'Quality Checked' }, { icon: Sparkles, label: 'Fresh Inventory' }, { icon: MapPin, label: 'Karachi Store' }].map(({ icon: Icon, label }) => <li key={label} className="flex items-center gap-1.5"><Icon size={13} className="text-brand-300" aria-hidden="true" />{label}</li>)}
+            </ul>
+            <Link to="/products?sort=created_at.desc" className="mt-5 inline-flex min-h-11 items-center justify-center gap-3 rounded-lg bg-action px-4 py-2.5 text-sm font-semibold text-content transition-colors duration-200 hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control motion-reduce:transition-none">Explore New Arrivals<ArrowRight size={16} aria-hidden="true" /></Link>
+          </div>
+        </div>
+        <div className="mt-6">
+          <Carousel label="New Arrivals" heading="Recently added">
+            {products.map((p) => <ProductCard key={p.id} product={p} badge="Fresh Stock" />)}
+          </Carousel>
+        </div>
       </div>
     </section>
   );
@@ -450,50 +318,13 @@ function NewArrivals({ products }) {
 function ShopByBrand({ brands }) {
   if (!brands.length) return null;
   return (
-    <section className="bg-surface py-14 sm:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <SectionHead
-          eyebrow="Top Brands"
-          title="Shop by Brand"
-          sub="Dell, HP, Lenovo, Apple and more , jump straight to a brand."
-        />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {brands.map((b) => (
-            <Link
-              key={b.brand}
-              to={`/products?brand=${encodeURIComponent(b.brand)}`}
-              className="group bg-surface-card border border-white/5 rounded-2xl p-5 hover:border-brand-600/40 transition-all"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <h3 className="text-lg font-bold text-white font-heading truncate group-hover:text-brand-400 transition-colors">
-                    {b.brand}
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {b.count} products
-                  </p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-brand-400 group-hover:translate-x-0.5 transition-all shrink-0 mt-1" />
-              </div>
-              <div className="flex gap-2 mt-4">
-                {b.preview.map((p) => {
-                  const img =
-                    p.thumbnail_url ||
-                    (Array.isArray(p.images) && p.images[0]) ||
-                    placeholderImg;
-                  return (
-                    <img
-                      key={p.id}
-                      src={img}
-                      alt=""
-                      loading="lazy"
-                      className="w-16 h-16 rounded-lg object-cover bg-surface-dark border border-white/5"
-                    />
-                  );
-                })}
-              </div>
-            </Link>
-          ))}
+    <section aria-labelledby="brands-heading" className="home-section border-y border-line bg-surface-alt">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <SectionHead id="brands-heading" eyebrow="Browse your way" title="Shop by Brand" sub="Have a brand in mind? Go straight to its catalog." action={<HeadLink to="/products">Full catalog</HeadLink>} />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {brands.map(brand => <Link key={brand} to={`/products?brand=${encodeURIComponent(brand)}`} className="brand-tile group flex min-h-24 min-w-0 items-center justify-between gap-3 rounded-xl border border-line bg-surface-card px-4 py-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control sm:px-5">
+            <h3 className="break-words text-base font-semibold tracking-tight text-content sm:text-lg">{brand}</h3><ArrowRight size={16} className="shrink-0 text-muted group-hover:text-brand-300" aria-hidden="true" />
+          </Link>)}
         </div>
       </div>
     </section>
@@ -504,17 +335,17 @@ function ShopByBrand({ brands }) {
 function Recommended({ products }) {
   if (!products.length) return null;
   return (
-    <section className="bg-surface-alt py-14 sm:py-16">
+    <section className="home-section bg-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHead
           icon={ThumbsUp}
-          eyebrow="Recommended for You"
-          title="You Might Like"
-          sub="A handpicked mix from across the catalog."
+          eyebrow="More to explore"
+          title="Recommended Products"
+          sub="Explore more options from across the catalog."
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {products.map((p) => (
-            <ProductCard key={p.id} product={p} showAskPrice />
+            <ProductCard key={p.id} product={p} />
           ))}
         </div>
       </div>
@@ -523,146 +354,101 @@ function Recommended({ products }) {
 }
 
 /* ── 9. Explore by Budget ─────────────────────────────────────── */
-function Budgets({ budgets }) {
-  const withItems = budgets.filter((b) => b.count > 0);
-  if (!withItems.length) return null;
+function Budgets() {
+  const [budgets, setBudgets] = useState(() =>
+    BUDGETS.map(({ max }) => ({ max, status: "loading", preview: [] }))
+  );
+
+  useEffect(() => {
+    let active = true;
+    // Each response includes an exact catalog-wide count, while fetching only
+    // one preview. One failed request does not hide the other budgets.
+    BUDGETS.forEach(({ max }) => {
+      api.getProducts({ category: "laptops", maxPrice: max, minPrice: 1, limit: 1, sort: "price", order: "desc" })
+        .then((res) => {
+          if (!active) return;
+          setBudgets((items) => items.map((item) => item.max === max
+            ? { max, status: "ready", count: res.pagination.total, preview: res.products || [] }
+            : item));
+        })
+        .catch(() => {
+          if (!active) return;
+          setBudgets((items) => items.map((item) => item.max === max
+            ? { ...item, status: "error" }
+            : item));
+        });
+    });
+    return () => { active = false; };
+  }, []);
+
   return (
-    <section className="bg-surface py-14 sm:py-16">
+    <section aria-labelledby="budget-heading" className="home-section bg-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <SectionHead
-          icon={Wallet}
-          eyebrow="Budget Friendly"
-          title="Explore by Budget"
-          sub="Great tech at every price point."
-        />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {withItems.map((b) => (
-            <Link
-              key={b.max}
-              to={`/products?maxPrice=${b.max}`}
-              className="group relative bg-surface-card border border-white/5 rounded-2xl p-5 overflow-hidden hover:border-brand-600/40 transition-all"
-            >
-              <div className="absolute inset-0 grid-bg opacity-20" />
-              <div className="relative">
-                <p className="text-xs font-bold text-brand-500 uppercase tracking-widest">
-                  Under
-                </p>
-                <h3 className="text-xl font-extrabold text-white font-heading mt-1">
-                  {formatPrice(b.max)}
-                </h3>
-                <p className="text-xs text-gray-500 mt-1">
-                  {b.count} products
-                </p>
-                <div className="flex -space-x-3 mt-4">
-                  {b.preview.map((p) => {
-                    const img =
-                      p.thumbnail_url ||
-                      (Array.isArray(p.images) && p.images[0]) ||
-                      placeholderImg;
-                    return (
-                      <img
-                        key={p.id}
-                        src={img}
-                        alt=""
-                        loading="lazy"
-                        className="w-11 h-11 rounded-full object-cover bg-surface-dark border-2 border-surface-card"
-                      />
-                    );
-                  })}
+        <div className="mb-7 flex items-end justify-between gap-5">
+          <div>
+            <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-300"><Wallet size={15} aria-hidden="true" />Find your fit</p>
+            <h2 id="budget-heading" className="text-2xl font-bold tracking-tight text-content sm:text-3xl">Explore by Budget</h2>
+            <p className="mt-2 text-sm leading-6 text-muted">Your next laptop, at a price that works for you.</p>
+          </div>
+          <Link to="/products?category=laptops" className="hidden min-h-11 shrink-0 items-center gap-2 rounded-lg text-sm font-semibold text-muted hover:text-brand-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control sm:inline-flex">All laptops <ArrowRight size={16} aria-hidden="true" /></Link>
+        </div>
+        <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4">
+          {budgets.map((b) => {
+            const product = b.preview[0];
+            const image = product?.thumbnail_url || (Array.isArray(product?.images) && product.images[0]);
+            return (
+              <Link key={b.max} to={`/products?category=laptops&minPrice=1&maxPrice=${b.max}&sort=price.desc`}
+                aria-label={`Explore laptops up to ${formatPrice(b.max)}`}
+                className="budget-card group relative isolate flex min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-surface-card p-5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control">
+                <div className="relative">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Laptops up to</p>
+                  <h3 className="mt-2 flex items-baseline gap-2 font-heading font-bold tracking-tight text-content"><span className="text-xs font-medium tracking-normal text-muted">PKR</span><span className="text-3xl">{b.max.toLocaleString("en-PK")}</span></h3>
+                  <p aria-live="polite" className="mt-2 min-h-5 text-xs leading-5 text-muted">
+                    {b.status === "loading" ? "Checking availability…" : b.status === "error" ? "Browse to check availability" : b.count === 0 ? "No matching laptops right now" : `${b.count.toLocaleString("en-PK")} ${b.count === 1 ? "laptop" : "laptops"} within budget`}
+                  </p>
                 </div>
-                <p className="mt-4 text-xs font-semibold text-brand-400 group-hover:text-brand-300 flex items-center gap-1 transition-colors">
-                  Shop Now
-                  <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                </p>
-              </div>
-            </Link>
-          ))}
+                <div className="budget-media relative my-4 flex h-36 items-center justify-center rounded-xl bg-midnight/15 sm:h-40">
+                  {b.status === "loading" ? <span className="h-20 w-3/4 rounded-xl bg-arctic/5 motion-safe:animate-pulse" aria-hidden="true" />
+                    : image ? <img key={image} src={image} alt={product.name} width="320" height="200" loading="lazy" decoding="async" className="budget-image h-full w-full object-contain p-2" onError={e => { e.currentTarget.hidden = true; }} />
+                    : <Laptop size={56} strokeWidth={1} className="text-muted" aria-hidden="true" />}
+                </div>
+                <span className="relative mt-auto flex min-h-11 items-center justify-between gap-2 border-t border-line pt-3 text-sm font-semibold text-content group-hover:text-brand-300">Explore Laptops<ArrowRight size={17} aria-hidden="true" /></span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
 
-/* ── 10. Why ElectroGhar + product row ────────────────────────── */
-function WhySection({ products }) {
+function LocalShopping() {
   return (
-    <section className="bg-surface-alt py-14 sm:py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-        <div>
-          <p className="text-xs font-bold text-brand-500 uppercase tracking-widest mb-1.5">
-            Our Promise
-          </p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white font-heading mb-7">
-            Why ElectroGhar?
-          </h2>
-          <div className="space-y-6">
-            {WHY_ITEMS.map((item) => {
-              const Icon = WHY_ICON_MAP[item.icon] || ShieldCheck;
-              return (
-                <div key={item.title} className="flex items-start gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-brand-600/10 border border-brand-600/25 flex items-center justify-center shrink-0">
-                    <Icon className="w-5 h-5 text-brand-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-100">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-gray-500 mt-0.5 leading-relaxed">
-                      {item.desc}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+    <section aria-labelledby="local-shopping-heading" className="home-section mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="rounded-2xl border border-line bg-surface-alt p-6 sm:p-8 lg:flex lg:items-center lg:gap-12">
+        <div className="min-w-0 flex-1">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-300">Online discovery. Local support.</p>
+          <h2 id="local-shopping-heading" className="text-2xl font-bold tracking-tight text-content sm:text-3xl">Your Local Laptop Store in Karachi</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">Explore new, used and refurbished laptops at ElectroGhar. Compare HP, Dell, Lenovo and other brands in our <Link to="/products?category=laptops" className="local-shopping-link">laptop catalog</Link>, subject to availability. Visit <Link to="/contact" className="local-shopping-link">our store at Naaz Digital Plaza</Link> for help finding a laptop for study, work or everyday use.</p>
         </div>
-        {products.length > 0 && (
-          <div className="grid grid-cols-3 gap-4">
-            {products.map((p) => (
-              <MiniCard key={p.id} product={p} />
-            ))}
-          </div>
-        )}
+        <ul className="mt-6 grid gap-4 border-t border-line pt-6 sm:grid-cols-3 lg:mt-0 lg:min-w-56 lg:grid-cols-1 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+          {[{ icon: ShieldCheck, title: "Quality Checked", detail: "Inspected before listing" }, { icon: MapPin, title: "Karachi Store", detail: "Naaz Digital Plaza" }, { icon: MessageCircle, title: "WhatsApp Support", detail: "Ask our team for guidance" }].map(({ icon: Icon, title, detail }) => (
+            <li key={title} className="flex items-center gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-500/15 bg-brand-500/10 text-brand-300"><Icon size={17} aria-hidden="true" /></span><div><h3 className="text-sm font-semibold text-content">{title}</h3><p className="mt-0.5 text-xs text-muted">{detail}</p></div></li>
+          ))}
+        </ul>
       </div>
     </section>
   );
 }
 
-/* ── 11. Final Product Discovery , Still Looking? ─────────────── */
+/* A compact final action keeps support available without another shopping section. */
 function FinalDiscovery() {
   return (
-    <section className="relative bg-gradient-to-br from-surface-dark via-brand-950/60 to-surface-dark text-white overflow-hidden">
-      <div className="absolute inset-0 grid-bg opacity-40" />
-      <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[46rem] h-80 glow-blob pointer-events-none" />
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-600/60 to-transparent" />
-      <div className="relative max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center">
-        <h2 className="text-3xl sm:text-4xl font-extrabold font-heading mb-3">
-          Still Looking?
-        </h2>
-        <p className="text-gray-400 leading-relaxed mb-8 max-w-lg mx-auto">
-          Search the catalog, browse everything, or just message us , tell us
-          your budget and we&rsquo;ll find the right machine.
-        </p>
-        <div className="max-w-xl mx-auto mb-8">
-          <SearchBar />
-        </div>
-        <div className="flex flex-col sm:flex-row justify-center gap-3">
-          <Link
-            to="/products"
-            className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-brand-600 text-white text-sm font-bold tracking-wide uppercase hover:bg-brand-500 transition-colors"
-          >
-            <Search className="w-4 h-4" />
-            Browse All Products
-          </Link>
-          <a
-            href={WA_GENERAL}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-green-600 text-white text-sm font-bold tracking-wide uppercase hover:bg-green-500 transition-colors"
-          >
-            <Phone className="w-4 h-4" />
-            WhatsApp Us
-          </a>
+    <section aria-labelledby="shopping-support-heading" className="home-section bg-surface">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="flex flex-col gap-5 rounded-2xl border border-brand-400/20 bg-brand-500/[0.04] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div><h2 id="shopping-support-heading" className="text-xl font-semibold tracking-tight text-content">Need help choosing?</h2><p className="mt-1 text-sm leading-6 text-muted">Tell our team your budget and what you need your next device to do.</p></div>
+          <a href={WA_GENERAL} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-action px-5 py-3 text-sm font-semibold text-content transition-colors duration-200 hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control motion-reduce:transition-none"><MessageCircle size={17} aria-hidden="true" />Chat on WhatsApp<span className="sr-only"> (opens in a new tab)</span><ArrowRight size={16} aria-hidden="true" /></a>
         </div>
       </div>
     </section>
@@ -670,24 +456,24 @@ function FinalDiscovery() {
 }
 
 /* ── Shared building blocks ───────────────────────────────────── */
-function SectionHead({ icon: Icon, eyebrow, title, sub, action }) {
+function SectionHead({ id, icon: Icon, eyebrow, title, sub, action }) {
   return (
-    <div className="flex items-end justify-between gap-4 mb-8">
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2.5 mb-1.5">
           {Icon && (
             <span className="w-8 h-8 rounded-lg bg-brand-600/15 border border-brand-600/30 flex items-center justify-center shrink-0">
-              <Icon className="w-4 h-4 text-brand-500" />
+              <Icon className="w-4 h-4 text-brand-300" />
             </span>
           )}
-          <p className="text-xs font-bold text-brand-500 uppercase tracking-widest">
+          <p className="text-xs font-bold text-brand-300 uppercase tracking-widest">
             {eyebrow}
           </p>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-white font-heading">
+        <h2 id={id} className="text-2xl sm:text-3xl font-bold tracking-tight text-content font-heading">
           {title}
         </h2>
-        {sub && <p className="text-sm text-gray-400 mt-1">{sub}</p>}
+        {sub && <p className="text-sm text-muted mt-1">{sub}</p>}
       </div>
       {action}
     </div>
@@ -698,7 +484,7 @@ function HeadLink({ to, children }) {
   return (
     <Link
       to={to}
-      className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors shrink-0"
+      className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-lg text-sm font-semibold text-brand-300 transition-colors hover:text-content focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control motion-reduce:transition-none"
     >
       {children}
       <ArrowRight className="w-4 h-4" />
@@ -706,92 +492,49 @@ function HeadLink({ to, children }) {
   );
 }
 
-function Carousel({ children }) {
+function Carousel({ children, label = 'Products', heading }) {
   const ref = useRef(null);
-  const scroll = (dir) => {
-    if (!ref.current) return;
-    const amount = ref.current.offsetWidth * 0.75;
-    ref.current.scrollBy({
-      left: dir === "left" ? -amount : amount,
-      behavior: "smooth",
-    });
+  const id = useId();
+  const [edges, setEdges] = useState({ start: true, end: true });
+  useEffect(() => {
+    const track = ref.current;
+    const update = () => setEdges({ start: track.scrollLeft < 2, end: track.scrollLeft + track.clientWidth >= track.scrollWidth - 2 });
+    update();
+    track.addEventListener('scroll', update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(track);
+    return () => { track.removeEventListener('scroll', update); observer.disconnect(); };
+  }, [children]);
+  const scroll = (direction) => {
+    const track = ref.current;
+    if (!track) return;
+    const step = track.firstElementChild?.getBoundingClientRect().width + 20 || track.clientWidth;
+    track.scrollBy({ left: direction * step, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   };
-  return (
-    <div className="relative group">
-      <div
-        ref={ref}
-        className="flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 -mx-4 px-4 scrollbar-hide"
-      >
-        {children}
-      </div>
-      <button
-        onClick={() => scroll("left")}
-        aria-label="Scroll left"
-        className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -ml-5 w-10 h-10 rounded-full bg-surface-dark/90 border border-white/10 items-center justify-center text-gray-300 opacity-0 group-hover:opacity-100 hover:border-brand-600/60 hover:text-brand-400 transition-all z-10 shadow-xl"
-      >
-        <ChevronLeft className="w-5 h-5" />
-      </button>
-      <button
-        onClick={() => scroll("right")}
-        aria-label="Scroll right"
-        className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 -mr-5 w-10 h-10 rounded-full bg-surface-dark/90 border border-white/10 items-center justify-center text-gray-300 opacity-0 group-hover:opacity-100 hover:border-brand-600/60 hover:text-brand-400 transition-all z-10 shadow-xl"
-      >
-        <ChevronRight className="w-5 h-5" />
-      </button>
+  const control = 'flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface-card text-content transition-colors hover:border-brand-400/50 hover:text-brand-300 disabled:opacity-30 disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-control';
+  return <div role="region" aria-roledescription="carousel" aria-label={label}>
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <div>{heading ? <h3 className="text-lg font-semibold tracking-tight text-content">{heading}</h3> : <span className="text-xs text-muted">Browse products</span>}<span className="sr-only">Browse with the arrow buttons or left and right arrow keys</span></div>
+      <div className="flex gap-2"><button type="button" aria-label={`Previous ${label.toLowerCase()}`} aria-controls={id} disabled={edges.start} onClick={() => scroll(-1)} className={control}><ChevronLeft size={18} aria-hidden="true" /></button><button type="button" aria-label={`Next ${label.toLowerCase()}`} aria-controls={id} disabled={edges.end} onClick={() => scroll(1)} className={control}><ChevronRight size={18} aria-hidden="true" /></button></div>
     </div>
-  );
-}
-
-function MiniCard({ product }) {
-  const img =
-    product.thumbnail_url ||
-    (Array.isArray(product.images) && product.images[0]) ||
-    placeholderImg;
-  const discount = discountPercent(product.price, product.compare_at_price);
-  return (
-    <Link
-      to={`/product/${product.slug}`}
-      className="group block bg-surface-dark rounded-xl border border-white/5 overflow-hidden hover:border-brand-600/40 transition-all"
-    >
-      <div className="relative aspect-[4/3] bg-surface-dark">
-        <img
-          src={img}
-          alt={product.name}
-          loading="lazy"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-        {discount > 0 && (
-          <span className="absolute top-2 left-2 bg-brand-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-            -{discount}%
-          </span>
-        )}
-      </div>
-      <div className="p-3">
-        <p className="text-[11px] text-gray-500 uppercase tracking-wider truncate">
-          {product.brand}
-        </p>
-        <p className="text-sm text-gray-200 font-medium truncate group-hover:text-brand-400 transition-colors">
-          {product.name}
-        </p>
-        {productPolicy(product).asIs && <p className="text-xs text-gray-300 mt-1">{POLICY.asIsLabel}. Subject to applicable consumer protection laws.</p>}
-        <p className="text-sm font-bold text-white mt-0.5">
-          {formatPrice(product.price)}
-        </p>
-      </div>
-    </Link>
-  );
+    <div id={id} ref={ref} tabIndex={0} aria-label={`${label} carousel`} onKeyDown={e => {
+      if (e.target !== e.currentTarget) return;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); scroll(e.key === 'ArrowLeft' ? -1 : 1); }
+      if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); ref.current.scrollTo({ left: e.key === 'Home' ? 0 : ref.current.scrollWidth }); }
+    }} className="product-carousel-track scrollbar-hide rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control">{children}</div>
+  </div>;
 }
 
 function HomeSkeleton() {
   return (
-    <section className="bg-surface-alt py-14 sm:py-16">
+    <section className="home-section bg-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="h-8 w-56 bg-surface-card rounded-lg animate-pulse mb-8" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="bg-surface-card rounded-2xl h-80 animate-pulse"
+              className="bg-surface-card rounded-2xl min-h-[440px] animate-pulse"
             />
           ))}
         </div>

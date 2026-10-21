@@ -24,15 +24,15 @@ export function conditionColor(grade) {
   switch (grade) {
     case "New":
     case "Like New":
-      return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 backdrop-blur-sm";
+      return "bg-success/10 text-success border border-success/20 backdrop-blur-sm";
     case "Excellent":
-      return "bg-blue-500/10 text-blue-400 border border-blue-500/20 backdrop-blur-sm";
+      return "bg-info/10 text-info border border-info/20 backdrop-blur-sm";
     case "Good":
-      return "bg-brand-500/10 text-brand-400 border border-brand-500/20 backdrop-blur-sm";
+      return "bg-brand-500/10 text-brand-300 border border-brand-500/20 backdrop-blur-sm";
     case "Fair":
-      return "bg-gray-500/10 text-gray-400 border border-gray-500/20 backdrop-blur-sm";
+      return "bg-surface-card text-muted border border-line backdrop-blur-sm";
     default:
-      return "bg-gray-500/10 text-gray-400 border border-gray-500/20 backdrop-blur-sm";
+      return "bg-surface-card text-muted border border-line backdrop-blur-sm";
   }
 }
 

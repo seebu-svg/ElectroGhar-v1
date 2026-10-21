@@ -1,3 +1,4 @@
+import { BRANDING } from '../../../client/src/utils/branding.mjs';
 import { visibleCategorySlugs } from './catalog.js';
 import { supabase } from '../config/supabase.js';
 import { SITE_URL, STATIC_PAGES, canonicalUrl, collectionMetadata, productMetadata, productSchema, organizationSchema, faqSchema, isFilteredSearch, absoluteUrl, breadcrumbData, articleSchema } from '../../../client/src/utils/seoData.mjs';
@@ -95,7 +96,7 @@ export function renderHead(html, meta) {
   // Remove only tags owned by the SEO manager. Preserve assets, fonts and viewport.
   html = html.replace(/<title>[^]*?<\/title>/gi, '').replace(/<meta\s+[^>]*(?:name=["'](?:description|robots|twitter:[^"']+|google-site-verification|msvalidate\.01)["']|property=["']og:[^"']+["'])[^>]*>/gi, '').replace(/<link\s+[^>]*rel=["']canonical["'][^>]*>/gi, '').replace(/<script\s+[^>]*id=["']structured-data["'][^>]*>[^]*?<\/script>/gi, '');
   const title = `${meta.title || 'ElectroGhar'} | ElectroGhar`;
-  const image = absoluteUrl(meta.image || '/logo-full.png');
+  const image = absoluteUrl(meta.image || BRANDING.logo);
   const tags = [
     `<title>${escapeXml(title)}</title>`, `<link rel="canonical" href="${escapeXml(meta.canonical)}">`,
     ...Object.entries({ description: meta.description || '', robots: meta.noIndex ? 'noindex, follow' : 'index, follow, max-image-preview:large', 'twitter:card': 'summary_large_image', 'twitter:title': title, 'twitter:description': meta.description || '', 'twitter:image': image, 'twitter:url': meta.canonical, ...((process.env.GOOGLE_SITE_VERIFICATION || process.env.VITE_GOOGLE_SITE_VERIFICATION) ? { 'google-site-verification': (process.env.GOOGLE_SITE_VERIFICATION || process.env.VITE_GOOGLE_SITE_VERIFICATION) } : {}), ...((process.env.BING_SITE_VERIFICATION || process.env.VITE_BING_SITE_VERIFICATION) ? { 'msvalidate.01': (process.env.BING_SITE_VERIFICATION || process.env.VITE_BING_SITE_VERIFICATION) } : {}) }).map(([name, content]) => `<meta name="${name}" content="${escapeXml(content)}">`),

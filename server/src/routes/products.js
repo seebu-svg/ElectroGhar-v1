@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { supabase } from "../config/supabase.js";
 
+import { selectDiscountedPage } from "../services/productBrowsing.js";
 import { visibleCategorySlugs } from "../services/catalog.js";
 
 export const productRoutes = Router();
@@ -51,13 +52,18 @@ productRoutes.get("/", async (req, res, next) => {
       condition,
       featured,
       deals,
+      processor, ram, storage,
       sort = "created_at",
       order = "desc",
       page = 1,
       limit = 12,
     } = req.query;
 
-    const offset = (Number(page) - 1) * Number(limit);
+    const pageNumber = Math.max(1, Math.floor(Number(page)) || 1);
+    const pageSize = Math.min(100, Math.max(1, Math.floor(Number(limit)) || 12));
+    const offset = (pageNumber - 1) * pageSize;
+    const sortField = ['price', 'created_at', 'name', 'stock_qty', 'discount'].includes(sort) ? sort : 'created_at';
+    const onlyDeals = deals === '1' || deals === 'true';
 
     let query = supabase
       .from("products")
@@ -89,29 +95,43 @@ productRoutes.get("/", async (req, res, next) => {
     if (conditionType) query = query.eq("condition_type", conditionType);
     if (condition) query = query.eq("condition_grade", condition);
 
+    for (const [key, value] of Object.entries({ processor, ram, storage })) {
+      if (typeof value === 'string' && value) query = query.eq(`specs->>${key}`, value);
+    }
+
     // Collections: Best Sellers (featured) & Daily Deals (discounted)
     if (featured === "1" || featured === "true") query = query.eq("is_featured", true);
     if (deals === "1" || deals === "true") query = query.not("compare_at_price", "is", null);
     if (minPrice) query = query.gte("price", Number(minPrice));
     if (maxPrice) query = query.lte("price", Number(maxPrice));
 
-    // Sort
-    query = query.order(sort, { ascending: order === "asc" });
-
-    // Pagination
-    query = query.range(offset, offset + Number(limit) - 1);
-
-    const { data, error, count } = await query;
-
-    if (error) throw error;
+    // Add a stable tie-breaker so equal prices/stocks cannot shuffle across pages.
+    query = query.order(sortField === 'discount' ? 'id' : sortField, { ascending: sortField === 'discount' || order === 'asc' });
+    if (sortField !== 'discount') query = query.order('id');
+    let data, count;
+    if (sortField === 'discount' || onlyDeals) {
+      // Derived discounts must be sorted/validated before pagination, never within a single page.
+      const candidates = [];
+      for (let start = 0; ; start += 1000) {
+        const result = await query.range(start, start + 999);
+        if (result.error) throw result.error;
+        candidates.push(...(result.data || []));
+        if (!result.data || result.data.length < 1000) break;
+      }
+      ({ data, count } = selectDiscountedPage(candidates, { deals: onlyDeals, sort: sortField, order, offset, limit: pageSize }));
+    } else {
+      const result = await query.range(offset, offset + pageSize - 1);
+      if (result.error) throw result.error;
+      ({ data, count } = result);
+    }
 
     res.json({
       products: data,
       pagination: {
-        page: Number(page),
-        limit: Number(limit),
+        page: pageNumber,
+        limit: pageSize,
         total: count,
-        totalPages: Math.ceil(count / Number(limit)),
+        totalPages: Math.ceil(count / pageSize),
       },
     });
   } catch (err) {
@@ -141,15 +161,29 @@ productRoutes.get("/featured", async (_req, res, next) => {
 // ── GET /api/products/brands , distinct brand list ─────────────────────────
 productRoutes.get("/brands", async (_req, res, next) => {
   try {
-    const { data, error } = await supabase
-      .from("products")
-      .select("brand")
-      .eq("is_active", true)
-      .in("category", await visibleCategorySlugs());
-
-    if (error) throw error;
-    const brands = [...new Set(data.map((p) => p.brand).filter(Boolean))].sort();
-    res.json({ brands });
+    const visible = await visibleCategorySlugs();
+    const brandCounts = {};
+    const specs = { processor: new Map(), ram: new Map(), storage: new Map() };
+    // Page through the catalog so facet counts are not capped by the API row limit.
+    for (let offset = 0; ; offset += 1000) {
+      const { data, error } = await supabase.from("products").select("brand, specs")
+        .eq("is_active", true).in("category", visible).order("id").range(offset, offset + 999);
+      if (error) throw error;
+      for (const product of data || []) {
+        if (product.brand) brandCounts[product.brand] = (brandCounts[product.brand] || 0) + 1;
+        for (const key of Object.keys(specs)) {
+          const value = product.specs?.[key];
+          if ((typeof value === 'string' && value.trim()) || (typeof value === 'number' && Number.isFinite(value) && value > 0)) {
+            const text = String(value);
+            specs[key].set(text, (specs[key].get(text) || 0) + 1);
+          }
+        }
+      }
+      if (!data || data.length < 1000) break;
+    }
+    const brands = Object.keys(brandCounts).sort();
+    res.json({ brands, brandCounts, specifications: Object.fromEntries(Object.entries(specs).map(([key, values]) =>
+      [key, [...values].sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true })).map(([value, count]) => ({ value, count }))])) });
   } catch (err) {
     next(err);
   }

@@ -1,367 +1,100 @@
 import { CONTACT } from "../../utils/contact";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown, Phone } from "lucide-react";
-import logo from "../../assets/logo.png";
+import { Menu, X, ChevronDown, ArrowRight, MessageCircle, Search, LayoutGrid, Flame, ChevronRight } from "lucide-react";
 import SiteLogo from '../ui/SiteLogo';
 import SearchBar from "../ui/SearchBar";
 import { api } from "../../utils/api";
 
-/* ── Main navigation (in display order) ────────────────────────── */
 const NAV_LINKS = [
   { label: "Home", to: "/" },
-  { label: "About", to: "/about" },
-  { label: "Shop", to: null }, // mega-menu trigger
+  { label: "Shop", to: null },
   { label: "Best Sellers", to: "/products?featured=1" },
   { label: "Daily Deals", to: "/products?deals=1" },
+  { label: "About", to: "/about" },
   { label: "Blog", to: "/blogs" },
   { label: "Contact", to: "/contact" },
 ];
-
-function navLinkCls(active) {
-  return `whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-    active ? "text-brand-400" : "text-gray-400 hover:text-white"
-  }`;
-}
+const focus = 'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-control';
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false); // mobile menu
-  const [shopOpen, setShopOpen] = useState(false); // desktop Shop mega-menu
-  const [shopExpanded, setShopExpanded] = useState(false); // mobile Shop accordion
-  const [hidden, setHidden] = useState(false); // hide header while scrolling down
+  const [open, setOpen] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [shopExpanded, setShopExpanded] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [focused, setFocused] = useState(false);
   const [tree, setTree] = useState([]);
+  const [categoryStatus, setCategoryStatus] = useState('loading');
   const headerRef = useRef(null);
-  const lastYRef = useRef(0);
+  const mobileToggle = useRef(null);
+  const shopToggle = useRef(null);
+  const moreToggle = useRef(null);
+  const searchToggle = useRef(null);
+  const lastY = useRef(0);
   const location = useLocation();
-
-  // Category tree feeds the Shop mega-menu
   useEffect(() => {
-    api
-      .getCategories()
-      .then((r) => setTree(r.tree || []))
-      .catch(console.error);
-  }, [location.pathname]);
-
-  // Hide the header when scrolling down, show it again when scrolling up
-  useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (y < 96) {
-        setHidden(false);
-      } else {
-        const delta = y - lastYRef.current;
-        if (delta > 8) setHidden(true);
-        else if (delta < -8) setHidden(false);
-      }
-      lastYRef.current = y;
+    let active = true;
+    const load = () => {
+      setCategoryStatus('loading');
+      api.getCategories().then(r => { if (active) { setTree(r.tree || []); setCategoryStatus('ready'); } }).catch(() => { if (active) setCategoryStatus('error'); });
     };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    load(); window.addEventListener('catalog-updated', load);
+    return () => { active = false; window.removeEventListener('catalog-updated', load); };
   }, []);
-
-  // Close menus + reveal the header whenever the route changes
   useEffect(() => {
-    setShopOpen(false);
-    setOpen(false);
-    setHidden(false);
-    lastYRef.current = 0;
-  }, [location.pathname, location.search]);
-
-  // Escape + outside click close the mega-menu
+    const scroll = () => {
+      const y = window.scrollY;
+      if (y < 160) setHidden(false);
+      else if (Math.abs(y - lastY.current) > 8) setHidden(y > lastY.current);
+      lastY.current = y;
+    };
+    window.addEventListener('scroll', scroll, { passive: true });
+    return () => window.removeEventListener('scroll', scroll);
+  }, []);
   useEffect(() => {
-    if (!shopOpen) return;
-    const onKey = (e) => e.key === "Escape" && setShopOpen(false);
-    const onClick = (e) => {
-      if (headerRef.current && !headerRef.current.contains(e.target)) {
-        setShopOpen(false);
-      }
+    const key = e => {
+      if (e.key !== 'Escape') return;
+      if (searchOpen) { setSearchOpen(false); searchToggle.current?.focus(); }
+      else if (moreOpen) { setMoreOpen(false); moreToggle.current?.focus(); }
+      else if (open) { setOpen(false); mobileToggle.current?.focus(); }
+      else if (shopOpen) { setShopOpen(false); shopToggle.current?.focus(); }
     };
-    window.addEventListener("keydown", onKey);
-    document.addEventListener("mousedown", onClick);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.removeEventListener("mousedown", onClick);
-    };
-  }, [shopOpen]);
-
-  // Manual active state (NavLink can't match query strings)
+    const outside = e => { if (!headerRef.current?.contains(e.target)) { setShopOpen(false); setOpen(false); setMoreOpen(false); setSearchOpen(false); } };
+    window.addEventListener('keydown', key); document.addEventListener('pointerdown', outside);
+    return () => { window.removeEventListener('keydown', key); document.removeEventListener('pointerdown', outside); };
+  }, [open, shopOpen, moreOpen, searchOpen]);
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 1024px)');
+    const close = () => { setOpen(false); setShopOpen(false); setMoreOpen(false); setSearchOpen(false); };
+    media.addEventListener('change', close);
+    return () => media.removeEventListener('change', close);
+  }, []);
+  const params = new URLSearchParams(location.search);
   function isActive(to) {
-    const [path, query] = to.split("?");
+    const [path, query] = to.split('?');
     if (location.pathname !== path) return false;
     if (!query) return !location.search;
-    return location.search.startsWith(`?${query}`);
+    return [...new URLSearchParams(query)].every(([key, value]) => params.get(key) === value);
   }
-
-  const shopActive =
-    location.pathname === "/products" &&
-    new URLSearchParams(location.search).has("category");
-
-  // Never hide the header while a menu is open
-  const headerHidden = hidden && !shopOpen && !open;
-
-  // Internal header links always land at the top of the page (covers
-  // same-route clicks like the logo or category switches); external
-  // links (WhatsApp) must not move the page
-  const onHeaderClick = (e) => {
-    const a = e.target.closest("a");
-    if (a && !a.getAttribute("href")?.startsWith("http")) {
-      window.scrollTo(0, 0);
-    }
-  };
-
-  return (
-    <header
-      ref={headerRef}
-      onClick={onHeaderClick}
-      className={`sticky top-0 z-50 bg-surface-dark/90 backdrop-blur-md border-b border-white/5 transition-transform duration-300 will-change-transform ${
-        headerHidden ? "-translate-y-full" : "translate-y-0"
-      }`}
-      onMouseLeave={() => setShopOpen(false)}
-    >
-      <nav className="max-w-7xl mx-auto flex items-center gap-2 px-4 sm:px-6 h-16">
-        {/* ── Logo ──────────────────────────────────────────── */}
-        <Link to="/" className="flex items-center shrink-0">
-          <SiteLogo
-            fallback={logo}
-            alt="ElectroGhar"
-            className="h-9 sm:h-10 w-auto"
-          />
-        </Link>
-
-        {/* ── Main navigation (desktop) ─────────────────────── */}
-        <ul className="hidden lg:flex items-center gap-0.5 ml-2">
-          {NAV_LINKS.map((link) =>
-            link.to ? (
-              <li key={link.label}>
-                <Link to={link.to} className={navLinkCls(isActive(link.to))}>
-                  {link.label}
-                </Link>
-              </li>
-            ) : (
-              <li key={link.label}>
-                <button
-                  type="button"
-                  onClick={() => setShopOpen((v) => !v)}
-                  aria-expanded={shopOpen}
-                  aria-haspopup="true"
-                  className={`flex items-center gap-1 whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    shopOpen || shopActive
-                      ? "text-brand-400"
-                      : "text-gray-400 hover:text-white"
-                  }`}
-                >
-                  {link.label}
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      shopOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-              </li>
-            )
-          )}
-        </ul>
-
-        <div className="flex-1" />
-
-        {/* ── Compact search (desktop) ──────────────────────── */}
-        <div className="hidden lg:block w-48 xl:w-64 xl:focus-within:w-80 transition-[width] duration-300">
-          <SearchBar compact placeholder="Search products, brands & models" />
-        </div>
-
-        {/* ── WhatsApp CTA (desktop) ────────────────────────── */}
-        <a
-          href={CONTACT.whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-600 text-white text-sm font-semibold hover:bg-green-500 transition-colors shrink-0"
-        >
-          <Phone className="w-4 h-4" />
-          WhatsApp
-        </a>
-
-        {/* ── Mobile toggle ─────────────────────────────────── */}
-        <button
-          className="lg:hidden p-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 min-w-[44px] min-h-[44px] flex items-center justify-center"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle menu"
-        >
-          {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-      </nav>
-      {/* ── Shop mega-menu (desktop) , full category tree ──────── */}
-      {shopOpen && (
-        <div className="hidden lg:block absolute top-full inset-x-0 z-50">
-          <div className="bg-surface-dark/95 backdrop-blur-xl border-b border-white/10 shadow-2xl shadow-black/60">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-              {/* Header row */}
-              <div className="flex items-center justify-between gap-4 mb-6">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
-                  Shop by Category
-                </p>
-                <Link
-                  to="/products"
-                  className="text-sm font-semibold text-brand-400 hover:text-brand-300 transition-colors"
-                >
-                  View All Products
-                </Link>
-              </div>
-
-              {/* Category columns */}
-              {tree.length ? (
-                <div className="grid grid-cols-5 gap-6 xl:gap-10">
-                  {tree.map((cat) => (
-                    <div key={cat.slug} className="min-w-0">
-                      <Link
-                        to={`/products?category=${cat.slug}`}
-                        className="group flex items-baseline justify-between gap-2 border-b border-white/10 pb-2 mb-2.5"
-                      >
-                        <span className="text-sm font-semibold text-white group-hover:text-brand-400 transition-colors truncate">
-                          {cat.name}
-                        </span>
-                        <span className="text-[11px] text-gray-600 shrink-0">
-                          {cat.total_count ?? 0}
-                        </span>
-                      </Link>
-                      <ul>
-                        {cat.children.map((sub) => (
-                          <li key={sub.slug}>
-                            <Link
-                              to={`/products?category=${sub.slug}`}
-                              className="block py-1 text-[13px] text-gray-400 hover:text-brand-400 transition-colors truncate"
-                            >
-                              {sub.name}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="py-10 text-center text-sm text-gray-500">
-                  Loading categories…
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Mobile menu ───────────────────────────────────────── */}
-      {open && (
-        <div className="lg:hidden border-t border-white/5 bg-surface-dark max-h-[calc(100vh-4rem)] overflow-y-auto">
-          {/* Search */}
-          <div className="px-4 py-3 border-b border-white/5">
-            <SearchBar compact placeholder="Search products, brands & models" />
-          </div>
-
-          <ul className="px-4 py-3 space-y-1">
-            {NAV_LINKS.map((link) =>
-              link.to ? (
-                <li key={link.label}>
-                  <Link
-                    to={link.to}
-                    onClick={() => setOpen(false)}
-                    className={`block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                      isActive(link.to)
-                        ? "text-brand-400 bg-brand-600/10"
-                        : "text-gray-400 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ) : (
-                <li key={link.label}>
-                  {/* Shop , link + expandable category list */}
-                  <div className="flex items-center">
-                    <Link
-                      to="/products"
-                      onClick={() => setOpen(false)}
-                      className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                        shopActive
-                          ? "text-brand-400 bg-brand-600/10"
-                          : "text-gray-400 hover:text-white hover:bg-white/5"
-                      }`}
-                    >
-                      Shop
-                    </Link>
-                    <button
-                      onClick={() => setShopExpanded(!shopExpanded)}
-                      className="p-2.5 text-gray-500 hover:text-white"
-                      aria-label={
-                        shopExpanded ? "Collapse categories" : "Expand categories"
-                      }
-                    >
-                      <ChevronDown
-                        className={`w-4 h-4 transition-transform ${
-                          shopExpanded ? "rotate-180" : ""
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  {shopExpanded && (
-                    <ul className="ml-5 pl-4 border-l border-white/10 py-1 space-y-0.5">
-                      {tree.map((cat) => (
-                        <li key={cat.slug}>
-                          <Link
-                            to={`/products?category=${cat.slug}`}
-                            onClick={() => setOpen(false)}
-                            className="flex items-center justify-between px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
-                          >
-                            <span>{cat.name}</span>
-                            <span className="text-[10px] text-gray-600">
-                              {cat.total_count ?? 0}
-                            </span>
-                          </Link>
-                          {cat.children?.length > 0 && (
-                            <ul className="ml-3 pl-3 border-l border-white/10">
-                              {cat.children.map((sub) => (
-                                <li key={sub.slug}>
-                                  <Link
-                                    to={`/products?category=${sub.slug}`}
-                                    onClick={() => setOpen(false)}
-                                    className="block px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-colors"
-                                  >
-                                    {sub.name}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </li>
-                      ))}
-                      <li>
-                        <Link
-                          to="/products"
-                          onClick={() => setOpen(false)}
-                          className="block px-3 py-2 rounded-lg text-sm font-semibold text-brand-400 hover:bg-brand-600/5 transition-colors"
-                        >
-                          View All Products
-                        </Link>
-                      </li>
-                    </ul>
-                  )}
-                </li>
-              )
-            )}
-
-            <li className="pt-3">
-              <a
-                href={CONTACT.whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full bg-green-600 text-white text-sm font-semibold hover:bg-green-500 transition-colors"
-              >
-                <Phone className="w-4 h-4" />
-                WhatsApp Us
-              </a>
-            </li>
-          </ul>
-        </div>
-      )}
-    </header>
-  );
+  const closeMenus = () => { setOpen(false); setShopOpen(false); setShopExpanded(false); setMoreOpen(false); setSearchOpen(false); setHidden(false); };
+  useEffect(() => {
+    closeMenus();
+  }, [location.pathname, location.search]);
+  const shopActive = location.pathname === '/products' && !params.has('featured') && !params.has('deals');
+  const categoryMessage = categoryStatus === 'loading' ? 'Loading categories…' : categoryStatus === 'error' ? 'Categories are unavailable. You can still browse all products.' : 'Explore our latest products in the catalog.';
+  return <header ref={headerRef} onFocusCapture={() => { setFocused(true); setHidden(false); }} onBlurCapture={e => { if (!e.currentTarget.contains(e.relatedTarget)) { setFocused(false); setShopOpen(false); setMoreOpen(false); } }} onClick={e => { const a = e.target.closest('a'); if (a?.getAttribute('href')?.startsWith('/')) { closeMenus(); window.scrollTo(0, 0); } }} className={`sticky top-0 z-50 border-b border-line bg-surface-card/95 backdrop-blur-xl transition-transform duration-300 motion-reduce:transition-none [&_button]:cursor-pointer ${hidden && !open && !shopOpen && !moreOpen && !searchOpen && !focused ? '-translate-y-full' : 'translate-y-0'}`}>
+    <div className="mx-auto flex h-[76px] max-w-7xl items-center gap-2 px-4 sm:gap-4 sm:px-6 lg:gap-5">
+      <Link to="/" aria-label="ElectroGhar home" className={`shrink-0 rounded-lg ${focus}`}><SiteLogo alt="ElectroGhar" className="h-9 w-auto sm:h-10" /></Link>
+      <nav aria-label="Main navigation" className="hidden shrink-0 lg:block"><ul className="flex items-center gap-0.5">{NAV_LINKS.slice(0, 4).map(link => <li key={link.label}>{link.to ? <Link to={link.to} aria-current={isActive(link.to) ? 'page' : undefined} className={`relative flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 text-[13px] font-medium transition-colors xl:px-3 xl:text-sm ${focus} ${isActive(link.to) ? 'bg-arctic/5 text-content after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:rounded-full after:bg-action' : 'text-muted hover:bg-arctic/5 hover:text-content'}`}>{link.label === 'Daily Deals' && <Flame size={14} className="text-brand-300" aria-hidden="true" />}{link.label}</Link> : <button ref={shopToggle} type="button" onClick={() => { setShopOpen(!shopOpen); setMoreOpen(false); }} aria-expanded={shopOpen} aria-controls="desktop-shop-categories" className={`flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-[13px] font-semibold xl:text-sm ${focus} ${shopActive || shopOpen ? 'bg-brand-500/10 text-brand-300' : 'text-muted hover:bg-arctic/5'}`}><LayoutGrid size={15} />Shop<ChevronDown size={13} className={`transition-transform motion-reduce:transition-none ${shopOpen ? 'rotate-180' : ''}`} /></button>}</li>)}
+        <li className="relative"><button ref={moreToggle} type="button" onClick={() => { setMoreOpen(!moreOpen); setShopOpen(false); }} aria-expanded={moreOpen} aria-controls="more-navigation" className={`flex min-h-11 items-center gap-1.5 rounded-lg px-2.5 text-[13px] font-medium xl:text-sm ${focus} ${moreOpen || NAV_LINKS.slice(4).some(link => isActive(link.to)) ? 'bg-arctic/5 text-content' : 'text-muted hover:bg-arctic/5 hover:text-content'}`}>More<ChevronDown size={13} className={`transition-transform motion-reduce:transition-none ${moreOpen ? 'rotate-180' : ''}`} /></button>{moreOpen && <ul id="more-navigation" className="absolute left-0 top-full z-50 mt-3 w-48 rounded-2xl border border-line bg-surface-card p-2 shadow-2xl shadow-midnight/50">{NAV_LINKS.slice(4).map(link => <li key={link.to}><Link to={link.to} aria-current={isActive(link.to) ? 'page' : undefined} className={`flex min-h-11 items-center justify-between rounded-xl px-3 text-sm hover:bg-arctic/5 ${focus} ${isActive(link.to) ? 'text-brand-300' : 'text-muted'}`}>{link.label}<ChevronRight size={14} className="text-muted" /></Link></li>)}</ul>}</li>
+      </ul></nav>
+      <div className="ml-auto hidden min-w-0 flex-1 lg:block"><SearchBar compact placeholder="Search products…" /></div>
+      <div className="ml-auto flex shrink-0 items-center gap-2 lg:ml-0"><button ref={searchToggle} type="button" onClick={() => { setSearchOpen(!searchOpen); setOpen(false); }} aria-label={searchOpen ? 'Close search' : 'Search products'} aria-expanded={searchOpen} aria-controls="mobile-header-search" className={`flex h-11 w-11 items-center justify-center rounded-xl text-content hover:bg-arctic/5 lg:hidden ${focus}`}>{searchOpen ? <X size={21} /> : <Search size={21} />}</button><a href={CONTACT.whatsappUrl} target="_blank" rel="noopener noreferrer" className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-line bg-arctic/5 px-3 text-sm font-medium text-content transition-colors hover:border-brand-400/40 hover:bg-brand-500/10 xl:px-4 ${focus}`}><MessageCircle size={18} aria-hidden="true" /><span className="hidden xl:inline">WhatsApp</span><span className="sr-only xl:hidden">Chat on WhatsApp</span><span className="sr-only"> (opens in a new tab)</span></a><button ref={mobileToggle} type="button" onClick={() => { setOpen(!open); setShopOpen(false); setSearchOpen(false); }} aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} aria-controls="mobile-navigation" className={`flex h-11 w-11 items-center justify-center rounded-xl border border-line text-content lg:hidden ${focus}`}>{open ? <X size={22} /> : <Menu size={22} />}</button></div>
+    </div>
+    {searchOpen && <div id="mobile-header-search" className="absolute inset-x-0 top-full border-y border-line bg-surface-card p-4 shadow-xl lg:hidden"><div className="mx-auto max-w-2xl"><SearchBar compact autoFocus placeholder="Search laptops, brands & models…" /><p className="mt-3 text-xs text-muted">Search by product, brand or model. Press Enter to see all results.</p></div></div>}
+    {shopOpen && <div id="desktop-shop-categories" className="absolute inset-x-0 top-full hidden max-h-[70vh] overflow-y-auto border-b border-line bg-surface-card shadow-2xl shadow-midnight/50 lg:block"><div className="mx-auto max-w-7xl px-6 py-7"><div className="mb-6 flex items-center justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-300">Find your next upgrade</p><h2 className="mt-2 text-lg font-semibold text-content">Shop by category</h2></div><Link to="/products" className={`inline-flex min-h-11 items-center gap-2 rounded-xl border border-line px-4 text-sm font-semibold text-content hover:bg-arctic/5 ${focus}`}>Browse all products<ArrowRight size={16} /></Link></div>{categoryStatus === 'ready' && tree.length ? <div className="grid grid-cols-3 gap-4 xl:grid-cols-4">{tree.map(cat => <div key={cat.slug} className="min-w-0 rounded-xl border border-line bg-arctic/[0.02] p-4"><Link to={`/products?category=${encodeURIComponent(cat.slug)}`} className={`flex min-h-11 items-center justify-between gap-2 rounded-md text-sm font-semibold text-content hover:text-brand-300 ${focus}`}><span>{cat.name}</span><ChevronRight size={15} className="shrink-0 text-muted" /></Link><ul className="mt-2 border-t border-line pt-2">{(cat.children || []).map(sub => <li key={sub.slug}><Link to={`/products?category=${encodeURIComponent(sub.slug)}`} className={`block rounded-lg px-2 py-2.5 text-sm text-muted hover:bg-arctic/5 hover:text-content ${focus}`}>{sub.name}</Link></li>)}</ul></div>)}</div> : <p role="status" className="rounded-xl border border-line bg-arctic/[0.02] p-6 text-sm text-muted">{categoryMessage}</p>}</div></div>}
+    {open && <nav id="mobile-navigation" aria-label="Mobile navigation" className="absolute inset-x-0 top-full max-h-[calc(100dvh-76px)] overflow-y-auto overscroll-contain border-y border-line bg-surface-card shadow-2xl lg:hidden"><ul className="space-y-1 p-4">{NAV_LINKS.map(link => <li key={link.label}>{link.to ? <Link to={link.to} aria-current={isActive(link.to) ? 'page' : undefined} className={`flex min-h-12 items-center justify-between rounded-xl px-4 text-sm font-medium ${focus} ${isActive(link.to) ? 'bg-brand-500/10 text-brand-300' : 'text-muted hover:bg-arctic/5'}`}>{link.label}<ChevronRight size={15} className="text-muted" /></Link> : <><div className="flex items-center rounded-xl bg-arctic/5"><Link to="/products" className={`flex min-h-12 flex-1 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-content ${focus}`}><LayoutGrid size={16} />Shop all products</Link><button type="button" aria-label={shopExpanded ? 'Collapse categories' : 'Expand categories'} aria-expanded={shopExpanded} aria-controls="mobile-shop-categories" onClick={() => setShopExpanded(!shopExpanded)} className={`flex h-12 w-12 items-center justify-center rounded-xl text-muted ${focus}`}><ChevronDown size={17} className={shopExpanded ? 'rotate-180' : ''} /></button></div>{shopExpanded && <div id="mobile-shop-categories" className="ml-5 mt-2 border-l border-line pl-3">{categoryStatus === 'ready' && tree.length ? tree.map(cat => <details key={cat.slug} className="group"><summary className={`flex min-h-11 cursor-pointer list-none items-center justify-between rounded-lg px-3 text-sm font-medium text-content hover:bg-arctic/5 [&::-webkit-details-marker]:hidden ${focus}`}>{cat.name}<ChevronDown size={14} className="shrink-0 group-open:rotate-180" /></summary><ul className="ml-3 border-l border-line pl-2"><li><Link to={`/products?category=${encodeURIComponent(cat.slug)}`} className={`block rounded-lg px-3 py-3 text-sm text-brand-300 ${focus}`}>All {cat.name}</Link></li>{(cat.children || []).map(sub => <li key={sub.slug}><Link to={`/products?category=${encodeURIComponent(sub.slug)}`} className={`block rounded-lg px-3 py-3 text-sm text-muted hover:text-content ${focus}`}>{sub.name}</Link></li>)}</ul></details>) : <p role="status" className="p-3 text-sm text-muted">{categoryMessage}</p>}</div>}</>}</li>)}</ul><div className="border-t border-line p-5"><p className="text-xs leading-5 text-muted">Need help choosing? Our team can walk you through the options.</p><a href={CONTACT.whatsappUrl} target="_blank" rel="noopener noreferrer" className={`mt-3 flex min-h-12 items-center justify-center gap-2 rounded-xl bg-action text-sm font-semibold text-content hover:bg-action-hover ${focus}`}><MessageCircle size={18} />Ask on WhatsApp<span className="sr-only"> (opens in a new tab)</span></a></div></nav>}
+  </header>;
 }
